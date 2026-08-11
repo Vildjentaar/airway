@@ -480,6 +480,7 @@ BOOKINGS: list[dict] = [
     {"booking_id": 16, "flight_number": "PX-C100", "return_flight_number": None,      "passenger_count": 2,  "trip_type": "One-way",    "departure_date": "2026-09-01", "return_date": None,         "total_price_tl": 59000.00,  "booking_status": BookingStatus.CONFIRMED, "notes": "Booked on the ESB→JFK connecting itinerary (via IST)"},
     {"booking_id": 17, "flight_number": "PX-0700", "return_flight_number": "PX-0701", "passenger_count": 2,  "trip_type": "Round-trip", "departure_date": "2026-10-12", "return_date": "2026-10-19", "total_price_tl": 24800.00,  "booking_status": BookingStatus.CONFIRMED, "notes": "New Cairo route"},
     {"booking_id": 18, "flight_number": "PX-0921", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-08-09", "return_date": None,         "total_price_tl": 0.00,      "booking_status": BookingStatus.FAILED, "notes": "Payment declined at checkout"},
+    {"booking_id": 19, "flight_number": "PX-0010", "return_flight_number": None,      "passenger_count": 218,"trip_type": "One-way",    "departure_date": "2026-08-12", "return_date": None,         "total_price_tl": 272500.00, "booking_status": BookingStatus.CONFIRMED, "notes": "Corporate group. Leaves exactly 2 seats remaining on this 220-seat A321neo."},
 ]
 
 _BOOKING_BY_ID: dict[int, dict] = {b["booking_id"]: b for b in BOOKINGS}
