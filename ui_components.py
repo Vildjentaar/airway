@@ -1,19 +1,33 @@
 """
 ui_components.py
 -----------------
-Streamlit component rendering and presentation logic ONLY.
+Streamlit component rendering and presentation logic.
 
 Nothing in here talks to the LLM. Functions either render widgets directly
 to the page, or build export strings (markdown transcript / raw JSON log)
 from session data that is handed to them. This keeps the frontend isolated
 from the chatbot "brain" — restyle the cart or tweak the transcript format
 without touching engine code.
+
+One deliberate exception: the secure checkout forms (auth / passenger
+details / payment) validate themselves on submit by calling
+`default_auth_provider` / `default_payment_gateway` / `validate_tckn`
+directly, rather than routing sensitive field values through the LLM and
+chat history (see workflow_extension_plan.md, Phase 2.1 — this is the
+"Hybrid" approach). That's still just "render a secure form and react to
+its result" — one cohesive job — not "implement auth or payment logic,"
+which stays behind the AuthProvider / PaymentGateway interfaces in
+accounts.py / payment.py. Swapping either mock for a real implementation
+later requires no changes in this file.
 """
 
 import json
 from datetime import datetime
 
 import streamlit as st
+
+from accounts import default_auth_provider, validate_tckn
+from payment import default_payment_gateway
 
 
 def render_flight_card(flight_cart: list):
@@ -204,3 +218,107 @@ def build_raw_log(messages: list, flight_data: list, report_data: dict) -> str:
         "report_data": report_data,
     }
     return json.dumps(payload, indent=2, ensure_ascii=False)
+
+
+def render_secure_form_ui(form_type: str):
+    """
+    Renders the appropriate secure checkout form and, on submit, validates
+    it against the relevant service — rather than unconditionally telling
+    the LLM the submission succeeded regardless of what was typed.
+    """
+    st.markdown(f"### 🔒 Secure Checkout: {form_type.replace('_', ' ').title()}")
+
+    mode = email = password = None
+    first_name = last_name = nationality = tckn = None
+    cardholder_name = card_number = expiry = cvc = None
+
+    with st.form(key=f"form_{form_type}"):
+        if form_type == "auth":
+            mode = st.radio("Checkout as:", ["Guest", "Login", "Register"])
+            email = st.text_input("Email", placeholder="you@example.com")
+            password = st.text_input("Password", type="password")
+
+        elif form_type == "passenger_details":
+            first_name = st.text_input("First Name")
+            last_name = st.text_input("Last Name")
+            st.date_input("Date of Birth", min_value=datetime(1900, 1, 1), max_value=datetime.today())
+            st.radio("Gender", ["Male", "Female", "Other"])
+            nationality = st.text_input("Nationality", placeholder="TR")
+            tckn = st.text_input("TCKN (if Turkish)", max_chars=11)
+
+        elif form_type == "payment":
+            cardholder_name = st.text_input("Cardholder Name")
+            card_number = st.text_input("Card Number", max_chars=19, placeholder="0000 0000 0000 0000")
+            col1, col2 = st.columns(2)
+            with col1:
+                expiry = st.text_input("Expiry Date", placeholder="MM/YY")
+            with col2:
+                cvc = st.text_input("CVC", type="password", max_chars=4)
+
+        submitted = st.form_submit_button("Submit & Continue")
+
+    if not submitted:
+        return
+
+    if form_type == "auth":
+        result = _process_auth_submission(mode, email, password)
+    elif form_type == "passenger_details":
+        result = _process_passenger_submission(first_name, last_name, nationality, tckn)
+    elif form_type == "payment":
+        result = _process_payment_submission(cardholder_name, card_number, expiry, cvc)
+    else:
+        result = {"success": True, "detail": ""}
+
+    if result["success"]:
+        st.session_state.pending_user_message = (
+            f"[System Note: User successfully submitted the {form_type} form. {result.get('detail', '')}]".strip()
+        )
+        st.rerun()
+    else:
+        st.error(result["error"])
+
+
+def _process_auth_submission(mode: str, email: str, password: str) -> dict:
+    """Calls the AuthProvider abstraction — never talks to USERS directly."""
+    if mode == "Guest":
+        return {"success": True, "detail": "Continuing as guest."}
+
+    if mode == "Login":
+        result = default_auth_provider.authenticate(email or "", password or "")
+        if result["success"]:
+            st.session_state.user_profile = result["profile"]
+            return {"success": True, "detail": f"Logged in as {result['profile'].get('name', email)}."}
+        return {"success": False, "error": result["error"]}
+
+    if mode == "Register":
+        result = default_auth_provider.register({"email": email, "password": password})
+        if result["success"]:
+            st.session_state.user_profile = result["profile"]
+            return {"success": True, "detail": "Account created."}
+        return {"success": False, "error": result["error"]}
+
+    return {"success": False, "error": "Please select Guest, Login, or Register."}
+
+
+def _process_passenger_submission(first_name: str, last_name: str, nationality: str, tckn: str) -> dict:
+    """Basic required-field check, plus a real TCKN checksum validation for
+    Turkish nationals — the same validate_tckn used elsewhere in the app."""
+    if not (first_name or "").strip() or not (last_name or "").strip():
+        return {"success": False, "error": "First and last name are required."}
+
+    if (nationality or "").strip().upper() == "TR":
+        tckn_result = validate_tckn(tckn or "")
+        if not tckn_result["valid"]:
+            return {"success": False, "error": tckn_result["error"]}
+
+    return {"success": True, "detail": "Passenger details recorded."}
+
+
+def _process_payment_submission(cardholder_name: str, card_number: str, expiry: str, cvc: str) -> dict:
+    """Calls the PaymentGateway abstraction — never validates card shape
+    itself. Swapping default_payment_gateway for a real processor later
+    requires no change here."""
+    result = default_payment_gateway.charge(card_number or "", expiry or "", cvc or "", cardholder_name or "")
+    if result["success"]:
+        return {"success": True, "detail": f"Payment approved ({result['transaction_id']})."}
+    return {"success": False, "error": result["error"]}

@@ -30,8 +30,8 @@ flight_widget_tool = [
                     },
                     "trip_type": {
                         "type": "string",
-                        "enum": ["One-way", "Round-trip"],
-                        "description": "Whether the flight is one-way or round-trip."
+                        "enum": ["One-way", "Round-trip", "Multi-city"],
+                        "description": "Whether the flight is one-way, round-trip, or multi-city."
                     },
                     "departure_date": {
                         "type": "string",
@@ -39,7 +39,7 @@ flight_widget_tool = [
                     },
                     "return_date": {
                         "type": "string",
-                        "description": "The return date, if applicable. Leave blank if One-way."
+                        "description": "The return date, if applicable. Leave blank if One-way or Multi-city."
                     },
                     "departure_time": {
                         "type": "string",
@@ -68,18 +68,31 @@ flight_widget_tool = [
                     },
                     "price_tl": {
                         "type": "integer",
-                        "description": "Total trip price in TL from the database (base price × passenger count)."
+                        "description": "Total trip price in TL from the database."
                     },
-                    "passenger_count": {
+                    "ticket_class": {
+                        "type": "string",
+                        "enum": ["Economy", "Business"],
+                        "description": "Ticket class selected by the user."
+                    },
+                    "adult_count": {
                         "type": "integer",
-                        "description": "Number of passengers the user specified."
+                        "description": "Number of adult passengers (age 12+)."
+                    },
+                    "child_count": {
+                        "type": "integer",
+                        "description": "Number of child passengers (age 2-12)."
+                    },
+                    "baby_count": {
+                        "type": "integer",
+                        "description": "Number of baby passengers (age 0-2)."
                     }
                 },
                 "required": [
                     "departure_point", "arrival_point", "trip_type", "departure_date",
                     "departure_time", "arrival_time", "flight_duration",
                     "transfer_status", "airline_name", "flight_number", "price_tl",
-                    "passenger_count"
+                    "ticket_class", "adult_count", "child_count", "baby_count"
                 ]
             }
         }
@@ -241,6 +254,47 @@ context_tool = [
     }
 ]
 
+render_secure_form_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "render_secure_form",
+            "description": "Render a secure UI form during the checkout flow to collect sensitive info. Use this INSTEAD of asking for auth, passenger details, or credit cards in the chat.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "form_type": {
+                        "type": "string",
+                        "enum": ["auth", "passenger_details", "payment"],
+                        "description": "Which form to render. Flow is ALWAYS: auth -> passenger_details -> payment."
+                    }
+                },
+                "required": ["form_type"]
+            }
+        }
+    }
+]
+
+validate_tckn_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "validate_tckn",
+            "description": "Validate a Turkish Citizen Identity Number (TCKN) using the official checksum algorithm.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "tckn": {
+                        "type": "string",
+                        "description": "The 11-digit TCKN to validate."
+                    }
+                },
+                "required": ["tckn"]
+            }
+        }
+    }
+]
+
 # Convenience bundles, mirroring how app.py assembles the active tool list
 # depending on chatbot state.
 ALL_TOOLS = (
@@ -250,6 +304,8 @@ ALL_TOOLS = (
     + context_tool
     + check_availability_tool
     + remove_flight_tool
+    + render_secure_form_tool
+    + validate_tckn_tool
 )
 
 PRE_CART_TOOLS = flight_widget_tool + db_query_tool + context_tool + check_availability_tool
@@ -261,4 +317,6 @@ POST_CART_TOOLS = (
     + context_tool
     + check_availability_tool
     + remove_flight_tool
+    + render_secure_form_tool
+    + validate_tckn_tool
 )

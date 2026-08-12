@@ -337,51 +337,18 @@ def find_flight(departure: str, arrival: str) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
-# Pricing
+# NOTE: fare calculation (TAX_RATE, class/passenger-type multipliers,
+# calculate_total_price) has moved to pricing.py — pricing rules change for
+# different reasons and on a different cadence than the flight schedule, so
+# they no longer share a file. See pricing.py.
 # ---------------------------------------------------------------------------
-TAX_RATE = 0.08          # 8% flat tax/fee, applied to the fare subtotal
-PER_PASSENGER_FEE_TL = 150.00  # fixed airport/service fee per passenger, per direction
 
 
-def calculate_total_price(
-    outbound: dict,
-    passengers: int,
-    trip_type: str,
-    inbound: dict | None = None,
-    *,
-    detailed: bool = False,
-) -> int | dict:
-    """
-    Total price in TL. SAME DEFAULT CONTRACT AS BEFORE, bit-for-bit: with
-    `detailed=False` (the default) this returns exactly the plain fare
-    subtotal as an int, computed exactly like the original function did —
-    every existing caller that unpacks an int keeps getting the same
-    number it always did. `detailed=True` is strictly additive: it
-    returns a breakdown dict layering tax and per-passenger fees on top
-    of that same subtotal, for callers that want it.
-
-    Round-trip uses outbound + inbound base prices × passengers. If no
-    inbound flight row is given, doubles the outbound price (unchanged
-    fallback behavior from the original implementation).
-    """
-    subtotal = outbound["base_price_tl"] * passengers
-    if trip_type == "Round-trip":
-        if inbound:
-            subtotal += inbound["base_price_tl"] * passengers
-        else:
-            subtotal *= 2
-
-    if not detailed:
-        return int(subtotal)
-
-    tax = subtotal * TAX_RATE
-    fees = PER_PASSENGER_FEE_TL * passengers * (2 if trip_type == "Round-trip" else 1)
-    return {
-        "subtotal_tl": round(subtotal, 2),
-        "tax_tl": round(tax, 2),
-        "fees_tl": round(fees, 2),
-        "total_tl": int(subtotal + tax + fees),
-    }
+def get_flight_by_number(flight_number: str) -> dict | None:
+    """Public accessor for a single flight by its flight_number. Exists so
+    other modules (pricing.py's self-test, etc.) never need to reach into
+    the private _FLIGHT_BY_NUMBER index directly."""
+    return _FLIGHT_BY_NUMBER.get(flight_number)
 
 
 # ---------------------------------------------------------------------------
@@ -580,66 +547,11 @@ def db_list_bookings() -> dict:
     }
 
 
-def ctx_get_current_datetime() -> dict:
-    """Return the current date, time, and day of the week."""
-    now = datetime.now()
-    return {
-        "date":          now.strftime("%Y-%m-%d"),
-        "date_readable": now.strftime("%A, %d %B %Y"),
-        "time":          now.strftime("%H:%M"),
-        "day_of_week":   now.strftime("%A"),
-        "timezone_note": "Server local time",
-    }
-
-
-def ctx_get_relative_dates() -> dict:
-    """Return pre-computed common relative dates (tomorrow, this weekend, next Monday, etc.)."""
-    now = datetime.now()
-    today = now.date()
-
-    days_to_saturday = (5 - today.weekday()) % 7 or 7
-    next_saturday = today + timedelta(days=days_to_saturday)
-    next_sunday = next_saturday + timedelta(days=1)
-    days_to_monday = (0 - today.weekday()) % 7 or 7
-    next_monday = today + timedelta(days=days_to_monday)
-
-    def fmt(d):
-        return {"date": d.strftime("%Y-%m-%d"), "readable": d.strftime("%A, %d %B %Y")}
-
-    return {
-        "today":              fmt(today),
-        "tomorrow":           fmt(today + timedelta(days=1)),
-        "day_after_tomorrow": fmt(today + timedelta(days=2)),
-        "this_saturday":      fmt(next_saturday),
-        "this_sunday":        fmt(next_sunday),
-        "next_monday":        fmt(next_monday),
-        "one_week_from_now":  fmt(today + timedelta(days=7)),
-    }
-
-
-def ctx_get_booking_window() -> dict:
-    """Return the allowed booking window (earliest and latest bookable dates)."""
-    now = datetime.now()
-    min_booking = now + timedelta(hours=2)
-    max_booking = now + timedelta(days=180)
-    return {
-        "current_datetime": now.strftime("%Y-%m-%d %H:%M"),
-        "earliest_departure": {
-            "datetime": min_booking.strftime("%Y-%m-%d %H:%M"),
-            "rule":     "At least 2 hours from now",
-        },
-        "latest_departure": {
-            "date": max_booking.strftime("%Y-%m-%d"),
-            "rule": "Up to 6 months (180 days) from today",
-        },
-    }
-
-
 # ---------------------------------------------------------------------------
-# Self-checks — run at the bottom of __main__, not at import time. These
-# operationalize the integrity analysis as executable tests rather than
-# prose claims: bidirectional route coverage, and every stored booking
-# price actually matching what calculate_total_price would produce today.
+# Self-checks — not run at import time; invoked from self_tests.py. These
+# operationalize the route-integrity analysis as an executable test rather
+# than a prose claim. (The matching price-integrity self-test now lives in
+# pricing.py, next to calculate_total_price.)
 # ---------------------------------------------------------------------------
 def self_test_bidirectional_coverage() -> list[str]:
     problems = []
@@ -650,55 +562,17 @@ def self_test_bidirectional_coverage() -> list[str]:
     return problems
 
 
-def self_test_booking_prices() -> list[str]:
-    problems = []
-    for b in BOOKINGS:
-        if b["booking_status"] in (BookingStatus.FAILED, BookingStatus.WAITLISTED):
-            continue  # these deliberately carry no confirmed fare
-        outbound = _FLIGHT_BY_NUMBER.get(b["flight_number"])
-        if not outbound:
-            problems.append(f"booking {b['booking_id']}: flight_number {b['flight_number']} not found")
-            continue
-        inbound = _FLIGHT_BY_NUMBER.get(b["return_flight_number"]) if b["return_flight_number"] else None
-        expected = calculate_total_price(outbound, b["passenger_count"], b["trip_type"], inbound)
-        if expected != int(b["total_price_tl"]):
-            problems.append(
-                f"booking {b['booking_id']}: stored total_price_tl={b['total_price_tl']} "
-                f"but calculate_total_price(...) = {expected}"
-            )
-    return problems
-
-
-if __name__ == "__main__":
-    print(f"Loaded {len(FLIGHTS)} flight rows ({sum(1 for f in FLIGHTS if not f['is_leg'])} sellable, "
-          f"{sum(1 for f in FLIGHTS if f['is_leg'])} legs) and {len(BOOKINGS)} bookings.\n")
-
-    print("--- self-test: bidirectional route coverage ---------------------")
-    issues = self_test_bidirectional_coverage()
-    print("OK — every sellable route has a return leg." if not issues else "\n".join(issues))
-
-    print("\n--- self-test: booking prices reconcile with calculate_total_price ---")
-    issues = self_test_booking_prices()
-    print("OK — every priced booking matches calculate_total_price()." if not issues else "\n".join(issues))
-
-
-    print("--- find_flight sanity checks --------------------------------")
-    for dep, arr in [("Ankara", "New York"), ("Izmir", "London"), ("Gothenburg", "Istanbul"), ("XXX", "IST")]:
-        print(f"{dep} -> {arr}:", find_flight(dep, arr))
-
-    print("\n--- capacity check --------------------------------------------")
-    print(db_check_capacity("PX-0015", "2026-11-10", additional_passengers=210))
-
-    print("\n--- price check (round trip w/ explicit inbound) ---------------")
-    ob = find_flight("IST", "LHR")
-    ib = find_flight("LHR", "IST")
-    print("int contract:", calculate_total_price(ob, 2, "Round-trip", ib))
-    print("detailed:", calculate_total_price(ob, 2, "Round-trip", ib, detailed=True))
-
-    print("\n--- route catalogue (first 5 lines) -----------------------------")
-    print("\n".join(route_catalogue().splitlines()[:5]))
-
-    print("\n--- connecting route details ------------------------------------")
-    import json
-    print(json.dumps(db_get_route_details("ESB", "JFK"), indent=2, default=str))
+# ---------------------------------------------------------------------------
+# NOTE: USERS and validate_tckn have moved to accounts.py — identity and
+# login are a different responsibility than flight/route data. See
+# accounts.py.
+#
+# NOTE: ctx_get_current_datetime / ctx_get_relative_dates /
+# ctx_get_booking_window have moved to booking_context.py.
+#
+# A combined self-test runner for this module plus pricing.py lives in
+# self_tests.py (run `python self_tests.py`), rather than here, so this
+# file doesn't need to import pricing.py just to exercise its own demo
+# output at the bottom of a __main__ block.
+# ---------------------------------------------------------------------------
 

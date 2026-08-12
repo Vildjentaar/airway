@@ -223,3 +223,52 @@ flowchart TD
     style FINAL_REPORT fill:#e94560,stroke:#1a1a2e,color:#fff
     style BOOKING_SEQ fill:#533483,stroke:#2b2d42,color:#fff
     style WIDGET fill:#0f3460,stroke:#16213e,color:#fff
+
+flowchart TD
+    GREET["Greet User and Ask Intent"] --> INTENT{"Analyze User Input"}
+    
+    INTENT -- "Off-Topic" --> PIVOT["Pivot smoothly back\nto booking"] --> INTENT
+    INTENT -- "Relative Dates" --> CTX["Determine real calendar dates"] --> BOOKING_SEQ
+    INTENT -- "Unserviced Route" --> ALT["State we do not fly it.\nOffer closest alternative."]
+    ALT -- "User Accepts" --> BOOKING_SEQ
+    INTENT -- "Valid Booking\nRequest" --> BOOKING_SEQ
+    
+    BOOKING_SEQ{"Check Missing Fields\nTrip Type, Locations, Dates,\nTicket Class, Passenger Breakdown"}
+    BOOKING_SEQ -- "Fields Missing" --> INFER{"Can it be inferred\nfrom context?"}
+    INFER -- Yes --> PREFILL["Pre-fill from context"] --> BOOKING_SEQ
+    INFER -- No --> ASK["Ask ONE question\nfor missing field"] --> WAIT_REPLY["Wait for User"] --> BOOKING_SEQ
+    
+    BOOKING_SEQ -- "Invalid Data" --> CALLOUT["Call out user error\nAsk for real info"] --> WAIT_REPLY
+    
+    BOOKING_SEQ -- "All Fields\nCollected" --> AVAIL["Check Seat Availability"]
+    AVAIL --> RECAP["Present numbered recap\nincluding layovers and connections.\nAsk if everything is right."]
+    RECAP --> CONFIRM{"User confirms?"}
+    
+    CONFIRM -- No --> EDIT["Ask what to change"] --> WAIT_REPLY
+    CONFIRM -- Yes --> WIDGET["Add Flight to Cart"]
+    
+    WIDGET --> PROMPT_CART["Ask if user wants to add another\nflight or is ready to check out"]
+    PROMPT_CART --> NEXT_STEP{"User Choice"}
+    
+    NEXT_STEP -- "Add another flight" --> BOOKING_SEQ
+    NEXT_STEP -- "Check out" --> AUTH_FORM["Render Secure Form:\nAuth (Login / Register / Guest)"]
+
+    AUTH_FORM --> AUTH_CHECK{"AuthProvider\nvalidates submission"}
+    AUTH_CHECK -- "Invalid" --> AUTH_FORM
+    AUTH_CHECK -- "Valid" --> PAX_FORM["Render Secure Form:\nPassenger Details incl. TCKN"]
+
+    PAX_FORM --> PAX_CHECK{"Required fields +\nTCKN checksum valid?"}
+    PAX_CHECK -- "Invalid" --> PAX_FORM
+    PAX_CHECK -- "Valid" --> PAY_FORM["Render Secure Form:\nPayment"]
+
+    PAY_FORM --> PAY_CHECK{"PaymentGateway validates\nLuhn, expiry, CVC"}
+    PAY_CHECK -- "Invalid" --> PAY_FORM
+    PAY_CHECK -- "Valid" --> FINAL_REPORT["Provide detailed breakdown of\nfare, taxes, and fees"]
+    
+    style GREET fill:#1a1a2e,stroke:#e94560,color:#fff
+    style FINAL_REPORT fill:#e94560,stroke:#1a1a2e,color:#fff
+    style BOOKING_SEQ fill:#533483,stroke:#2b2d42,color:#fff
+    style WIDGET fill:#0f3460,stroke:#16213e,color:#fff
+    style AUTH_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style PAX_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style PAY_FORM fill:#0f3460,stroke:#16213e,color:#fff

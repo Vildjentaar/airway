@@ -146,16 +146,31 @@ with st.sidebar:
         help="Full session state including tool calls and tool results.",
     )
 
+from ui_components import (
+    render_flight_card,
+    render_final_report,
+    render_secure_form_ui,
+    build_transcript,
+    build_raw_log,
+)
+
 # --------------------------------------------------------------------------
 # Main chat history render
 # --------------------------------------------------------------------------
 
-for message in st.session_state.messages:
+for i, message in enumerate(st.session_state.messages):
     role = message.get("role")
+    is_last = (i == len(st.session_state.messages) - 1)
 
     if role == "tool" and "report_data" in message:
         with st.chat_message("assistant"):
-            render_final_report(message["report_data"])
+            if message["report_data"] and message["report_data"].get("render_form"):
+                if is_last:
+                    render_secure_form_ui(message["report_data"]["render_form"])
+                else:
+                    st.markdown(f"*(Secure {message['report_data']['render_form']} form submitted)*")
+            else:
+                render_final_report(message["report_data"])
         continue
 
     if role in ("system", "tool"):

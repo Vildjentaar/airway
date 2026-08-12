@@ -19,11 +19,13 @@ import re as _re
 from datetime import datetime
 
 from thall_lines_db import (
-    find_flight, calculate_total_price, AIRLINE_NAME,
+    find_flight, AIRLINE_NAME,
     db_list_all_routes, db_get_route_details,
     db_list_airports, db_get_airport_info, db_list_bookings,
-    ctx_get_current_datetime, ctx_get_relative_dates, ctx_get_booking_window,
 )
+from pricing import calculate_total_price
+from booking_context import ctx_get_current_datetime, ctx_get_relative_dates, ctx_get_booking_window
+from accounts import validate_tckn
 
 # Attempt to import check_capacity if it was added to thall_lines_db
 try:
@@ -164,6 +166,111 @@ def _sanitize_for_gemini(messages: list) -> list:
     return cleaned
 
 
+def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
+    """
+    Validates a `generate_flight_widget` call and, if valid, prices it and
+    returns the flight record ready to add to the cart.
+
+    Deliberately kept separate from `_dispatch_tool_call`: this function
+    only knows about booking rules (passenger counts, dates, route
+    existence, pricing, duplicates) and returns plain data. It has no idea
+    a `tool_call` or a `messages` list exists. That split means the
+    validation/pricing logic here can be tested or reused (e.g. from a
+    future non-chat booking form) without dragging tool-call plumbing
+    along with it, and adding a new validation rule never requires
+    touching the tool-call bookkeeping in `_dispatch_tool_call`.
+
+    Returns {"error": "..."} or {"flight": {...}}.
+    """
+    dep = _extract_code(tool_args.get("departure_point", ""))
+    arr = _extract_code(tool_args.get("arrival_point", ""))
+    trip_type = tool_args.get("trip_type", "One-way")
+
+    adult_count = int(tool_args.get("adult_count", 0))
+    child_count = int(tool_args.get("child_count", 0))
+    baby_count = int(tool_args.get("baby_count", 0))
+    ticket_class = tool_args.get("ticket_class", "Economy")
+
+    # Fallback if old passenger_count is used by the model
+    passenger_count = int(tool_args.get("passenger_count", 0))
+    if passenger_count > 0 and adult_count == 0 and child_count == 0 and baby_count == 0:
+        adult_count = passenger_count
+
+    passengers = adult_count + child_count + baby_count
+    passengers_breakdown = {"Adult": adult_count, "Child": child_count, "Baby": baby_count}
+
+    if passengers <= 0 or passengers > 9:
+        return {"error": "Invalid passenger count. Cannot book more than 9 passengers per transaction."}
+
+    dep_date_str = tool_args.get("departure_date", "")
+    try:
+        dep_date_parsed = datetime.strptime(dep_date_str, "%Y-%m-%d")
+        if dep_date_parsed.date() < datetime.now().date():
+            return {"error": "Departure date cannot be in the past."}
+    except ValueError:
+        return {"error": "Invalid departure_date format. Must be YYYY-MM-DD."}
+
+    missing_user_fields = [
+        f for f in ["departure_point", "arrival_point", "departure_date"]
+        if not str(tool_args.get(f, "")).strip()
+    ]
+    if missing_user_fields:
+        return {"error": (
+            f"Cannot render the flight widget yet. "
+            f"Still missing: {', '.join(missing_user_fields)}. "
+            f"Resume the booking sequence."
+        )}
+
+    outbound = find_flight(dep, arr)
+    if not outbound:
+        return {"error": (
+            f"No route found from '{dep}' to '{arr}'. "
+            f"{AIRLINE_NAME} does not operate that route. "
+            f"Inform the user and offer available alternatives."
+        )}
+
+    inbound = find_flight(arr, dep) if trip_type == "Round-trip" else None
+    if trip_type == "Round-trip" and not inbound:
+        return {"error": (
+            f"No return route found from '{arr}' to '{dep}'. "
+            f"{AIRLINE_NAME} does not operate that return route. Inform the user."
+        )}
+
+    total_price = calculate_total_price(
+        outbound, passengers, trip_type, inbound,
+        ticket_class=ticket_class, passengers_breakdown=passengers_breakdown
+    )
+    verified = {
+        "departure_point": dep,
+        "arrival_point": arr,
+        "trip_type": trip_type,
+        "departure_date": tool_args.get("departure_date", ""),
+        "return_date": tool_args.get("return_date", ""),
+        "passenger_count": passengers,
+        "adult_count": adult_count,
+        "child_count": child_count,
+        "baby_count": baby_count,
+        "ticket_class": ticket_class,
+        "departure_time": outbound["departure_time"],
+        "arrival_time": outbound["arrival_time"],
+        "flight_duration": outbound["duration"],
+        "transfer_status": outbound["transfer_status"],
+        "airline_name": AIRLINE_NAME,
+        "flight_number": outbound["flight_number"],
+        "price_tl": total_price,
+    }
+
+    is_duplicate = any(
+        f["flight_number"] == verified["flight_number"]
+        and f["departure_date"] == verified["departure_date"]
+        for f in flight_data
+    )
+    if is_duplicate:
+        return {"error": f"Flight {verified['flight_number']} on {verified['departure_date']} is already in the cart."}
+
+    return {"flight": verified}
+
+
 def _select_active_tools(messages: list, flight_data: list, report_data):
     """Decide which tools (if any) should be offered to the model on this turn."""
     if report_data is not None:
@@ -189,108 +296,17 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
     skip_followup = False
 
     if function_name == "generate_flight_widget":
-        dep = _extract_code(tool_args.get("departure_point", ""))
-        arr = _extract_code(tool_args.get("arrival_point", ""))
-        passengers = int(tool_args.get("passenger_count", 1) or 1)
-        trip_type = tool_args.get("trip_type", "One-way")
+        result = _build_verified_flight(tool_args, flight_data)
 
-        if passengers <= 0 or passengers > 9:
+        if "error" in result:
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
-                "content": "Error: Invalid passenger count. Cannot book more than 9 passengers per transaction."
+                "content": f"Error: {result['error']}",
             })
             return report_data, skip_followup
 
-        dep_date_str = tool_args.get("departure_date", "")
-        try:
-            dep_date_parsed = datetime.strptime(dep_date_str, "%Y-%m-%d")
-            if dep_date_parsed.date() < datetime.now().date():
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": "Error: Departure date cannot be in the past."
-                })
-                return report_data, skip_followup
-        except ValueError:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": "Error: Invalid departure_date format. Must be YYYY-MM-DD."
-            })
-            return report_data, skip_followup
-
-        missing_user_fields = [
-            f for f in ["departure_point", "arrival_point", "departure_date"]
-            if not str(tool_args.get(f, "")).strip()
-        ]
-        if missing_user_fields:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": (
-                    f"Error: Cannot render the flight widget yet. "
-                    f"Still missing: {', '.join(missing_user_fields)}. "
-                    f"Resume the booking sequence."
-                ),
-            })
-            return report_data, skip_followup
-
-        outbound = find_flight(dep, arr)
-        if not outbound:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": (
-                    f"Error: No route found from '{dep}' to '{arr}'. "
-                    f"{AIRLINE_NAME} does not operate that route. "
-                    f"Inform the user and offer available alternatives."
-                ),
-            })
-            return report_data, skip_followup
-
-        inbound = find_flight(arr, dep) if trip_type == "Round-trip" else None
-        if trip_type == "Round-trip" and not inbound:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": (
-                    f"Error: No return route found from '{arr}' to '{dep}'. "
-                    f"{AIRLINE_NAME} does not operate that return route. Inform the user."
-                )
-            })
-            return report_data, skip_followup
-
-        total_price = calculate_total_price(outbound, passengers, trip_type, inbound)
-        verified = {
-            "departure_point": dep,
-            "arrival_point": arr,
-            "trip_type": trip_type,
-            "departure_date": tool_args.get("departure_date", ""),
-            "return_date": tool_args.get("return_date", ""),
-            "passenger_count": passengers,
-            "departure_time": outbound["departure_time"],
-            "arrival_time": outbound["arrival_time"],
-            "flight_duration": outbound["duration"],
-            "transfer_status": outbound["transfer_status"],
-            "airline_name": AIRLINE_NAME,
-            "flight_number": outbound["flight_number"],
-            "price_tl": total_price,
-        }
-
-        is_duplicate = any(
-            f["flight_number"] == verified["flight_number"]
-            and f["departure_date"] == verified["departure_date"]
-            for f in flight_data
-        )
-        if is_duplicate:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": f"Error: Flight {verified['flight_number']} on {verified['departure_date']} is already in the cart."
-            })
-            return report_data, skip_followup
-
+        verified = result["flight"]
         flight_data.append(verified)
 
         # Optimization: skip followup for widget rendering, emit directly
@@ -301,7 +317,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
         })
         messages.append({
             "role": "assistant",
-            "content": f"I've added flight {outbound['flight_number']} to your cart. Please check the summary above!"
+            "content": f"I've added flight {verified['flight_number']} to your cart. Please check the summary above!"
         })
         skip_followup = True
 
@@ -420,6 +436,29 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
                 "tool_call_id": tool_call.id,
                 "content": f"Error fetching '{info_type}': {ctx_err}",
             })
+
+    elif function_name == "validate_tckn":
+        tckn_str = tool_args.get("tckn", "")
+        result = validate_tckn(tckn_str)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(result, ensure_ascii=False),
+        })
+
+    elif function_name == "render_secure_form":
+        form_type = tool_args.get("form_type", "auth")
+        if report_data is None:
+            # We use report_data as a generic dict to signal the UI
+            report_data = {}
+        report_data["render_form"] = form_type
+        
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": f"Form '{form_type}' rendered. Waiting for user submission...",
+        })
+        skip_followup = True
 
     else:
         messages.append({
