@@ -254,7 +254,7 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         "departure_time": outbound["departure_time"],
         "arrival_time": outbound["arrival_time"],
         "flight_duration": outbound["duration"],
-        "transfer_status": outbound["transfer_status"],
+        "transfer_status": outbound["transfer_status"].value if hasattr(outbound["transfer_status"], "value") else outbound["transfer_status"],
         "airline_name": AIRLINE_NAME,
         "flight_number": outbound["flight_number"],
         "price_tl": total_price,

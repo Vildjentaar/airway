@@ -192,7 +192,7 @@ def build_transcript(messages: list, flight_data: list, report_data: dict, is_va
             total_price += fd.get("price_tl", 0)
         lines.append(f"- **Total Price:** {total_price} TL")
 
-    if report_data:
+    if report_data and not report_data.get("render_form"):
         lines += [
             "",
             "---",
