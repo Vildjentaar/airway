@@ -24,6 +24,7 @@ from llm_engine import call_llm, is_valid_flight_data
 from ui_components import (
     render_flight_card,
     render_final_report,
+    render_secure_form_ui,
     build_transcript,
     build_raw_log,
 )
@@ -146,13 +147,6 @@ with st.sidebar:
         help="Full session state including tool calls and tool results.",
     )
 
-from ui_components import (
-    render_flight_card,
-    render_final_report,
-    render_secure_form_ui,
-    build_transcript,
-    build_raw_log,
-)
 
 # --------------------------------------------------------------------------
 # Main chat history render
