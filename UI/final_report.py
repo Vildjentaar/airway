@@ -29,6 +29,17 @@ def render_final_report(report_data: dict):
                     st.text(f"Arrive: {flight.get('arrival_point', '')} at {flight.get('arrival_time', '')}")
                     st.text(f"Class: {flight.get('ticket_class', 'Economy')}")
 
+                if flight.get("trip_type") == "Round-trip" and flight.get("return_flight_number"):
+                    st.divider()
+                    st.markdown(f"** Return Flight {flight.get('return_flight_number', '')}**")
+                    r_col1, r_col2 = st.columns(2)
+                    with r_col1:
+                        st.text(f"Depart: {flight.get('arrival_point', '')} at {flight.get('return_departure_time', '')}")
+                        st.text(f"Date: {flight.get('return_date', '')}")
+                    with r_col2:
+                        st.text(f"Arrive: {flight.get('departure_point', '')} at {flight.get('return_arrival_time', '')}")
+                        st.text(f"Class: {flight.get('ticket_class', 'Economy')}")
+
                 pax_data = st.session_state.get("passenger_details", [])
                 if isinstance(pax_data, dict):
                     pax_data = [pax_data]

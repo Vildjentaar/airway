@@ -261,6 +261,13 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         "pricing_details": pricing_details,
     }
 
+    if trip_type == "Round-trip" and inbound:
+        verified["return_flight_number"] = inbound["flight_number"]
+        verified["return_departure_time"] = inbound["departure_time"]
+        verified["return_arrival_time"] = inbound["arrival_time"]
+        verified["return_duration"] = inbound["duration"]
+        verified["return_transfer_status"] = inbound["transfer_status"].value if hasattr(inbound["transfer_status"], "value") else inbound["transfer_status"]
+
     is_duplicate = any(
         f["flight_number"] == verified["flight_number"]
         and f["departure_date"] == verified["departure_date"]
@@ -537,70 +544,13 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                     tool_choice="none",
                 )
                 followup_text = (followup.choices[0].message.content or "").strip()
-                if not followup_text:
-                    # ── Retry with a minimal, structurally valid context ────
-                    # No tool messages — they require an assistant tool_calls
-                    # anchor that we don't have here, so _sanitize_for_gemini
-                    # would strip them as orphaned anyway.
-                    last_tool_names_retry = [
-                        m.get("name", "") for m in messages if m.get("role") == "tool"
-                    ]
-                    last_fn_retry = last_tool_names_retry[-1] if last_tool_names_retry else "the previous action"
-                    minimal_ctx = [messages[0]]
-                    last_user_msg = None
-                    for m in reversed(messages):
-                        if m.get("role") == "user" and not m.get("hidden"):
-                            last_user_msg = dict(m)
-                            break
-                    if last_user_msg:
-                        last_user_msg["content"] = str(last_user_msg.get("content", "")) + (
-                            f"\n\n[System: '{last_fn_retry}' completed successfully. "
-                            "Please respond to the user's original request now — "
-                            "do NOT call any tools, just reply in plain text.]"
-                        )
-                        minimal_ctx.append(last_user_msg)
-                    else:
-                        # Fallback if no user message exists
-                        minimal_ctx.append({
-                            "role": "user",
-                            "content": (
-                                f"[System: '{last_fn_retry}' completed successfully. "
-                                "Please respond to the user's original request now — "
-                                "do NOT call any tools, just reply in plain text.]"
-                            ),
-                        })
-                    try:
-                        retry = client.chat.completions.create(
-                            model=MODEL_NAME,
-                            messages=minimal_ctx,
-                            temperature=0.3,
-                            tools=None,
-                            tool_choice="none",
-                        )
-                        followup_text = (retry.choices[0].message.content or "").strip()
-                    except Exception:
-                        followup_text = ""
-
                 if followup_text:
                     messages.append({"role": "assistant", "content": followup_text})
                 else:
-                    # Last resort: derive a short, honest fallback from the
-                    # last tool that ran — no misleading "connection error".
-                    last_tool_names = [
-                        m.get("name", "") for m in messages if m.get("role") == "tool"
-                    ]
-                    last_fn = last_tool_names[-1] if last_tool_names else ""
-                    _fallbacks = {
-                        "search_flights": "I found some options — please check the results above.",
-                        "check_capacity": "Seat availability has been checked. Let me know how you'd like to proceed.",
-                        "get_context": "I have the latest date/time context. Please go ahead.",
-                        "validate_tckn": "The ID number has been validated. You can continue.",
-                    }
-                    fallback_text = _fallbacks.get(
-                        last_fn,
-                        "Done! Your request was processed. How would you like to continue?"
-                    )
-                    messages.append({"role": "assistant", "content": fallback_text})
+                    messages.append({
+                        "role": "assistant",
+                        "content": "I've processed your request, but I'm having trouble formatting the response. Could you let me know how you'd like to proceed?"
+                    })
             except Exception as follow_err:
                 last_error = str(follow_err)
                 messages.append({

@@ -52,8 +52,32 @@ def render_flight_card(flight_cart: list, is_disabled: bool = False):
                 )
                 st.text(flight_data.get("arrival_point", ""))
 
+            if trip_type == "Round-trip" and flight_data.get("return_flight_number"):
+                st.divider()
+                st.markdown(f"**{flight_data.get('arrival_point', '')} ➔ {flight_data.get('departure_point', '')}**")
+                
+                col4, col5, col6 = st.columns(3)
+                with col4:
+                    st.metric(
+                        label="Inbound",
+                        value=flight_data.get("return_departure_time", ""),
+                        delta=flight_data.get("return_transfer_status", "Direct"),
+                    )
+                    st.text(flight_data.get("arrival_point", ""))
+                with col5:
+                    st.metric(label="Duration", value=flight_data.get("return_duration", ""), delta_color="off")
+                with col6:
+                    st.metric(
+                        label="Arrival",
+                        value=flight_data.get("return_arrival_time", ""),
+                        delta=flight_data.get("return_transfer_status", "Direct"),
+                    )
+                    st.text(flight_data.get("departure_point", ""))
+
             pax = flight_data.get("passenger_count", 1)
             fn = flight_data.get("flight_number", "")
+            if trip_type == "Round-trip" and flight_data.get("return_flight_number"):
+                fn = f"{fn} & {flight_data.get('return_flight_number')}"
             price = flight_data.get("price_tl", 0)
             details = flight_data.get("pricing_details")
             total_price += price
