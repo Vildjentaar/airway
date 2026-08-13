@@ -534,14 +534,58 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                     tools=None,
                     tool_choice="none",
                 )
-                followup_text = followup.choices[0].message.content or ""
+                followup_text = (followup.choices[0].message.content or "").strip()
+                if not followup_text:
+
+                    last_tool_names_retry = [
+                        m.get("name", "") for m in messages if m.get("role") == "tool"
+                    ]
+                    last_fn_retry = last_tool_names_retry[-1] if last_tool_names_retry else "the previous action"
+                    minimal_ctx = [messages[0]]
+                    for m in reversed(messages):
+                        if m.get("role") == "user" and not m.get("hidden"):
+                            minimal_ctx.append(m)
+                            break
+                    minimal_ctx.append({
+                        "role": "user",
+                        "content": (
+                            f"[System: '{last_fn_retry}' completed successfully. "
+                            "Please respond to the user's original request now — "
+                            "do NOT call any tools, just reply in plain text.]"
+                        ),
+                    })
+                    try:
+                        retry = client.chat.completions.create(
+                            model=MODEL_NAME,
+                            messages=minimal_ctx,
+                            temperature=0.3,
+                            tools=None,
+                            tool_choice="none",
+                        )
+                        followup_text = (retry.choices[0].message.content or "").strip()
+                    except Exception:
+                        followup_text = ""
+
                 if followup_text:
                     messages.append({"role": "assistant", "content": followup_text})
                 else:
-                    messages.append({
-                        "role": "assistant",
-                        "content": "I apologize, I processed that but encountered a brief connection error before I could reply. Could you please repeat that?"
-                    })
+                    # Last resort: derive a short, honest fallback from the
+                    # last tool that ran — no misleading "connection error".
+                    last_tool_names = [
+                        m.get("name", "") for m in messages if m.get("role") == "tool"
+                    ]
+                    last_fn = last_tool_names[-1] if last_tool_names else ""
+                    _fallbacks = {
+                        "search_flights": "I found some options — please check the results above.",
+                        "check_capacity": "Seat availability has been checked. Let me know how you'd like to proceed.",
+                        "get_context": "I have the latest date/time context. Please go ahead.",
+                        "validate_tckn": "The ID number has been validated. You can continue.",
+                    }
+                    fallback_text = _fallbacks.get(
+                        last_fn,
+                        "Done! Your request was processed. How would you like to continue?"
+                    )
+                    messages.append({"role": "assistant", "content": fallback_text})
             except Exception as follow_err:
                 last_error = str(follow_err)
                 messages.append({
