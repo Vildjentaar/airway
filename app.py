@@ -172,8 +172,6 @@ for i, message in enumerate(st.session_state.messages):
     if role == "assistant":
         if message.get("hidden"):
             continue
-        if message.get("tool_calls"):
-            continue
         content = message.get("content") or ""
         if content:
             with st.chat_message("assistant"):

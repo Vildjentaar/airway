@@ -99,10 +99,10 @@ def render_flight_card(flight_cart: list, is_disabled: bool = False):
 def render_final_report(report_data: dict):
     booked_flights = report_data.get("booked_flights", [])
     if booked_flights:
-        st.markdown("### 🎟️ Final E-Ticket Details")
+        st.markdown("### Final E-Ticket Details")
         for flight in booked_flights:
             with st.container(border=True):
-                st.markdown(f"**✈️ Flight {flight.get('flight_number', '')}**")
+                st.markdown(f"** Flight {flight.get('flight_number', '')}**")
                 col1, col2 = st.columns(2)
                 with col1:
                     st.text(f"Depart: {flight.get('departure_point', '')} at {flight.get('departure_time', '')}")
@@ -111,24 +111,27 @@ def render_final_report(report_data: dict):
                     st.text(f"Arrive: {flight.get('arrival_point', '')} at {flight.get('arrival_time', '')}")
                     st.text(f"Class: {flight.get('ticket_class', 'Economy')}")
                 
-                pax = st.session_state.get("passenger_details", {})
+                pax_data = st.session_state.get("passenger_details", [])
+                if isinstance(pax_data, dict):
+                    pax_data = [pax_data]
                 pay = st.session_state.get("payment_details", {})
                 
-                if pax:
+                if pax_data:
                     st.divider()
-                    st.caption("Passenger Information (Protected)")
+                    st.caption("Passenger Information")
                     
-                    fn = pax.get("first_name", "")
-                    ln = pax.get("last_name", "")
-                    censored_name = f"{fn[:1]}*** {ln[:1]}***" if fn and ln else "N/A"
-                    
-                    tckn = pax.get("tckn", "")
-                    censored_tckn = f"*******{tckn[-4:]}" if len(tckn) == 11 else "N/A"
+                    for p in pax_data:
+                        fn = p.get("first_name", "")
+                        ln = p.get("last_name", "")
+                        censored_name = f"{fn[:1]}*** {ln[:1]}***" if fn and ln else "N/A"
+                        
+                        tckn = p.get("tckn", "")
+                        censored_tckn = f"*******{tckn[-4:]}" if len(tckn) == 11 else "N/A"
+                        ptype = p.get("type", "Adult")
+                        
+                        st.text(f"[{ptype}] Name: {censored_name} | ID / TCKN: {censored_tckn}")
                     
                     card_last4 = pay.get("card_last4", "****")
-                    
-                    st.text(f"Name: {censored_name}")
-                    st.text(f"ID / TCKN: {censored_tckn}")
                     st.text(f"Payment: **** **** **** {card_last4}")
 
     st.divider()
@@ -268,6 +271,7 @@ def render_secure_form_ui(form_type: str):
     mode = email = password = None
     first_name = last_name = nationality = tckn = None
     cardholder_name = card_number = exp_mm = exp_yy = cvc = None
+    passenger_data_list = []
     submitted = False
 
     if form_type == "passenger_details":
@@ -296,14 +300,42 @@ def render_secure_form_ui(form_type: str):
         
         default_tckn = profile.get("tckn") or ""
 
+        flight = st.session_state.flight_data[0] if st.session_state.get("flight_data") else {}
+        adults = flight.get("adult_count", 1)
+        children = flight.get("child_count", 0)
+        babies = flight.get("baby_count", 0)
+
         with st.container():
-            first_name = st.text_input("First Name", max_chars=32, value=default_fn)
-            last_name = st.text_input("Last Name", max_chars=32, value=default_ln)
-            st.date_input("Date of Birth", value=default_dob, min_value=datetime(1926, 1, 1), max_value=datetime.today())
-            st.radio("Gender", GENDERS, index=default_gender_idx)
-            nationality = st.selectbox("Nationality", NATIONALITIES, key="nationality_select", index=default_nat_idx)
-            if nationality == "TR":
-                tckn = st.text_input("TCKN", max_chars=11, value=default_tckn)
+            for p_type, count in [("Adult", adults), ("Child", children), ("Baby", babies)]:
+                for i in range(count):
+                    st.markdown(f"#### {p_type} {i+1}")
+                    is_first = (p_type == "Adult" and i == 0)
+                    
+                    fn_val = default_fn if is_first else ""
+                    ln_val = default_ln if is_first else ""
+                    dob_val = default_dob if is_first else datetime.today()
+                    gen_idx = default_gender_idx if is_first else 0
+                    nat_idx = default_nat_idx if is_first else 0
+                    tckn_val = default_tckn if is_first else ""
+
+                    fn = st.text_input("First Name", max_chars=32, value=fn_val, key=f"{p_type}_{i}_fn")
+                    ln = st.text_input("Last Name", max_chars=32, value=ln_val, key=f"{p_type}_{i}_ln")
+                    dob = st.date_input("Date of Birth", value=dob_val, min_value=datetime(1926, 1, 1), max_value=datetime.today(), key=f"{p_type}_{i}_dob")
+                    gender = st.radio("Gender", GENDERS, index=gen_idx, key=f"{p_type}_{i}_gen")
+                    nationality = st.selectbox("Nationality", NATIONALITIES, index=nat_idx, key=f"{p_type}_{i}_nat")
+                    tckn = ""
+                    if nationality == "TR":
+                        tckn = st.text_input("TCKN", max_chars=11, value=tckn_val, key=f"{p_type}_{i}_tckn")
+                        
+                    passenger_data_list.append({
+                        "type": p_type,
+                        "first_name": fn,
+                        "last_name": ln,
+                        "dob": dob,
+                        "gender": gender,
+                        "nationality": nationality,
+                        "tckn": tckn
+                    })
             submitted = st.button("Submit & Continue", key="passenger_submit")
     else:
         if form_type == "auth":
@@ -338,7 +370,7 @@ def render_secure_form_ui(form_type: str):
         name = f"{first_name or ''} {last_name or ''}".strip() if mode == "Register" else None
         result = _process_auth_submission(mode, email, password, name)
     elif form_type == "passenger_details":
-        result = _process_passenger_submission(first_name, last_name, nationality, tckn)
+        result = _process_passenger_submission(passenger_data_list)
     elif form_type == "payment":
         expiry = f"{exp_mm}/{exp_yy}" if exp_mm and exp_yy else ""
         result = _process_payment_submission(cardholder_name, card_number, expiry, cvc)
@@ -385,33 +417,38 @@ def _process_auth_submission(mode: str, email: str, password: str, name: str = N
     return {"success": False, "error": "Please select Guest, Login, or Register."}
 
 
-def _process_passenger_submission(first_name: str, last_name: str, nationality: str, tckn: str) -> dict:
-    """Basic required-field check, plus a real TCKN checksum validation for
-    Turkish nationals — the same validate_tckn used elsewhere in the app."""
-    fn = (first_name or "").strip()
-    ln = (last_name or "").strip()
-    if not fn or not ln:
-        return {"success": False, "error": "First and last name are required."}
-    if len(fn) < 2 or len(ln) < 2:
-        return {"success": False, "error": "First and last name must be at least 2 characters each."}
+def _process_passenger_submission(passengers: list) -> dict:
+    today = datetime.today().date()
+    for idx, p in enumerate(passengers):
+        fn = p["first_name"].strip()
+        ln = p["last_name"].strip()
+        ptype = p["type"]
         
-    name_regex = r"^[a-zA-ZçÇğĞıIİiöÖşŞüÜ\s\-']+$"
-    if not re.match(name_regex, fn):
-        return {"success": False, "error": "First name can only contain letters."}
-    if not re.match(name_regex, ln):
-        return {"success": False, "error": "Last name can only contain letters."}
+        if not fn or not ln:
+            return {"success": False, "error": f"{ptype} {idx+1}: First and last name are required."}
+        if len(fn) < 2 or len(ln) < 2:
+            return {"success": False, "error": f"{ptype} {idx+1}: Names must be at least 2 characters."}
+            
+        name_regex = r"^[a-zA-ZçÇğĞıIİiöÖşŞüÜ\s\-']+$"
+        if not re.match(name_regex, fn) or not re.match(name_regex, ln):
+            return {"success": False, "error": f"{ptype} {idx+1}: Name can only contain letters."}
 
-    if (nationality or "").strip().upper() == "TR":
-        tckn_result = validate_tckn(tckn or "")
-        if not tckn_result["valid"]:
-            return {"success": False, "error": tckn_result["error"]}
+        if p["nationality"].strip().upper() == "TR":
+            tckn_result = validate_tckn(p["tckn"] or "")
+            if not tckn_result["valid"]:
+                return {"success": False, "error": f"{ptype} {idx+1}: {tckn_result['error']}"}
 
-    st.session_state.passenger_details = {
-        "first_name": fn,
-        "last_name": ln,
-        "tckn": tckn or ""
-    }
+        dob = p["dob"]
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        
+        if ptype == "Adult" and age < 12:
+            return {"success": False, "error": f"{ptype} {idx+1} ({fn}) must be 12 or older (currently {age})."}
+        if ptype == "Child" and (age < 2 or age > 11):
+            return {"success": False, "error": f"{ptype} {idx+1} ({fn}) must be 2-11 years old (currently {age})."}
+        if ptype == "Baby" and age >= 2:
+            return {"success": False, "error": f"{ptype} {idx+1} ({fn}) must be under 2 years old (currently {age})."}
 
+    st.session_state.passenger_details = passengers
     return {"success": True, "detail": "Passenger details recorded."}
 
 
