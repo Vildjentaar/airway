@@ -73,14 +73,7 @@ if "messages" not in st.session_state:
     st.session_state.report_data = None
     st.session_state.last_error = None
     st.session_state.pending_user_message = None
-
-    with st.spinner("Connecting to terminal..."):
-        if not _run_llm_turn():
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": f"Welcome to {AIRLINE_NAME}. I'm currently experiencing connection issues. Please try again or click 'Start Over'."
-            })
-    st.rerun()
+    st.session_state.needs_init = True
 
 if "flight_data" not in st.session_state:
     st.session_state.flight_data = []
@@ -116,7 +109,8 @@ with st.sidebar:
         and not st.session_state.get("report_data")
         and st.session_state.get("last_error") is None
     )
-    if st.button("Start Over", use_container_width=True, disabled=is_fresh):
+    is_busy = st.session_state.get("needs_init", False) or st.session_state.get("is_thinking", False)
+    if st.button("Start Over", use_container_width=True, disabled=(is_fresh or is_busy)):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
@@ -203,30 +197,35 @@ if st.session_state.last_error:
 # --------------------------------------------------------------------------
 
 trigger = st.session_state.pending_user_message
-if trigger:
+if trigger and not st.session_state.get("needs_init", False):
     st.session_state.pending_user_message = None
     if trigger.startswith("[System Note:"):
         st.session_state.messages.append({"role": "user", "content": trigger, "hidden": True})
     else:
-        last = st.session_state.messages[-1] if st.session_state.messages else {}
-        if last.get("role") == "user" and not last.get("hidden"):
-            st.session_state.messages[-1]["content"] += "\n" + trigger
-        else:
-            st.session_state.messages.append({"role": "user", "content": trigger})
-    with st.spinner("Confirming…"):
-        _run_llm_turn()
+        st.session_state.messages.append({"role": "user", "content": trigger})
+    st.session_state.is_thinking = True
     st.rerun()
 
-# Disable input entirely if report is generated (session over)
-if user_input := st.chat_input("Type your message here...", disabled=(st.session_state.report_data is not None)):
+# Disable input entirely if report is generated (session over) or initializing/thinking
+is_chat_disabled = (st.session_state.report_data is not None) or st.session_state.get("needs_init", False) or st.session_state.get("is_thinking", False)
+if user_input := st.chat_input("Type your message here...", disabled=is_chat_disabled):
     if user_input.strip():
-        last = st.session_state.messages[-1] if st.session_state.messages else {}
-        if last.get("role") == "user":
-            st.session_state.messages[-1]["content"] += "\n" + user_input
-        else:
-            st.session_state.messages.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
-        with st.spinner("Thinking…"):
-            _run_llm_turn()
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.is_thinking = True
         st.rerun()
+
+if st.session_state.get("is_thinking"):
+    with st.spinner("Thinking…"):
+        _run_llm_turn()
+    st.session_state.is_thinking = False
+    st.rerun()
+
+if st.session_state.get("needs_init"):
+    with st.spinner("Connecting to terminal..."):
+        if not _run_llm_turn():
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": f"Welcome to {AIRLINE_NAME}. I'm currently experiencing connection issues. Please try again or click 'Start Over'."
+            })
+    st.session_state.needs_init = False
+    st.rerun()
