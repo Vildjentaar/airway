@@ -24,7 +24,7 @@ flowchart TD
     INPUT_CHECK{"Did the user perform an action or type a message?"}
     INPUT_CHECK -- Yes --> PROCESS_ACTION["The application sends the user input to the AI engine for processing"]
     PROCESS_ACTION --> ROUTE_ACTION{"Does the action require data or interface updates?"}
-    ROUTE_ACTION -- "Data Tool" --> DISPATCHER["The AI requests data and the dispatcher fetches it securely from the database"]
+    ROUTE_ACTION -- "Data Tool" --> DISPATCHER["The AI requests data and the dispatcher fetches it securely from the MySQL database"]
     ROUTE_ACTION -- "Interface Tool" --> UI_STATE["The AI updates the interface or cart state directly"]
     DISPATCHER --> REFRESH
     UI_STATE --> REFRESH
@@ -200,7 +200,7 @@ flowchart TD
     
     INTENT -- "Off-Topic" --> PIVOT["The AI pivots the conversation smoothly back to booking a flight"] --> INTENT
     INTENT -- "Relative Dates" --> CTX["The AI checks the calendar to determine the exact travel dates"] --> BOOKING_SEQ
-    INTENT -- "Unserviced Route" --> ALT["The AI queries the database to see that the route is unavailable and offers the closest alternative"]
+    INTENT -- "Unserviced Route" --> ALT["The AI queries the MySQL database to see that the route is unavailable and offers the closest alternative"]
     ALT -- "User Accepts" --> BOOKING_SEQ
     INTENT -- "Valid Booking Request" --> BOOKING_SEQ
     
@@ -211,7 +211,7 @@ flowchart TD
     
     BOOKING_SEQ -- "Invalid Data" --> CALLOUT["The AI informs the user about the invalid data and asks for correct information"] --> WAIT_REPLY
     
-    BOOKING_SEQ -- "All Fields Collected" --> AVAIL["The AI queries the database to check if there are enough available seats"]
+    BOOKING_SEQ -- "All Fields Collected" --> AVAIL["The AI queries the MySQL database to check if there are enough available seats"]
     AVAIL --> RECAP["The AI presents a numbered recap of the trip including layovers and asks for confirmation"]
     RECAP --> CONFIRM{"Does the user confirm the trip details?"}
     
@@ -224,7 +224,7 @@ flowchart TD
     NEXT_STEP -- "Add another flight" --> BOOKING_SEQ
     NEXT_STEP -- "Check out" --> AUTH_FORM["The AI triggers the interface to render a secure authentication form"]
     
-    AUTH_FORM --> AUTH_CHECK{"The authentication provider securely checks the credentials against the database"}
+    AUTH_FORM --> AUTH_CHECK{"The authentication provider securely checks the credentials against the MySQL database"}
     AUTH_CHECK -- "Invalid" --> AUTH_FORM
     AUTH_CHECK -- "Valid" --> PAX_FORM["The AI triggers the interface to render a secure form for passenger details"]
 

@@ -364,11 +364,13 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             })
         else:
             report_data = tool_args
+            report_data["booked_flights"] = list(flight_data)
+            flight_data.clear()
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
                 "content": "Session report generated. Interaction complete.",
-                "report_data": tool_args
+                "report_data": report_data
             })
             messages.append({
                 "role": "assistant",
@@ -538,8 +540,7 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                 else:
                     messages.append({
                         "role": "assistant",
-                        "content": "Processing complete.",
-                        "hidden": True
+                        "content": "I apologize, I processed that but encountered a brief connection error before I could reply. Could you please repeat that?"
                     })
             except Exception as follow_err:
                 last_error = str(follow_err)
@@ -561,6 +562,8 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                 "Please repeat your last message and it will be handled correctly."
             )
         else:
+            if not stripped:
+                bot_reply = "I'm sorry, There was a connection glitch and I couldn't process that. Could you please repeat?"
             messages.append({"role": "assistant", "content": bot_reply})
 
     return {

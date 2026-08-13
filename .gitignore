@@ -2,3 +2,4 @@
 __pycache__/
 debug report
 *.pyc
+airway-key.pem
