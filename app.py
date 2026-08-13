@@ -65,7 +65,7 @@ if "messages" not in st.session_state:
         {"role": "system", "content": get_system_prompt()},
         {
             "role": "user",
-            "content": "In English, greet and briefly introduce yourself with the airline, and ask the customer their request without exaggeration.",
+            "content": "Greet and briefly introduce yourself with the airline, and ask the customer their request without exaggeration.",
             "hidden": True,
         },
     ]

@@ -93,6 +93,8 @@ def _extract_code(value: str) -> str:
     return value.strip()
 
 
+
+
 def _sanitize_for_gemini(messages: list) -> list:
     """
     Clean up the message list so it conforms to Gemini's strict turn-sequence rules:
@@ -536,24 +538,37 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                 )
                 followup_text = (followup.choices[0].message.content or "").strip()
                 if not followup_text:
-
+                    # ── Retry with a minimal, structurally valid context ────
+                    # No tool messages — they require an assistant tool_calls
+                    # anchor that we don't have here, so _sanitize_for_gemini
+                    # would strip them as orphaned anyway.
                     last_tool_names_retry = [
                         m.get("name", "") for m in messages if m.get("role") == "tool"
                     ]
                     last_fn_retry = last_tool_names_retry[-1] if last_tool_names_retry else "the previous action"
                     minimal_ctx = [messages[0]]
+                    last_user_msg = None
                     for m in reversed(messages):
                         if m.get("role") == "user" and not m.get("hidden"):
-                            minimal_ctx.append(m)
+                            last_user_msg = dict(m)
                             break
-                    minimal_ctx.append({
-                        "role": "user",
-                        "content": (
-                            f"[System: '{last_fn_retry}' completed successfully. "
+                    if last_user_msg:
+                        last_user_msg["content"] = str(last_user_msg.get("content", "")) + (
+                            f"\n\n[System: '{last_fn_retry}' completed successfully. "
                             "Please respond to the user's original request now — "
                             "do NOT call any tools, just reply in plain text.]"
-                        ),
-                    })
+                        )
+                        minimal_ctx.append(last_user_msg)
+                    else:
+                        # Fallback if no user message exists
+                        minimal_ctx.append({
+                            "role": "user",
+                            "content": (
+                                f"[System: '{last_fn_retry}' completed successfully. "
+                                "Please respond to the user's original request now — "
+                                "do NOT call any tools, just reply in plain text.]"
+                            ),
+                        })
                     try:
                         retry = client.chat.completions.create(
                             model=MODEL_NAME,
