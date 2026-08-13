@@ -22,18 +22,20 @@ later requires no changes in this file.
 """
 
 import json
+import re
 from datetime import datetime
 
 import streamlit as st
 
 from accounts import default_auth_provider, validate_tckn
 from payment import default_payment_gateway
+from ui_constants import AUTH_MODES, GENDERS, NATIONALITIES
 
 
-def render_flight_card(flight_cart: list):
+def render_flight_card(flight_cart: list, is_disabled: bool = False):
     """Renders the flight summary card. Called from the persistent widget section."""
     with st.container(border=True):
-        st.markdown("### 🛒 Your Flight Cart")
+        st.markdown("### Your Flight Cart")
 
         total_price = 0
         for i, flight_data in enumerate(flight_cart):
@@ -44,7 +46,7 @@ def render_flight_card(flight_cart: list):
                 st.divider()
 
             st.markdown(
-                f"**✈️ {flight_data.get('departure_point', '')} ➔ {flight_data.get('arrival_point', '')}**"
+                f"**{flight_data.get('departure_point', '')} ➔ {flight_data.get('arrival_point', '')}**"
             )
 
             caption = f"Departure: {flight_data.get('departure_date', '')}"
@@ -73,8 +75,11 @@ def render_flight_card(flight_cart: list):
             pax = flight_data.get("passenger_count", 1)
             fn = flight_data.get("flight_number", "")
             price = flight_data.get("price_tl", 0)
+            details = flight_data.get("pricing_details")
             total_price += price
             st.caption(f"{fn} · {pax} passenger{'s' if pax != 1 else ''} · {price:,} TL")
+            if details:
+                st.caption(f"↳ Subtotal: {details['subtotal_tl']:,.2f} TL | Tax: {details['tax_tl']:,.2f} TL | Fees: {details['fees_tl']:,.2f} TL")
 
         st.divider()
 
@@ -87,6 +92,7 @@ def render_flight_card(flight_cart: list):
                 use_container_width=True,
                 key="confirm_booking_btn",
                 on_click=_on_confirm_booking,
+                disabled=is_disabled,
             )
 
 
@@ -142,7 +148,7 @@ def build_transcript(messages: list, flight_data: list, report_data: dict, is_va
     """
     lines = [
         "# Airline Booking Transcript",
-        f"_Exported: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_",
+        f"_Exported: {datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S')}_",
         "",
     ]
     for msg in messages or []:
@@ -160,15 +166,12 @@ def build_transcript(messages: list, flight_data: list, report_data: dict, is_va
 
         elif role == "assistant":
             if msg.get("tool_calls"):
-                for tc in msg["tool_calls"]:
-                    lines.append(f"_[Action: called `{tc['function']['name']}`]_")
+                continue
             elif content:
                 lines.append(f"**Assistant:** {content}")
 
         elif role == "tool":
-            tc_content = content or ""
-            label = "✅ Tool result" if not tc_content.startswith("Error") else "⚠️ Tool rejected"
-            lines.append(f"> {label}: {tc_content}")
+            continue
 
         lines.append("")
 
@@ -226,45 +229,59 @@ def render_secure_form_ui(form_type: str):
     it against the relevant service — rather than unconditionally telling
     the LLM the submission succeeded regardless of what was typed.
     """
-    st.markdown(f"### 🔒 Secure Checkout: {form_type.replace('_', ' ').title()}")
+    st.markdown(f"### Secure Checkout: {form_type.replace('_', ' ').title()}")
 
     mode = email = password = None
     first_name = last_name = nationality = tckn = None
-    cardholder_name = card_number = expiry = cvc = None
+    cardholder_name = card_number = exp_mm = exp_yy = cvc = None
+    submitted = False
 
-    with st.form(key=f"form_{form_type}"):
+    if form_type == "passenger_details":
+        with st.container():
+            first_name = st.text_input("First Name", max_chars=32)
+            last_name = st.text_input("Last Name", max_chars=32)
+            st.date_input("Date of Birth", min_value=datetime(1926, 1, 1), max_value=datetime.today())
+            st.radio("Gender", GENDERS)
+            nationality = st.selectbox("Nationality", NATIONALITIES, key="nationality_select")
+            if nationality == "TR":
+                tckn = st.text_input("TCKN", max_chars=11)
+            submitted = st.button("Submit & Continue", key="passenger_submit")
+    else:
         if form_type == "auth":
-            mode = st.radio("Checkout as:", ["Guest", "Login", "Register"])
-            email = st.text_input("Email", placeholder="you@example.com")
-            password = st.text_input("Password", type="password")
+            mode = st.radio("Checkout as:", AUTH_MODES, key="auth_mode")
 
-        elif form_type == "passenger_details":
-            first_name = st.text_input("First Name")
-            last_name = st.text_input("Last Name")
-            st.date_input("Date of Birth", min_value=datetime(1900, 1, 1), max_value=datetime.today())
-            st.radio("Gender", ["Male", "Female", "Other"])
-            nationality = st.text_input("Nationality", placeholder="TR")
-            tckn = st.text_input("TCKN (if Turkish)", max_chars=11)
+        with st.form(key=f"form_{form_type}"):
+            if form_type == "auth":
+                email = st.text_input("Email", placeholder="you@example.com")
+                if mode in ("Login", "Register"):
+                    password = st.text_input("Password", type="password")
+                if mode == "Register":
+                    first_name = st.text_input("First Name", max_chars=32)
+                    last_name = st.text_input("Last Name", max_chars=32)
 
-        elif form_type == "payment":
-            cardholder_name = st.text_input("Cardholder Name")
-            card_number = st.text_input("Card Number", max_chars=19, placeholder="0000 0000 0000 0000")
-            col1, col2 = st.columns(2)
-            with col1:
-                expiry = st.text_input("Expiry Date", placeholder="MM/YY")
-            with col2:
-                cvc = st.text_input("CVC", type="password", max_chars=4)
+            elif form_type == "payment":
+                cardholder_name = st.text_input("Cardholder Name")
+                card_number = st.text_input("Card Number", max_chars=16, placeholder="0000 0000 0000 0000")
+                col1, col2, col3 = st.columns([1, 1, 2])
+                with col1:
+                    exp_mm = st.text_input("Month", placeholder="MM", max_chars=2)
+                with col2:
+                    exp_yy = st.text_input("Year", placeholder="YY", max_chars=2)
+                with col3:
+                    cvc = st.text_input("CVC", type="password", max_chars=3)
 
-        submitted = st.form_submit_button("Submit & Continue")
+            submitted = st.form_submit_button("Submit & Continue")
 
     if not submitted:
         return
 
     if form_type == "auth":
-        result = _process_auth_submission(mode, email, password)
+        name = f"{first_name or ''} {last_name or ''}".strip() if mode == "Register" else None
+        result = _process_auth_submission(mode, email, password, name)
     elif form_type == "passenger_details":
         result = _process_passenger_submission(first_name, last_name, nationality, tckn)
     elif form_type == "payment":
+        expiry = f"{exp_mm}/{exp_yy}" if exp_mm and exp_yy else ""
         result = _process_payment_submission(cardholder_name, card_number, expiry, cvc)
     else:
         result = {"success": True, "detail": ""}
@@ -278,8 +295,11 @@ def render_secure_form_ui(form_type: str):
         st.error(result["error"])
 
 
-def _process_auth_submission(mode: str, email: str, password: str) -> dict:
+def _process_auth_submission(mode: str, email: str, password: str, name: str = None) -> dict:
     """Calls the AuthProvider abstraction — never talks to USERS directly."""
+    if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return {"success": False, "error": "Please enter a valid email address."}
+
     if mode == "Guest":
         return {"success": True, "detail": "Continuing as guest."}
 
@@ -291,7 +311,9 @@ def _process_auth_submission(mode: str, email: str, password: str) -> dict:
         return {"success": False, "error": result["error"]}
 
     if mode == "Register":
-        result = default_auth_provider.register({"email": email, "password": password})
+        if name and len(name.replace(" ", "")) < 2:
+            return {"success": False, "error": "Name must be at least 2 characters."}
+        result = default_auth_provider.register({"email": email, "password": password, "name": name})
         if result["success"]:
             st.session_state.user_profile = result["profile"]
             return {"success": True, "detail": "Account created."}
@@ -303,8 +325,12 @@ def _process_auth_submission(mode: str, email: str, password: str) -> dict:
 def _process_passenger_submission(first_name: str, last_name: str, nationality: str, tckn: str) -> dict:
     """Basic required-field check, plus a real TCKN checksum validation for
     Turkish nationals — the same validate_tckn used elsewhere in the app."""
-    if not (first_name or "").strip() or not (last_name or "").strip():
+    fn = (first_name or "").strip()
+    ln = (last_name or "").strip()
+    if not fn or not ln:
         return {"success": False, "error": "First and last name are required."}
+    if len(fn) < 2 or len(ln) < 2:
+        return {"success": False, "error": "First and last name must be at least 2 characters each."}
 
     if (nationality or "").strip().upper() == "TR":
         tckn_result = validate_tckn(tckn or "")

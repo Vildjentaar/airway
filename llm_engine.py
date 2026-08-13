@@ -20,8 +20,6 @@ from datetime import datetime
 
 from thall_lines_db import (
     find_flight, AIRLINE_NAME,
-    db_list_all_routes, db_get_route_details,
-    db_list_airports, db_get_airport_info, db_list_bookings,
 )
 from pricing import calculate_total_price
 from booking_context import ctx_get_current_datetime, ctx_get_relative_dates, ctx_get_booking_window
@@ -34,8 +32,8 @@ except ImportError:
     db_check_capacity = None
 
 from tools_schema import (
-    flight_widget_tool, final_report_tool, check_availability_tool,
-    remove_flight_tool, db_query_tool, context_tool,
+    flight_widget_tool, final_report_tool, check_capacity_tool,
+    remove_flight_tool, db_tools, context_tool,
     PRE_CART_TOOLS, POST_CART_TOOLS,
 )
 
@@ -236,9 +234,9 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
             f"{AIRLINE_NAME} does not operate that return route. Inform the user."
         )}
 
-    total_price = calculate_total_price(
+    pricing_details = calculate_total_price(
         outbound, passengers, trip_type, inbound,
-        ticket_class=ticket_class, passengers_breakdown=passengers_breakdown
+        detailed=True, ticket_class=ticket_class, passengers_breakdown=passengers_breakdown
     )
     verified = {
         "departure_point": dep,
@@ -257,7 +255,8 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         "transfer_status": outbound["transfer_status"].value if hasattr(outbound["transfer_status"], "value") else outbound["transfer_status"],
         "airline_name": AIRLINE_NAME,
         "flight_number": outbound["flight_number"],
-        "price_tl": total_price,
+        "price_tl": pricing_details["total_tl"],
+        "pricing_details": pricing_details,
     }
 
     is_duplicate = any(
@@ -331,21 +330,20 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             content = f"Flight {fn_to_remove} not found in cart."
         messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": content})
 
-    elif function_name == "check_availability":
-        fn = tool_args.get("flight_number")
-        dt = tool_args.get("date")
-        pax = tool_args.get("passengers", 1)
-
-        if db_check_capacity:
-            cap_info = db_check_capacity(fn, dt)
+    elif function_name == "check_capacity":
+        from tool_dispatcher import dispatch_tool
+        res = dispatch_tool(function_name, tool_args)
+        if "error" in res:
+            result = {"status": "Error", "message": res["error"]}
+        else:
+            cap_info = res["result"]
             if "error" in cap_info:
                 result = {"status": "Error", "message": cap_info["error"]}
             else:
                 avail = cap_info.get("seats_remaining", 0)
+                pax = tool_args.get("additional_passengers", 1)
                 status = "Available" if avail >= pax else "Unavailable"
                 result = {"status": status, "remaining_seats": avail}
-        else:
-            result = {"status": "Available", "message": "Capacity constraints unverified via DB, assuming available."}
 
         messages.append({
             "role": "tool",
@@ -378,41 +376,17 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             })
             skip_followup = True
 
-    elif function_name == "query_database":
-        operation = tool_args.get("operation", "")
-        try:
-            if operation == "list_all_routes":
-                result = db_list_all_routes()
-            elif operation == "get_route_details":
-                dep_q = tool_args.get("departure", "")
-                arr_q = tool_args.get("arrival", "")
-                if not dep_q or not arr_q:
-                    result = {"error": "Both 'departure' and 'arrival' are required."}
-                else:
-                    result = db_get_route_details(dep_q, arr_q)
-            elif operation == "list_airports":
-                result = db_list_airports()
-            elif operation == "get_airport_info":
-                code_q = tool_args.get("airport_code", "")
-                if not code_q:
-                    result = {"error": "'airport_code' is required."}
-                else:
-                    result = db_get_airport_info(code_q)
-            elif operation == "list_bookings":
-                result = db_list_bookings()
-            else:
-                result = {"error": f"Unknown operation '{operation}'."}
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": json.dumps(result, ensure_ascii=False),
-            })
-        except Exception as db_err:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": f"Error executing '{operation}': {db_err}",
-            })
+    elif function_name in [
+        "search_flights", "find_flight", "get_route_details", "list_all_routes",
+        "route_catalogue", "list_airports", "get_airport_info", "list_bookings", "get_booking_details"
+    ]:
+        from tool_dispatcher import dispatch_tool
+        result = dispatch_tool(function_name, tool_args)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(result, ensure_ascii=False),
+        })
 
     elif function_name == "get_context":
         info_type = tool_args.get("info_type", "")
@@ -457,6 +431,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             "role": "tool",
             "tool_call_id": tool_call.id,
             "content": f"Form '{form_type}' rendered. Waiting for user submission...",
+            "report_data": report_data
         })
         skip_followup = True
 

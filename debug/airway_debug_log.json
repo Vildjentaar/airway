@@ -11,33 +11,17 @@
     },
     {
       "role": "assistant",
-      "content": "hey, i'm the assistant for thall lines. premium travel, zero fluff, clean connections. \n\nwhat are we booking today?"
+      "content": "hey, i'm the assistant for thall lines. we keep travel sharp, fast, and completely drama-free. what are we booking today?"
     },
     {
       "role": "user",
-      "content": "one way to south america"
-    },
-    {
-      "role": "assistant",
-      "content": "we don't fly to south america directly, but we do operate a direct route straight from istanbul to são paulo (gru)—leaving at 16:00 and landing at 23:20 (13h 20m, 45,500 TL/person). \n\nwant to roll with that, or are you connecting from somewhere else first?"
-    },
-    {
-      "role": "user",
-      "content": "can we change time"
-    },
-    {
-      "role": "assistant",
-      "content": "flight schedules are locked in as scheduled—no custom times. \n\nthat são paulo flight (PX-0930) departs at 16:00 and lands at 23:20. want to lock that in, or are you starting from a different city?"
-    },
-    {
-      "role": "user",
-      "content": "yes"
+      "content": "sao pao\ntonight\n"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_33665",
+          "id": "call_61183",
           "function": {
             "arguments": "{\"info_type\":\"current_datetime\"}",
             "name": "get_context"
@@ -45,7 +29,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPg8vo17A4qRUFfFbwliD2wxczpufIfXLyuHx4vHQTVht/jfXnWMfzPwjaN7aKfRXCof7sgtn3runZaN1FUiYfCRUuaDjRwXW1ne8skf9pqfxnndu3Ksd7"
+              "thought_signature": "El4KXAERTTIPzq8+1Vcg3xCMpACWRF3XGlmFtXefPGT95vHcRQrKnJ982HtYAkFaQ9z4wyyPmIMevPkgZUyNd6jgupNiAKWc4QyTd4lbYh78MyRFJtfU6zz2EnWqfceN"
             }
           }
         }
@@ -53,22 +37,22 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_33665",
-      "content": "{\"date\": \"2026-08-12\", \"date_readable\": \"Wednesday, 12 August 2026\", \"time\": \"07:05\", \"day_of_week\": \"Wednesday\", \"timezone_note\": \"Server local time\"}"
+      "tool_call_id": "call_61183",
+      "content": "{\"date\": \"2026-08-12\", \"date_readable\": \"Wednesday, 12 August 2026\", \"time\": \"10:23\", \"day_of_week\": \"Wednesday\", \"timezone_note\": \"Server local time\"}"
     },
     {
       "role": "assistant",
-      "content": "got it. let's get this locked in. \n\nwhat date are you looking to fly out for that istanbul to são paulo trip?"
+      "content": "we don't fly out of são paulo tonight. our direct line to são paulo (gru) departs from istanbul (ist) as flight PX-0930 at 16:00, landing at 23:20 on the same day. \n\nif you're trying to get to são paulo from istanbul, we can set that up for your next available travel window. want to book the ist to gru flight, or are you looking to connect from somewhere else?"
     },
     {
       "role": "user",
-      "content": "today"
+      "content": "y"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_121840",
+          "id": "call_112378",
           "function": {
             "arguments": "{\"info_type\":\"relative_dates\"}",
             "name": "get_context"
@@ -76,7 +60,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPRptRp3grQRHp1KASgOd6KHpxMA1uDt0gt8QCNCI0CxT1VsX985A+y9UsqzQJn4/ok0w5BPuTW/+rNZHjjNyzUeYH8D0tLrI8t52hlRznmYtj40BFZjSv"
+              "thought_signature": "El4KXAERTTIPy8IKaVIwFRgtel0VYhyb8MmCqLMA/Tf9yU45zsc/8hQK+mjsx8/UoDEFSGLObePgoWsfekBeoM3Zj1/ZXZgQBsIgq3hXepOomiOje/JgGD6+7AbDToxj"
             }
           }
         }
@@ -84,47 +68,85 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_121840",
+      "tool_call_id": "call_112378",
       "content": "{\"today\": {\"date\": \"2026-08-12\", \"readable\": \"Wednesday, 12 August 2026\"}, \"tomorrow\": {\"date\": \"2026-08-13\", \"readable\": \"Thursday, 13 August 2026\"}, \"day_after_tomorrow\": {\"date\": \"2026-08-14\", \"readable\": \"Friday, 14 August 2026\"}, \"this_saturday\": {\"date\": \"2026-08-15\", \"readable\": \"Saturday, 15 August 2026\"}, \"this_sunday\": {\"date\": \"2026-08-16\", \"readable\": \"Sunday, 16 August 2026\"}, \"next_monday\": {\"date\": \"2026-08-17\", \"readable\": \"Monday, 17 August 2026\"}, \"one_week_from_now\": {\"date\": \"2026-08-19\", \"readable\": \"Wednesday, 19 August 2026\"}}"
     },
     {
       "role": "assistant",
-      "content": "Processing complete.",
-      "hidden": true
+      "content": "got it. we're looking at flight PX-0930 from istanbul (ist) to são paulo (gru). \n\nwhat date are you looking to fly out, and are we doing economy or business class?"
     },
     {
       "role": "user",
-      "content": "?"
+      "content": "tonight"
     },
     {
       "role": "assistant",
-      "content": "flying out today, 12 august 2026. \n\nwhat ticket class are we putting you in—economy or business?"
+      "content": "today's flight already pushed back at 16:00, so we can't squeeze you onto tonight's departure. \n\nthe next available flight for istanbul (ist) to são paulo (gru) is tomorrow, thursday, 13 august 2026. want to lock that in for tomorrow, and what ticket class (economy or business) are we running?"
     },
     {
       "role": "user",
-      "content": "eco"
+      "content": "today is fine"
     },
     {
       "role": "assistant",
-      "content": "how many passengers are we booking for?"
+      "content": "today's 16:00 flight is already gone, so we can't book you on it. we can lock in tomorrow, 13 august 2026, or a later date. \n\nwhat date works for you, and are you flying economy or business?"
     },
     {
       "role": "user",
-      "content": "me"
+      "content": "what"
+    },
+    {
+      "role": "assistant",
+      "content": "today's flight to são paulo departed at 16:00, so it's already in the air. we can't book past departures. \n\ntomorrow (august 13, 2026) is the earliest we can get you out. want me to book that, or are you looking for a different date?"
+    },
+    {
+      "role": "user",
+      "content": "it's not even midday"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_41786",
+          "id": "call_114169",
           "function": {
-            "arguments": "{\"flight_number\":\"PX-0930\",\"date\":\"2026-08-12\",\"passengers\":1}",
+            "arguments": "{\"info_type\":\"current_datetime\"}",
+            "name": "get_context"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPCX3J6zMQvnxXA5AVx7Q0Iw5x3u+mdnaYzJ16ZXdQsIOvgAKihbHPQVm+yR7dUdaXtWtpNNnssLN5Jpod+JG8yqn5DKkC2zOFDQ0MXlyFPb1vFYdruT+M"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_114169",
+      "content": "{\"date\": \"2026-08-12\", \"date_readable\": \"Wednesday, 12 August 2026\", \"time\": \"10:26\", \"day_of_week\": \"Wednesday\", \"timezone_note\": \"Server local time\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "ah, my bad—you're completely right, it's 10:26 AM right now. flight PX-0930 departs istanbul at 16:00 today, so you still have a few hours to catch it.\n\nlet's get this sorted. for today, august 12, 2026, are you flying economy or business, and how many passengers are we booking?"
+    },
+    {
+      "role": "user",
+      "content": "1 eco for me"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_199477",
+          "function": {
+            "arguments": "{\"date\":\"2026-08-12\",\"passengers\":1,\"flight_number\":\"PX-0930\"}",
             "name": "check_availability"
           },
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIP1/BRk9OSo0c41bx5hEOpxpQVwwiZ6mPq86uR7DdLIDaepFrAg/ESEXgVWUjthQ9NqbJfuCDK8+K7JX+r49xf3NlLb618VJerGlE1mZ1DW3wsNLFgdoTz"
+              "thought_signature": "El4KXAERTTIPAUFNCiz9XnbVZz5b39LR51FhM4U1iD5Xiz/mZxDXcZmUqMuTcI6/JLTIyJZC1bpr4xl6dd2UYDwm2yTxhYkaHpcQgCz0oq8NKZyuarmwJKcWE+EgnVJe"
             }
           }
         }
@@ -132,30 +154,30 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_41786",
+      "tool_call_id": "call_199477",
       "content": "{\"status\": \"Available\", \"remaining_seats\": 296}"
     },
     {
       "role": "assistant",
-      "content": "seats are wide open. \n\nhere's your recap:\n1. trip type: one-way\n2. from: istanbul (ist)\n3. to: são paulo (gru)\n4. flight: PX-0930 (direct, boeing 787-9)\n5. departure date: 12 august 2026 (dep 16:00, arr 23:20)\n6. ticket class: economy\n7. passengers: 1 adult\n\ngot everything right?"
+      "content": "seats are wide open on flight PX-0930. \n\nhere's your recap:\n1. trip type: one-way\n2. departure: istanbul (ist)\n3. arrival: são paulo (gru)\n4. date: 12 august 2026 (departing at 16:00, arriving at 23:20 same day)\n5. ticket class: economy\n6. passengers: 1 adult\n\ngot everything right?"
     },
     {
       "role": "user",
-      "content": "yes"
+      "content": "ye ye"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_5958",
+          "id": "call_155391",
           "function": {
-            "arguments": "{\"trip_type\":\"One-way\",\"adult_count\":1,\"flight_duration\":\"13h 20m\",\"departure_point\":\"IST\",\"baby_count\":0,\"airline_name\":\"Thall Lines\",\"child_count\":0,\"flight_number\":\"PX-0930\",\"ticket_class\":\"Economy\",\"transfer_status\":\"Direct\",\"arrival_time\":\"23:20\",\"arrival_point\":\"GRU\",\"departure_date\":\"2026-08-12\",\"departure_time\":\"16:00\",\"price_tl\":45500}",
+            "arguments": "{\"child_count\":0,\"arrival_time\":\"23:20\",\"arrival_point\":\"GRU\",\"flight_duration\":\"13h 20m\",\"transfer_status\":\"Direct\",\"flight_number\":\"PX-0930\",\"departure_time\":\"16:00\",\"ticket_class\":\"Economy\",\"price_tl\":45500,\"airline_name\":\"Thall Lines\",\"baby_count\":0,\"trip_type\":\"One-way\",\"departure_date\":\"2026-08-12\",\"departure_point\":\"IST\",\"adult_count\":1}",
             "name": "generate_flight_widget"
           },
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPqJv7Fri6DKw4vvUpHKHioBl+2KnXs+O9c/NYaUEPR+pRhGdij+IU8zU1+NswpaNqNsLRQIFScPSszP14LSdSPfceNco2HN1hmi6gsOiSXWK/Cbj7e/vO"
+              "thought_signature": "El4KXAERTTIPOjKvnktY0NZMHkWI74MPcbiVjOg897O3cRfMmvdE9bR3JbIKk69hHjHKIZrIFz25v+eh1sOjYymgJbvUFK/iZWqLdw236K4UfQrSaHt4VsHn4cvxF8Um"
             }
           }
         }
@@ -163,7 +185,7 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_5958",
+      "tool_call_id": "call_155391",
       "content": "Flight card successfully appended to cart UI."
     },
     {
@@ -178,7 +200,7 @@
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_81582",
+          "id": "call_122979",
           "function": {
             "arguments": "{\"form_type\":\"auth\"}",
             "name": "render_secure_form"
@@ -186,7 +208,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPXTF9/MZEzWs0kXiAq6yFHBHenR+8TIsb16GmAf1hZmElCmnEh6GP1vvHMhhALapxVNZoOfHlpaVLu5PlOcizplmN4h0NlP5UnHA/RyBWW+dKbR9IjMcn"
+              "thought_signature": "El4KXAERTTIPFNLZsVVtq7Iwvn/5HrujAjFPN3RSv/AS1KOwEKc6Ci+vhbtk5iuosNWy7T0tOLqNORYTQ9pFVCRKukRpPLVTMkqHN282rMcJeMuuU3K/uqW5cpT668J+"
             }
           }
         }
@@ -194,8 +216,343 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_81582",
-      "content": "Form 'auth' rendered. Waiting for user submission..."
+      "tool_call_id": "call_122979",
+      "content": "Form 'auth' rendered. Waiting for user submission...",
+      "report_data": {
+        "render_form": "payment"
+      }
+    },
+    {
+      "role": "user",
+      "content": "[System Note: User successfully submitted the auth form. Continuing as guest.]"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_252886",
+          "function": {
+            "arguments": "{\"form_type\":\"passenger_details\"}",
+            "name": "render_secure_form"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPk/rgM02xIlfLEuRkqi4WEyGYUBL/3YbFjJZUZPj7WBm7SpiN0ITwUL/lI3GMrDpuiYStllHATnMsvy9ZOXS45tdE9guyMlc6oUDnclsTc90DfBSzdLBh"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_252886",
+      "content": "Form 'passenger_details' rendered. Waiting for user submission...",
+      "report_data": {
+        "render_form": "payment"
+      }
+    },
+    {
+      "role": "user",
+      "content": "[System Note: User successfully submitted the passenger_details form. Passenger details recorded.]"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_99111",
+          "function": {
+            "arguments": "{\"form_type\":\"payment\"}",
+            "name": "render_secure_form"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPN30D1V3dwSIkQM3WaDQntQ16FszbXIAi/mhxBlqOjf21U/SPjQ4NoDRSDjyt8H6DTVzbLjbUIMZOazq+12K6AlRY60hmHfOqmXJXQW+vA95xArF9Aeke"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_99111",
+      "content": "Form 'payment' rendered. Waiting for user submission...",
+      "report_data": {
+        "render_form": "payment"
+      }
+    },
+    {
+      "role": "user",
+      "content": "[System Note: User successfully submitted the payment form. Payment approved (TXN-MOCK-8485).]"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_151848",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPPt8PndNaBMqWETpopuMuGfgBSt2d5Y1FVce/mAZfOo+oEkgvX1+L7yRa786O6uav0WGXMveaDMMvpyAsSmQdX4Q/D89mL6BAPc4/Z5132PM1XYGXTk9a"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_151848",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "content": "your booking is already confirmed and paid for, transaction TXN-MOCK-8485 is locked in. you're all set for são paulo today. need anything else, or are we good to go?"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "content": "look, we already processed your payment and locked in your ticket. repeating yourself isn't going to print a second seat. you're done, booked, and ready for takeoff. have a good flight."
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_107672",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPnMw1OK2CUaGsFwsF7Ak6z9Ej3t6obrpJbV3F5HKxARvFsm3MJ3mh3+BKuXMQA9926Yyd1B7YD3zH4kYoW7fkLAqURmwgxehcrPSyo3Y2FV8k3kWUmCLE"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_107672",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_182685",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIP2wZpFAHbj1GumEvhweQKU4MTy34lT83g+19pdWEryDtgBDvIRgFo+vzaVWHTe2XUpnIxk+TSx07qwEMT+rPYukjVoZYJ3BZQsXvkLgMu0ZxsBOUIZLmL"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_182685",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_143664",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPXrr6kScJ+8Uul/97C9ecO2q7j+n4hTX+T27llq7RxtG49osYy8EHTpMFsyCKPwS5sqcq385re484AO7bkcSiXFUTjiwGYDGCoojavWIwG8fGMDD83N0K"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_143664",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_151784",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPBxCpR6UFUx8NTGDQMfUHSAlp8B9A/VIm56hYKQ3BkUhXAfHvHiHzcCG6mCfZXOGqrg/SZ6/Aln8muGgEObrLmmmWWAXVTKAcb+UG5vpwxvYHDM9bLUDP"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_151784",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_160714",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIP1mImE9YUvV/ik0JnhO7n024TGueOh6ruevsJnNUksW6SWsi8MQBoSgxqfGLeG5beWOKK3hQL2YLZN7nKVoHDF+gkTiZt7/fC1TOT1fsKDw7bLZtHhL9B"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_160714",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary.\nI'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_73468",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPtCN7iAOO87awSHcIJHabw82ZCv9wI0Shq3Zyu7MkFkuvy5zIiy8XELnikaN4rfhkrJqheaUk3LXIjydq2sGI7pDwQBVHcLnnXEt0vZFUXYffv+98b3sW"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_73468",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
+    },
+    {
+      "role": "user",
+      "content": "I'm completely done adding flights. Please check out and finalize my itinerary."
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_53436",
+          "function": {
+            "arguments": "{}",
+            "name": "generate_final_report"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPglg5gnXulPi7RbG3OiIwwiZurwW5Pu4WWVvzyVsjVnpx5h0q6XYCh2ldNnDyoJpON0yR+wvsgQVWLz2jhN2l+joMq0dYyvBGGOj/AB7X3uHpp6Ky003j"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_53436",
+      "content": "Session report generated. Interaction complete.",
+      "report_data": {}
+    },
+    {
+      "role": "assistant",
+      "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
     }
   ],
   "flight_data": [
@@ -216,10 +573,14 @@
       "transfer_status": "Direct",
       "airline_name": "Thall Lines",
       "flight_number": "PX-0930",
-      "price_tl": 45500
+      "price_tl": 49290,
+      "pricing_details": {
+        "subtotal_tl": 45500.0,
+        "tax_tl": 3640.0,
+        "fees_tl": 150.0,
+        "total_tl": 49290
+      }
     }
   ],
-  "report_data": {
-    "render_form": "auth"
-  }
+  "report_data": {}
 }

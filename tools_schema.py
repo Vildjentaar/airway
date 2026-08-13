@@ -133,20 +133,20 @@ final_report_tool = [
     }
 ]
 
-check_availability_tool = [
+check_capacity_tool = [
     {
         "type": "function",
         "function": {
-            "name": "check_availability",
+            "name": "check_capacity",
             "description": "Check if a flight has enough capacity for the requested number of passengers. Must be called before booking.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "flight_number": {"type": "string"},
-                    "date": {"type": "string", "description": "Date of departure (YYYY-MM-DD)"},
-                    "passengers": {"type": "integer"}
+                    "departure_date": {"type": "string", "description": "Date of departure (YYYY-MM-DD)"},
+                    "additional_passengers": {"type": "integer"}
                 },
-                "required": ["flight_number", "date", "passengers"]
+                "required": ["flight_number", "departure_date", "additional_passengers"]
             }
         }
     }
@@ -169,53 +169,109 @@ remove_flight_tool = [
     }
 ]
 
-db_query_tool = [
+db_tools = [
     {
         "type": "function",
         "function": {
-            "name": "query_database",
-            "description": (
-                "Query the flight database to look up route information, airport details, "
-                "schedules, or booking status. Use this to answer user questions. "
-                "This is READ-ONLY — you cannot insert, update, or delete any data."
-            ),
+            "name": "search_flights",
+            "description": "Search sellable flights between a departure and arrival city or airport code.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "operation": {
-                        "type": "string",
-                        "enum": [
-                            "list_all_routes",
-                            "get_route_details",
-                            "list_airports",
-                            "get_airport_info",
-                            "list_bookings",
-                        ],
-                        "description": (
-                            "The specific read-only operation to run. "
-                            "list_all_routes: all operated routes. "
-                            "get_route_details: one specific route (requires departure + arrival). "
-                            "list_airports: all serviced airports. "
-                            "get_airport_info: details for one airport (requires airport_code). "
-                            "list_bookings: existing booking records."
-                        ),
-                    },
                     "departure": {
                         "type": "string",
-                        "description": "Departure city or IATA code. Required for get_route_details.",
+                        "description": "Departure city name or airport code, for example Istanbul or IST."
                     },
                     "arrival": {
                         "type": "string",
-                        "description": "Arrival city or IATA code. Required for get_route_details.",
-                    },
-                    "airport_code": {
-                        "type": "string",
-                        "description": "IATA code or city name. Required for get_airport_info.",
-                    },
+                        "description": "Arrival city name or airport code, for example London or LHR."
+                    }
                 },
-                "required": ["operation"],
-            },
-        },
+                "required": ["departure", "arrival"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_route_details",
+            "description": "Get full route details (including connecting legs) for a flight between departure and arrival points.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "departure": {"type": "string"},
+                    "arrival": {"type": "string"}
+                },
+                "required": ["departure", "arrival"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_all_routes",
+            "description": "List all sellable routes operated by the airline.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_airports",
+            "description": "List all airports serviced by the airline.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_airport_info",
+            "description": "Get details for a specific airport by code or city name.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "airport_code": {"type": "string"}
+                },
+                "required": ["airport_code"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_bookings",
+            "description": "List all existing bookings.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_booking_details",
+            "description": "Get details for one booking by booking ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "booking_id": {
+                        "type": "integer",
+                        "description": "The booking ID."
+                    }
+                },
+                "required": ["booking_id"]
+            }
+        }
     }
 ]
 
@@ -300,22 +356,22 @@ validate_tckn_tool = [
 ALL_TOOLS = (
     flight_widget_tool
     + final_report_tool
-    + db_query_tool
+    + db_tools
     + context_tool
-    + check_availability_tool
+    + check_capacity_tool
     + remove_flight_tool
     + render_secure_form_tool
     + validate_tckn_tool
 )
 
-PRE_CART_TOOLS = flight_widget_tool + db_query_tool + context_tool + check_availability_tool
+PRE_CART_TOOLS = flight_widget_tool + db_tools + context_tool + check_capacity_tool
 
 POST_CART_TOOLS = (
     flight_widget_tool
     + final_report_tool
-    + db_query_tool
+    + db_tools
     + context_tool
-    + check_availability_tool
+    + check_capacity_tool
     + remove_flight_tool
     + render_secure_form_tool
     + validate_tckn_tool

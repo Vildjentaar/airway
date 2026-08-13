@@ -1,45 +1,54 @@
 """
 accounts.py
 -----------
-User accounts, identity validation (TCKN), and authentication. Split out
-of thall_lines_db.py because "who is this customer and can they log in"
-is a different responsibility than "what flights exist" — they change for
-different reasons and shouldn't force edits to the same file.
-
-DEPENDENCY INVERSION:
-Callers (ui_components.py today; llm_engine.py or a future FastAPI route
-tomorrow) depend on the abstract `AuthProvider` interface below, never on
-the concrete mock store. `default_auth_provider` is the one line every
-caller actually imports. When this graduates to a real backend, write a
-new class (e.g. `DatabaseAuthProvider`) and repoint that single line —
-nothing that calls `default_auth_provider.authenticate(...)` has to change.
-
-Still a mock: passwords are compared in plaintext against an in-memory
-list. That's fine for a prototype with fabricated data — it must never
-happen against real credentials.
+User accounts, identity validation (TCKN), and authentication via MySQL.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-# ---------------------------------------------------------------------------
-# Mock user store
-# ---------------------------------------------------------------------------
-USERS: list[dict] = [
-    {
-        "user_id": 1,
-        "email": "ahmet@example.com",
-        "password": "password123",  # mock only — never store plaintext for real
-        "name": "Ahmet",
-        "surname": "Yılmaz",
-        "birthdate": "1990-05-14",
-        "sex": "M",
-        "nationality": "TR",
-        "tckn": "10000000146",
-        "mobile": "+905551234567",
-    }
-]
+import hashlib
+import secrets
+
+from database.db import fetch_one, get_connection
+
+def hash_password(password: str) -> str:
+    """Simple PBKDF2 password hash."""
+    password = password or ""
+    salt = secrets.token_hex(16)
+    iterations = 600_000
+
+    derived_key = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        bytes.fromhex(salt),
+        iterations,
+        dklen=32,
+    )
+
+    return f"pbkdf2_sha256${iterations}${salt}${derived_key.hex()}"
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    if not hashed or not password:
+        return False
+    parts = hashed.split('$')
+    if len(parts) != 4 or parts[0] != "pbkdf2_sha256":
+        return False
+        
+    iterations = int(parts[1])
+    salt = bytes.fromhex(parts[2])
+    stored_key = parts[3]
+    
+    derived_key = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        iterations,
+        dklen=32,
+    )
+    return derived_key.hex() == stored_key
 
 
 def validate_tckn(tckn: str) -> dict:
@@ -77,48 +86,76 @@ class AuthProvider(ABC):
         """Create a new account. Return {"success": True, "profile": {...}} or an error dict."""
 
 
-class MockAuthProvider(AuthProvider):
-    """In-memory implementation backed by USERS. Good enough for a
-    prototype; swappable for a real provider (a database, an OAuth
-    service) later without touching any caller."""
-
-    def __init__(self, users: list[dict] | None = None):
-        self._users = users if users is not None else USERS
+class DatabaseAuthProvider(AuthProvider):
+    """Production implementation backed by MySQL."""
 
     def authenticate(self, email: str, password: str) -> dict:
         email_norm = (email or "").strip().lower()
-        for user in self._users:
-            if user["email"].lower() == email_norm:
-                if user["password"] == password:
-                    profile = {k: v for k, v in user.items() if k != "password"}
-                    return {"success": True, "profile": profile}
-                return {"success": False, "error": "Incorrect password."}
-        return {"success": False, "error": "No account found with that email."}
+        if not email_norm:
+             return {"success": False, "error": "Email is required."}
+             
+        row = fetch_one("SELECT * FROM users WHERE LOWER(email) = %s", (email_norm,))
+        if not row:
+            return {"success": False, "error": "No account found with that email."}
+            
+        if not verify_password(password, row["password_hash"]):
+             return {"success": False, "error": "Incorrect password."}
+             
+        profile = {k: v for k, v in row.items() if k != "password_hash"}
+        return {"success": True, "profile": profile}
 
     def register(self, profile: dict) -> dict:
         email_norm = (profile.get("email") or "").strip().lower()
         if not email_norm:
             return {"success": False, "error": "Email is required."}
-        if any(u["email"].lower() == email_norm for u in self._users):
+            
+        existing = fetch_one("SELECT user_id FROM users WHERE LOWER(email) = %s", (email_norm,))
+        if existing:
             return {"success": False, "error": "An account with that email already exists."}
+            
+        hashed_pw = hash_password(profile.get("password", ""))
+        
+        conn = get_connection()
+        try:
+            cursor = conn.cursor(dictionary=True)
+            
+            # Use sex[0].upper() safely if it exists
+            sex = profile.get("sex", "")
+            if sex and len(sex) > 0:
+                sex = sex[0].upper()
+            else:
+                sex = None
+                
+            cursor.execute(
+                """
+                INSERT INTO users (email, password_hash, name, surname, birthdate, sex, nationality, tckn, mobile)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    email_norm,
+                    hashed_pw,
+                    profile.get("name", ""),
+                    profile.get("surname", ""),
+                    profile.get("birthdate", None) or None,
+                    sex,
+                    profile.get("nationality", ""),
+                    profile.get("tckn", ""),
+                    profile.get("mobile", "")
+                )
+            )
+            new_id = cursor.lastrowid
+            conn.commit()
+            
+            cursor.execute("SELECT * FROM users WHERE user_id = %s", (new_id,))
+            new_user = cursor.fetchone()
+            clean = {k: v for k, v in new_user.items() if k != "password_hash"}
+            return {"success": True, "profile": clean}
+        except Exception as e:
+            conn.rollback()
+            return {"success": False, "error": f"Registration failed: {e}"}
+        finally:
+            conn.close()
 
-        new_user = {
-            "user_id": max((u["user_id"] for u in self._users), default=0) + 1,
-            "email": profile.get("email", ""),
-            "password": profile.get("password", ""),
-            "name": profile.get("name", ""),
-            "surname": profile.get("surname", ""),
-            "birthdate": profile.get("birthdate", ""),
-            "sex": profile.get("sex", ""),
-            "nationality": profile.get("nationality", ""),
-            "tckn": profile.get("tckn", ""),
-            "mobile": profile.get("mobile", ""),
-        }
-        self._users.append(new_user)
-        clean = {k: v for k, v in new_user.items() if k != "password"}
-        return {"success": True, "profile": clean}
 
-
-# The one line every caller depends on. Repoint this at a different
-# AuthProvider implementation when a real backend exists.
-default_auth_provider: AuthProvider = MockAuthProvider()
+# The one line every caller depends on. Repointed to the MySQL implementation!
+default_auth_provider: AuthProvider = DatabaseAuthProvider()

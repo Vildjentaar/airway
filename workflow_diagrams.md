@@ -3,29 +3,34 @@ DIAGRAM 1 — APPLICATION LIFECYCLE
 Paste the block below into mermaid.live:
 
 flowchart TD
-    START(["🔄 User Opens App / New Interaction"]) --> INIT{"Is this a\nnew session?"}
+    START["User opens the application or starts a new interaction"] --> INIT{"Is this a new session?"}
     
-    INIT -- Yes --> SETUP["Prepare Chatbot:\n• Load Greeting\n• Clear Cart"]
-    SETUP --> RESTART(["Update Screen"])
+    INIT -- Yes --> SETUP["The system prepares the chatbot by loading the initial greeting and clearing the shopping cart"]
+    SETUP --> RESTART["The screen updates to show the clean state"]
     
-    INIT -- No --> SIDEBAR["Render Sidebar"]
+    INIT -- No --> SIDEBAR["The system renders the sidebar layout"]
     
-    SIDEBAR --> CART_CHECK{"Are there flights\nin the cart?"}
-    CART_CHECK -- Yes --> SIDEBAR_CART["Show 🛒 Flight Cart\nwith Checkout Button"]
+    SIDEBAR --> CART_CHECK{"Are there any flights currently in the cart?"}
+    CART_CHECK -- Yes --> SIDEBAR_CART["The sidebar displays the flight cart along with a checkout button"]
     CART_CHECK -- No --> CHAT_HISTORY
     SIDEBAR_CART --> CHAT_HISTORY
     
-    CHAT_HISTORY["Display Conversation History"] --> ERR_CHECK{"Any previous\nerrors?"}
+    CHAT_HISTORY["The main window displays the entire conversation history"] --> ERR_CHECK{"Did any previous errors occur?"}
     
-    ERR_CHECK -- Yes --> SHOW_ERR["Display ⚠️ Warning Message"]
+    ERR_CHECK -- Yes --> SHOW_ERR["The system displays a warning message to the user"]
     ERR_CHECK -- No --> INPUT_CHECK
     SHOW_ERR --> INPUT_CHECK
     
-    INPUT_CHECK{"User performed an\naction (e.g., Checkout\nor typed message)?"}
-    INPUT_CHECK -- Yes --> PROCESS_ACTION["Process User Input\n(Send to AI Engine)"]
-    PROCESS_ACTION --> REFRESH(["Update Screen"])
+    INPUT_CHECK{"Did the user perform an action or type a message?"}
+    INPUT_CHECK -- Yes --> PROCESS_ACTION["The application sends the user input to the AI engine for processing"]
+    PROCESS_ACTION --> ROUTE_ACTION{"Does the action require data or interface updates?"}
+    ROUTE_ACTION -- "Data Tool" --> DISPATCHER["The AI requests data and the dispatcher fetches it securely from the database"]
+    ROUTE_ACTION -- "Interface Tool" --> UI_STATE["The AI updates the interface or cart state directly"]
+    DISPATCHER --> REFRESH
+    UI_STATE --> REFRESH
+    REFRESH["The screen updates to reflect the new state"]
     
-    INPUT_CHECK -- No --> IDLE(["⏳ Waiting for user input"])
+    INPUT_CHECK -- No --> IDLE["The system waits for the user to provide input"]
     
     style START fill:#1a1a2e,stroke:#e94560,color:#fff
     style RESTART fill:#1a1a2e,stroke:#e94560,color:#fff
@@ -191,79 +196,45 @@ DIAGRAM 7 — CONVERSATIONAL AI LOGIC
 Paste the block below into mermaid.live:
 
 flowchart TD
-    GREET["Greet User and Ask Intent"] --> INTENT{"Analyze User Input"}
+    GREET["The AI greets the user and asks how it can help"] --> INTENT{"How should the user input be classified?"}
     
-    INTENT -- "Off-Topic" --> PIVOT["Pivot smoothly back\nto booking"] --> INTENT
-    INTENT -- "Relative Dates" --> CTX["Determine real calendar dates"] --> BOOKING_SEQ
-    INTENT -- "Unserviced Route" --> ALT["State we do not fly it.\nOffer closest alternative."]
+    INTENT -- "Off-Topic" --> PIVOT["The AI pivots the conversation smoothly back to booking a flight"] --> INTENT
+    INTENT -- "Relative Dates" --> CTX["The AI checks the calendar to determine the exact travel dates"] --> BOOKING_SEQ
+    INTENT -- "Unserviced Route" --> ALT["The AI queries the database to see that the route is unavailable and offers the closest alternative"]
     ALT -- "User Accepts" --> BOOKING_SEQ
-    INTENT -- "Valid Booking\nRequest" --> BOOKING_SEQ
+    INTENT -- "Valid Booking Request" --> BOOKING_SEQ
     
-    BOOKING_SEQ{"Check Missing Fields\nTrip Type, Locations, Dates,\nand Passenger Count"}
-    BOOKING_SEQ -- "Fields Missing" --> INFER{"Can it be inferred\nfrom context?"}
-    INFER -- Yes --> PREFILL["Pre-fill from context"] --> BOOKING_SEQ
-    INFER -- No --> ASK["Ask ONE question\nfor missing field"] --> WAIT_REPLY["Wait for User"] --> BOOKING_SEQ
+    BOOKING_SEQ{"Are any required booking fields missing?"}
+    BOOKING_SEQ -- "Fields Missing" --> INFER{"Can the missing fields be inferred from the conversation context?"}
+    INFER -- Yes --> PREFILL["The AI pre-fills the missing fields using context"] --> BOOKING_SEQ
+    INFER -- No --> ASK["The AI asks the user one specific question to fill the missing field"] --> WAIT_REPLY["The system waits for the user to reply"] --> BOOKING_SEQ
     
-    BOOKING_SEQ -- "Invalid Data" --> CALLOUT["Call out user error\nAsk for real info"] --> WAIT_REPLY
+    BOOKING_SEQ -- "Invalid Data" --> CALLOUT["The AI informs the user about the invalid data and asks for correct information"] --> WAIT_REPLY
     
-    BOOKING_SEQ -- "All Fields\nCollected" --> AVAIL["Check Seat Availability"]
-    AVAIL --> RECAP["Present numbered recap\nincluding layovers and connections.\nAsk if everything is right."]
-    RECAP --> CONFIRM{"User confirms?"}
+    BOOKING_SEQ -- "All Fields Collected" --> AVAIL["The AI queries the database to check if there are enough available seats"]
+    AVAIL --> RECAP["The AI presents a numbered recap of the trip including layovers and asks for confirmation"]
+    RECAP --> CONFIRM{"Does the user confirm the trip details?"}
     
-    CONFIRM -- No --> EDIT["Ask what to change"] --> WAIT_REPLY
-    CONFIRM -- Yes --> WIDGET["Add Flight to Cart"]
+    CONFIRM -- No --> EDIT["The AI asks the user what they want to change"] --> WAIT_REPLY
+    CONFIRM -- Yes --> WIDGET["The AI triggers a state update to add the flight to the shopping cart"]
     
-    WIDGET --> PROMPT_CART["Ask if user wants to add another\nflight or is ready to check out"]
-    PROMPT_CART --> NEXT_STEP{"User Choice"}
+    WIDGET --> PROMPT_CART["The AI asks if the user wants to add another flight or proceed to checkout"]
+    PROMPT_CART --> NEXT_STEP{"What does the user choose to do?"}
     
     NEXT_STEP -- "Add another flight" --> BOOKING_SEQ
-    NEXT_STEP -- "Check out" --> FINAL_REPORT["Provide detailed breakdown of\nfare, taxes, and fees"]
+    NEXT_STEP -- "Check out" --> AUTH_FORM["The AI triggers the interface to render a secure authentication form"]
     
-    style GREET fill:#1a1a2e,stroke:#e94560,color:#fff
-    style FINAL_REPORT fill:#e94560,stroke:#1a1a2e,color:#fff
-    style BOOKING_SEQ fill:#533483,stroke:#2b2d42,color:#fff
-    style WIDGET fill:#0f3460,stroke:#16213e,color:#fff
-
-flowchart TD
-    GREET["Greet User and Ask Intent"] --> INTENT{"Analyze User Input"}
-    
-    INTENT -- "Off-Topic" --> PIVOT["Pivot smoothly back\nto booking"] --> INTENT
-    INTENT -- "Relative Dates" --> CTX["Determine real calendar dates"] --> BOOKING_SEQ
-    INTENT -- "Unserviced Route" --> ALT["State we do not fly it.\nOffer closest alternative."]
-    ALT -- "User Accepts" --> BOOKING_SEQ
-    INTENT -- "Valid Booking\nRequest" --> BOOKING_SEQ
-    
-    BOOKING_SEQ{"Check Missing Fields\nTrip Type, Locations, Dates,\nTicket Class, Passenger Breakdown"}
-    BOOKING_SEQ -- "Fields Missing" --> INFER{"Can it be inferred\nfrom context?"}
-    INFER -- Yes --> PREFILL["Pre-fill from context"] --> BOOKING_SEQ
-    INFER -- No --> ASK["Ask ONE question\nfor missing field"] --> WAIT_REPLY["Wait for User"] --> BOOKING_SEQ
-    
-    BOOKING_SEQ -- "Invalid Data" --> CALLOUT["Call out user error\nAsk for real info"] --> WAIT_REPLY
-    
-    BOOKING_SEQ -- "All Fields\nCollected" --> AVAIL["Check Seat Availability"]
-    AVAIL --> RECAP["Present numbered recap\nincluding layovers and connections.\nAsk if everything is right."]
-    RECAP --> CONFIRM{"User confirms?"}
-    
-    CONFIRM -- No --> EDIT["Ask what to change"] --> WAIT_REPLY
-    CONFIRM -- Yes --> WIDGET["Add Flight to Cart"]
-    
-    WIDGET --> PROMPT_CART["Ask if user wants to add another\nflight or is ready to check out"]
-    PROMPT_CART --> NEXT_STEP{"User Choice"}
-    
-    NEXT_STEP -- "Add another flight" --> BOOKING_SEQ
-    NEXT_STEP -- "Check out" --> AUTH_FORM["Render Secure Form:\nAuth (Login / Register / Guest)"]
-
-    AUTH_FORM --> AUTH_CHECK{"AuthProvider\nvalidates submission"}
+    AUTH_FORM --> AUTH_CHECK{"The authentication provider securely checks the credentials against the database"}
     AUTH_CHECK -- "Invalid" --> AUTH_FORM
-    AUTH_CHECK -- "Valid" --> PAX_FORM["Render Secure Form:\nPassenger Details incl. TCKN"]
+    AUTH_CHECK -- "Valid" --> PAX_FORM["The AI triggers the interface to render a secure form for passenger details"]
 
-    PAX_FORM --> PAX_CHECK{"Required fields +\nTCKN checksum valid?"}
+    PAX_FORM --> PAX_CHECK{"The system validates the passenger details and identity checksums"}
     PAX_CHECK -- "Invalid" --> PAX_FORM
-    PAX_CHECK -- "Valid" --> PAY_FORM["Render Secure Form:\nPayment"]
+    PAX_CHECK -- "Valid" --> PAY_FORM["The AI triggers the interface to render a secure payment form"]
 
-    PAY_FORM --> PAY_CHECK{"PaymentGateway validates\nLuhn, expiry, CVC"}
+    PAY_FORM --> PAY_CHECK{"The payment gateway validates the credit card information"}
     PAY_CHECK -- "Invalid" --> PAY_FORM
-    PAY_CHECK -- "Valid" --> FINAL_REPORT["Provide detailed breakdown of\nfare, taxes, and fees"]
+    PAY_CHECK -- "Valid" --> FINAL_REPORT["The AI generates a final report detailing the fare, taxes, and fees"]
     
     style GREET fill:#1a1a2e,stroke:#e94560,color:#fff
     style FINAL_REPORT fill:#e94560,stroke:#1a1a2e,color:#fff

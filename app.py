@@ -18,7 +18,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from system_prompt import SYSTEM_PROMPT
+from system_prompt import get_system_prompt
 from thall_lines_db import AIRLINE_NAME
 from llm_engine import call_llm, is_valid_flight_data
 from ui_components import (
@@ -62,7 +62,7 @@ def _run_llm_turn():
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": get_system_prompt()},
         {
             "role": "user",
             "content": "In English, greet and briefly introduce yourself with the airline, and ask the customer their request without exaggeration.",
@@ -99,9 +99,9 @@ with st.sidebar:
     if (
         st.session_state.get("flight_data")
         and is_valid_flight_data(st.session_state.flight_data)
-        and not st.session_state.get("report_data")
     ):
-        render_flight_card(st.session_state.flight_data)
+        is_checkout_disabled = bool(st.session_state.get("report_data"))
+        render_flight_card(st.session_state.flight_data, is_checkout_disabled)
 
     st.markdown("### 🛠️ Session Controls")
 
@@ -157,13 +157,12 @@ for i, message in enumerate(st.session_state.messages):
     is_last = (i == len(st.session_state.messages) - 1)
 
     if role == "tool" and "report_data" in message:
-        with st.chat_message("assistant"):
-            if message["report_data"] and message["report_data"].get("render_form"):
-                if is_last:
+        if message["report_data"] and message["report_data"].get("render_form"):
+            if is_last:
+                with st.chat_message("assistant"):
                     render_secure_form_ui(message["report_data"]["render_form"])
-                else:
-                    st.markdown(f"*(Secure {message['report_data']['render_form']} form submitted)*")
-            else:
+        else:
+            with st.chat_message("assistant"):
                 render_final_report(message["report_data"])
         continue
 
@@ -200,11 +199,14 @@ if st.session_state.last_error:
 trigger = st.session_state.pending_user_message
 if trigger:
     st.session_state.pending_user_message = None
-    last = st.session_state.messages[-1] if st.session_state.messages else {}
-    if last.get("role") == "user":
-        st.session_state.messages[-1]["content"] += "\n" + trigger
+    if trigger.startswith("[System Note:"):
+        st.session_state.messages.append({"role": "user", "content": trigger, "hidden": True})
     else:
-        st.session_state.messages.append({"role": "user", "content": trigger})
+        last = st.session_state.messages[-1] if st.session_state.messages else {}
+        if last.get("role") == "user" and not last.get("hidden"):
+            st.session_state.messages[-1]["content"] += "\n" + trigger
+        else:
+            st.session_state.messages.append({"role": "user", "content": trigger})
     with st.spinner("Confirming…"):
         _run_llm_turn()
     st.rerun()

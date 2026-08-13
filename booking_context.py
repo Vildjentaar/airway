@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 def ctx_get_current_datetime() -> dict:
     """Return the current date, time, and day of the week."""
-    now = datetime.now()
+    now = datetime.now().astimezone()
     return {
         "date":          now.strftime("%Y-%m-%d"),
         "date_readable": now.strftime("%A, %d %B %Y"),
@@ -28,7 +28,7 @@ def ctx_get_current_datetime() -> dict:
 
 def ctx_get_relative_dates() -> dict:
     """Return pre-computed common relative dates (tomorrow, this weekend, next Monday, etc.)."""
-    now = datetime.now()
+    now = datetime.now().astimezone()
     today = now.date()
 
     days_to_saturday = (5 - today.weekday()) % 7 or 7
@@ -53,7 +53,7 @@ def ctx_get_relative_dates() -> dict:
 
 def ctx_get_booking_window() -> dict:
     """Return the allowed booking window (earliest and latest bookable dates)."""
-    now = datetime.now()
+    now = datetime.now().astimezone()
     min_booking = now + timedelta(hours=2)
     max_booking = now + timedelta(days=180)
     return {

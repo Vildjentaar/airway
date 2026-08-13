@@ -15,16 +15,19 @@ doesn't belong inside any one of those modules.
 import json
 
 from thall_lines_db import (
-    FLIGHTS, BOOKINGS, find_flight, db_check_capacity,
+    find_flight, db_check_capacity,
     route_catalogue, db_get_route_details, self_test_bidirectional_coverage,
 )
+from database.db import fetch_one
 from pricing import calculate_total_price, self_test_booking_prices
 from accounts import default_auth_provider, validate_tckn
 from payment import default_payment_gateway
 
-if __name__ == "__main__":
-    print(f"Loaded {len(FLIGHTS)} flight rows ({sum(1 for f in FLIGHTS if not f['is_leg'])} sellable, "
-          f"{sum(1 for f in FLIGHTS if f['is_leg'])} legs) and {len(BOOKINGS)} bookings.\n")
+    flight_stats = fetch_one("SELECT COUNT(*) as total, SUM(CASE WHEN is_leg = 0 THEN 1 ELSE 0 END) as sellable, SUM(is_leg) as legs FROM flights")
+    booking_stats = fetch_one("SELECT COUNT(*) as total FROM bookings")
+    
+    print(f"Loaded {flight_stats['total']} flight rows ({flight_stats['sellable']} sellable, "
+          f"{flight_stats['legs']} legs) and {booking_stats['total']} bookings.\n")
 
     print("--- self-test: bidirectional route coverage ---------------------")
     issues = self_test_bidirectional_coverage()

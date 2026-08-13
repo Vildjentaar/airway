@@ -139,21 +139,51 @@ def calculate_total_price(
 # other way around, so there's no import cycle.
 # ---------------------------------------------------------------------------
 def self_test_booking_prices() -> list[str]:
-    from thall_lines_db import BOOKINGS, get_flight_by_number, BookingStatus
+    from thall_lines_db import db_list_bookings, get_flight_by_number, BookingStatus
 
     problems = []
-    for b in BOOKINGS:
-        if b["booking_status"] in (BookingStatus.FAILED, BookingStatus.WAITLISTED):
-            continue  # these deliberately carry no confirmed fare
-        outbound = get_flight_by_number(b["flight_number"])
-        if not outbound:
-            problems.append(f"booking {b['booking_id']}: flight_number {b['flight_number']} not found")
+
+    bookings = db_list_bookings()["bookings"]
+
+    for b in bookings:
+        if b["booking_status"] in (
+            BookingStatus.FAILED.value,
+            BookingStatus.WAITLISTED.value,
+        ):
             continue
-        inbound = get_flight_by_number(b["return_flight_number"]) if b["return_flight_number"] else None
-        expected = calculate_total_price(outbound, b["passenger_count"], b["trip_type"], inbound)
-        if expected != int(b["total_price_tl"]):
+
+        outbound = get_flight_by_number(b["flight_number"])
+
+        if not outbound:
             problems.append(
-                f"booking {b['booking_id']}: stored total_price_tl={b['total_price_tl']} "
+                f"booking {b['booking_id']}: flight_number {b['flight_number']} not found"
+            )
+            continue
+
+        inbound = None
+
+        if b["return_flight_number"]:
+            inbound = get_flight_by_number(b["return_flight_number"])
+
+        expected = calculate_total_price(
+            outbound,
+            b["passenger_count"],
+            b["trip_type"],
+            inbound,
+        )
+
+        stored_total = b.get("total_price_tl")
+
+        if stored_total is None:
+            problems.append(
+                f"booking {b['booking_id']}: total_price_tl is missing"
+            )
+            continue
+
+        if expected != int(stored_total):
+            problems.append(
+                f"booking {b['booking_id']}: stored total_price_tl={stored_total} "
                 f"but calculate_total_price(...) = {expected}"
             )
+
     return problems
