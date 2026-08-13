@@ -105,7 +105,18 @@ with st.sidebar:
 
     st.markdown("### 🛠️ Session Controls")
 
-    if st.button("🔄 Start Over", use_container_width=True):
+    has_convo = any(
+        m.get("role") == "user" and not m.get("hidden")
+        for m in st.session_state.get("messages", [])
+    )
+
+    is_fresh = (
+        not has_convo
+        and not st.session_state.get("flight_data")
+        and not st.session_state.get("report_data")
+        and st.session_state.get("last_error") is None
+    )
+    if st.button("Start Over", use_container_width=True, disabled=is_fresh):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
@@ -113,10 +124,7 @@ with st.sidebar:
     st.divider()
     st.markdown("### 📥 Export")
 
-    has_convo = any(
-        m.get("role") == "user" and not m.get("hidden")
-        for m in st.session_state.get("messages", [])
-    )
+    # has_convo definition moved up
 
     st.download_button(
         label="📄 Download Transcript",
