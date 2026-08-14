@@ -5,8 +5,9 @@ Paste the block below into mermaid.live:
 flowchart TD
     START["User opens the application or starts a new interaction"] --> INIT{"Is this a new session?"}
     
-    INIT -- Yes --> SETUP["The system prepares the chatbot by loading the initial greeting and clearing the shopping cart"]
-    SETUP --> RESTART["The screen updates to show the clean state"]
+    INIT -- Yes --> SETUP["The system sets 'needs_init' and clears session state"]
+    SETUP --> LOCK_INIT["The screen instantly updates to a locked state while connecting"]
+    LOCK_INIT --> RESTART["The screen unlocks and shows the clean state with greeting"]
     
     INIT -- No --> SIDEBAR["The system renders the sidebar layout"]
     
@@ -22,13 +23,14 @@ flowchart TD
     SHOW_ERR --> INPUT_CHECK
     
     INPUT_CHECK{"Did the user perform an action or type a message?"}
-    INPUT_CHECK -- Yes --> PROCESS_ACTION["The application sends the user input to the AI engine for processing"]
+    INPUT_CHECK -- Yes --> LOCK_UI["The system flags 'is_thinking' to instantly lock the UI"]
+    LOCK_UI --> PROCESS_ACTION["The application sends the user input to the AI engine for processing"]
     PROCESS_ACTION --> ROUTE_ACTION{"Does the action require data or interface updates?"}
     ROUTE_ACTION -- "Data Tool" --> DISPATCHER["The AI requests data and the dispatcher fetches it securely from the MySQL database"]
     ROUTE_ACTION -- "Interface Tool" --> UI_STATE["The AI updates the interface or cart state directly"]
     DISPATCHER --> REFRESH
     UI_STATE --> REFRESH
-    REFRESH["The screen updates to reflect the new state"]
+    REFRESH["The screen unlocks and updates to reflect the new state"]
     
     INPUT_CHECK -- No --> IDLE["The system waits for the user to provide input"]
     
@@ -37,6 +39,8 @@ flowchart TD
     style REFRESH fill:#1a1a2e,stroke:#e94560,color:#fff
     style IDLE fill:#0f3460,stroke:#16213e,color:#fff
     style SETUP fill:#533483,stroke:#2b2d42,color:#fff
+    style LOCK_INIT fill:#e94560,stroke:#1a1a2e,color:#fff
+    style LOCK_UI fill:#e94560,stroke:#1a1a2e,color:#fff
 
 
 DIAGRAM 2 — CHAT HISTORY RENDERING

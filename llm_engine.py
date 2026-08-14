@@ -317,17 +317,21 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
         verified = result["flight"]
         flight_data.append(verified)
 
-        # Optimization: skip followup for widget rendering, emit directly
+        pricing = verified.get("pricing_details", {})
         messages.append({
             "role": "tool",
             "tool_call_id": tool_call.id,
-            "content": "Flight card successfully appended to cart UI."
+            "content": (
+                f"Flight {verified['flight_number']} ({verified['departure_point']} → {verified['arrival_point']}, "
+                f"{verified['ticket_class']}, {verified['departure_date']}) added to cart. "
+                f"Price breakdown — subtotal: {pricing.get('subtotal_tl', 'N/A')} TL, "
+                f"tax: {pricing.get('tax_tl', 'N/A')} TL, "
+                f"fees: {pricing.get('fees_tl', 'N/A')} TL, "
+                f"total: {pricing.get('total_tl', verified.get('price_tl', 'N/A'))} TL. "
+                f"Confirm to the user in THEIR language. "
+                f"Remind them they can add more flights or proceed to checkout."
+            ),
         })
-        messages.append({
-            "role": "assistant",
-            "content": f"I've added flight {verified['flight_number']} to your cart. Please check the summary above!"
-        })
-        skip_followup = True
 
     elif function_name == "remove_flight_from_cart":
         fn_to_remove = tool_args.get("flight_number")
@@ -375,17 +379,22 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             report_data = tool_args
             report_data["booked_flights"] = list(flight_data)
             flight_data.clear()
+
+            booked_summary = "; ".join(
+                f"{f.get('flight_number')} {f.get('departure_point')}→{f.get('arrival_point')} "
+                f"({f.get('ticket_class')}, {f.get('departure_date')})"
+                for f in report_data["booked_flights"]
+            )
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
-                "content": "Session report generated. Interaction complete.",
+                "content": (
+                    f"Final report generated. Booked flights: {booked_summary}. "
+                    f"Tell the user (in THEIR language) that the itinerary is finalized "
+                    f"and the summary report is shown below. Wish them a great trip."
+                ),
                 "report_data": report_data
             })
-            messages.append({
-                "role": "assistant",
-                "content": "I've finalized your itinerary and generated a summary report below. Have a great trip!"
-            })
-            skip_followup = True
 
     elif function_name in [
         "search_flights", "find_flight", "get_route_details", "list_all_routes",
