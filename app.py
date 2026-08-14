@@ -214,6 +214,21 @@ if user_input := st.chat_input("Type your message here...", disabled=is_chat_dis
         st.session_state.is_thinking = True
         st.rerun()
 
+if not is_chat_disabled:
+    st.components.v1.html(
+        """
+        <script>
+        setTimeout(function() {
+            var inputs = window.parent.document.querySelectorAll('textarea[data-testid="stChatInputTextArea"]');
+            if (inputs.length > 0) {
+                inputs[0].focus();
+            }
+        }, 50);
+        </script>
+        """,
+        height=0,
+    )
+
 if st.session_state.get("is_thinking"):
     with st.spinner("Thinking…"):
         _run_llm_turn()
