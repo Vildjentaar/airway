@@ -26,11 +26,7 @@ from pricing import calculate_total_price
 from booking_context import ctx_get_current_datetime, ctx_get_relative_dates, ctx_get_booking_window
 from accounts import validate_tckn
 
-# Attempt to import check_capacity if it was added to thall_lines_db
-try:
-    from thall_lines_db import db_check_capacity
-except ImportError:
-    db_check_capacity = None
+
 
 from tools_schema import (
     flight_widget_tool, final_report_tool, check_capacity_tool,
@@ -125,7 +121,11 @@ def _sanitize_for_gemini(messages: list) -> list:
             out[-1]["content"] = (prev.get("content") or "") + "\n" + (msg.get("content") or "")
             continue
 
-        if role == "assistant" and prev_role == "assistant" and not msg.get("tool_calls"):
+        # Only merge two consecutive assistant messages if NEITHER has tool_calls.
+        # Merging into a message that has tool_calls would produce a muddled entry
+        # with both tool_calls and unrelated free text.
+        if (role == "assistant" and prev_role == "assistant"
+                and not msg.get("tool_calls") and not prev.get("tool_calls")):
             out[-1] = dict(prev)
             out[-1]["content"] = (prev.get("content") or "") + "\n" + (msg.get("content") or "")
             continue
@@ -144,13 +144,15 @@ def _sanitize_for_gemini(messages: list) -> list:
                     tool_call_ids.add(tc_id)
 
             j = i + 1
-            found_any = False
+            found_ids = set()
             while j < len(out) and out[j].get("role") == "tool":
                 if out[j].get("tool_call_id") in tool_call_ids:
-                    found_any = True
+                    found_ids.add(out[j].get("tool_call_id"))
                 j += 1
 
-            if not found_any:
+            # Every tool_call_id must have a matching tool response;
+            # otherwise the API will reject the malformed history.
+            if found_ids != tool_call_ids:
                 i += 1
                 continue
 
@@ -204,6 +206,9 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
     if passenger_count > 0 and adult_count == 0 and child_count == 0 and baby_count == 0:
         adult_count = passenger_count
 
+    if adult_count < 0 or child_count < 0 or baby_count < 0:
+        return {"error": "Passenger counts cannot be negative."}
+
     passengers = adult_count + child_count + baby_count
     passengers_breakdown = {"Adult": adult_count, "Child": child_count, "Baby": baby_count}
 
@@ -211,8 +216,9 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         return {"error": "Invalid passenger count. Cannot book more than 9 passengers per transaction."}
 
     verified_segments = []
+    prev_dep_date = None
 
-    for seg in segments:
+    for seg_idx, seg in enumerate(segments):
         dep = _extract_code(seg.get("departure_point", ""))
         arr = _extract_code(seg.get("arrival_point", ""))
         dep_date_str = seg.get("departure_date", "")
@@ -223,6 +229,16 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
                 return {"error": f"Departure date {dep_date_str} cannot be in the past."}
         except ValueError:
             return {"error": f"Invalid departure_date format: {dep_date_str}. Must be YYYY-MM-DD."}
+
+        # Cross-segment chronological ordering: each segment must depart
+        # on or after the previous segment's departure date.
+        if prev_dep_date is not None and dep_date_parsed.date() < prev_dep_date:
+            return {"error": (
+                f"Segment {seg_idx + 1} departs on {dep_date_str}, which is before "
+                f"the previous segment's departure date ({prev_dep_date.isoformat()}). "
+                f"Segments must be in chronological order."
+            )}
+        prev_dep_date = dep_date_parsed.date()
 
         flight_number_provided = seg.get("flight_number")
         if flight_number_provided:
@@ -270,14 +286,21 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         "segments": verified_segments,
     }
 
+    # Compare ALL segments for duplicate detection, not just the first.
+    # Two bookings sharing only the outbound but differing on return are
+    # distinct, and vice versa.
+    new_seg_keys = tuple(
+        (s["flight_number"], s["departure_date"]) for s in verified_segments
+    )
     is_duplicate = any(
-        f.get("segments") and 
-        f["segments"][0]["flight_number"] == first_seg["flight_number"] and 
-        f["segments"][0]["departure_date"] == first_seg["departure_date"]
+        f.get("segments")
+        and tuple(
+            (s["flight_number"], s["departure_date"]) for s in f["segments"]
+        ) == new_seg_keys
         for f in flight_data
     )
     if is_duplicate:
-        return {"error": f"Flight {first_seg['flight_number']} on {first_seg['departure_date']} is already in the cart."}
+        return {"error": f"This itinerary is already in the cart."}
 
     return {"flight": verified}
 
@@ -285,8 +308,6 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
 def _select_active_tools(messages: list, flight_data: list, report_data):
     """Decide which tools (if any) should be offered to the model on this turn."""
     if report_data is not None:
-        return [], "none"
-    if len(messages) <= 2 and messages[-1].get("hidden"):
         return [], "none"
     if flight_data:
         return POST_CART_TOOLS, "auto"
@@ -491,18 +512,27 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
     flight_data = [dict(f) for f in flight_data] if flight_data else []
     last_error = None
 
-    active_tools, active_tool_choice = _select_active_tools(messages, flight_data, report_data)
-
     max_turns = 5
     for turn in range(max_turns):
+        # Recompute available tools each iteration — flight_data and
+        # report_data are mutated inside the loop (e.g. generate_final_report
+        # clears flight_data and sets report_data), so the tool list must
+        # reflect the *current* state, not the state at call_llm entry.
+        active_tools, active_tool_choice = _select_active_tools(
+            messages, flight_data, report_data
+        )
+
         system_msg = [messages[0]]
         recent = messages[1:][-MAX_HISTORY_MESSAGES:]
         
-        # Flatten the history to avoid Gemini API tool-parsing bugs (thought_signature)
-        # We must flatten the entire history on every loop iteration before sending it.
+        # Flatten the history to strip Gemini-incompatible fields (thought_signature, etc.)
+        # while keeping the structural integrity of assistant <-> tool turns.
+        # IMPORTANT: assistant tool-call messages must NOT be omitted — if the model
+        # can't see that it already called a tool, it will call it again every turn
+        # until max_turns is exhausted.
         trimmed_recent = _truncate_tool_results(recent)
-        
-        # Map tool_call_id to function name so we can label tool results clearly
+
+        # Map tool_call_id -> function name for labelling tool results.
         tool_id_to_name = {}
         for msg in recent:
             if msg.get("role") == "assistant" and msg.get("tool_calls"):
@@ -511,10 +541,12 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     tid = tc.get("id") if isinstance(tc, dict) else getattr(tc, "id", "")
                     if tid and name:
                         tool_id_to_name[tid] = name
-                        
+
         flattened_messages = []
         for msg in trimmed_recent:
             if msg.get("role") == "tool":
+                # Convert tool responses to user messages with XML tags so Gemini
+                # can parse them without native tool-call schema.
                 tid = msg.get("tool_call_id", "")
                 name = tool_id_to_name.get(tid, "unknown_tool")
                 flattened_messages.append({
@@ -522,15 +554,37 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     "content": f"<tool_result tool_name=\"{name}\">\n{msg.get('content', '')}\n</tool_result>"
                 })
             elif msg.get("role") == "assistant" and msg.get("tool_calls"):
-                content = msg.get("content", "")
-                if isinstance(content, str) and content.strip():
-                    flattened_messages.append({"role": "assistant", "content": content.strip()})
-                # Completely omit the assistant's tool-call message.
-                # The presence of <tool_result> is enough for Gemini to understand the flow.
+                # Represent tool-call turns as a terse assistant stub so the model
+                # knows it already acted on this turn. Omitting this entirely causes
+                # the model to re-invoke the same tools on every subsequent turn.
+                tool_calls = msg.get("tool_calls", [])
+                call_labels = []
+                for tc in tool_calls:
+                    fn_name = tc.get("function", {}).get("name") if isinstance(tc, dict) else getattr(tc.function, "name", "tool")
+                    call_labels.append(f"[Called: {fn_name}]")
+                stub_text = (msg.get("content") or "").strip()
+                if call_labels:
+                    stub_text = (stub_text + "\n" if stub_text else "") + " ".join(call_labels)
+                flattened_messages.append({"role": "assistant", "content": stub_text.strip() or "[Tool call]"})
             else:
                 flattened_messages.append(dict(msg))
-                
+
         flattened_history = _sanitize_for_gemini(system_msg + flattened_messages)
+
+        # Circuit-breaker: if the model has already used several turns calling tools
+        # without producing a text reply, inject a one-shot nudge (not persisted to
+        # `messages`) asking it to stop and respond in natural language.
+        CIRCUIT_BREAK_TURN = 3
+        if turn >= CIRCUIT_BREAK_TURN and active_tools:
+            nudge = {
+                "role": "user",
+                "content": (
+                    "[System: You have already called tools multiple times. "
+                    "Stop calling tools now and reply to the user in natural language, "
+                    "summarising what you found or what action was taken.]"
+                )
+            }
+            flattened_history = flattened_history + [nudge]
 
         try:
             response = client.chat.completions.create(
@@ -576,6 +630,7 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     last_error = f"`{function_name}` returned malformed JSON: {parse_err}"
                     continue
 
+
                 report_data, call_skip = _dispatch_tool_call(
                     tool_call, function_name, tool_args, messages, flight_data, report_data,
                     ancillary_data=ancillary_data,
@@ -598,7 +653,15 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     "The model tried to perform an action but used the wrong format. "
                     "Please repeat your last message and it will be handled correctly."
                 )
+                # Still append a user-visible reply so the conversation doesn't dead-end.
+                messages.append({
+                    "role": "assistant",
+                    "content": "I'm sorry, I ran into a formatting issue. Could you please repeat your last request?",
+                })
             else:
+                # A clean assistant reply clears any residual last_error from
+                # an earlier failed tool call that the model has since recovered from.
+                last_error = None
                 if not stripped:
                     bot_reply = "I'm sorry, There was a connection glitch and I couldn't process that. Could you please repeat?"
                 messages.append({"role": "assistant", "content": bot_reply})
@@ -615,6 +678,6 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
         "messages": messages,
         "flight_data": flight_data,
         "report_data": report_data,
-        "success": True,
+        "success": last_error is None,
         "error": last_error,
     }
