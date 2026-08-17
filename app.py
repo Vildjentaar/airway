@@ -220,7 +220,7 @@ if user_input := st.chat_input("Type your message here...", disabled=is_chat_dis
         st.rerun()
 
 if not is_chat_disabled:
-    st.components.v1.html(
+    st.html(
         """
         <script>
         setTimeout(function() {
@@ -230,8 +230,7 @@ if not is_chat_disabled:
             }
         }, 50);
         </script>
-        """,
-        height=0,
+        """
     )
 
 if st.session_state.get("is_thinking"):

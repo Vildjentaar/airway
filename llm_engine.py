@@ -531,7 +531,6 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
         skip_followup = False
         for tool_call in response_message.tool_calls:
             function_name = tool_call.function.name
-
             try:
                 tool_args = json.loads(tool_call.function.arguments)
             except json.JSONDecodeError as parse_err:
@@ -550,26 +549,39 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
             skip_followup = skip_followup or call_skip
 
         if not skip_followup:
-            print("\n[DEBUG] --- TOOL OUTPUTS BEFORE FOLLOW-UP ---")
-            for msg in messages:
-                if msg.get("role") == "tool" and msg.get("tool_call_id") in [tc.id for tc in response_message.tool_calls]:
-                    print(f"Tool {msg.get('tool_call_id')}: {msg.get('content')}")
-            print("[DEBUG] ---------------------------------------")
-
+            # Flatten the history for the follow up to avoid Gemini API tool-parsing bugs
             followup_trimmed = _sanitize_for_gemini(_truncate_tool_results(
                 [messages[0]] + messages[1:][-MAX_HISTORY_MESSAGES:]
             ))
+            
+            # Remove the last 'tool' messages and replace with a standard user prompt
+            flattened_messages = []
+            tool_outputs = []
+            for msg in followup_trimmed:
+                if msg.get("role") == "tool":
+                    tool_outputs.append(msg.get("content", ""))
+                elif msg.get("role") == "assistant" and msg.get("tool_calls"):
+                    # skip assistant messages that are just tool calls
+                    continue
+                else:
+                    flattened_messages.append(msg)
+                    
+            if tool_outputs:
+                combined_tools = "\\n".join(tool_outputs)
+                flattened_messages.append({
+                    "role": "user",
+                    "content": f"[System: The system just executed a tool in the background and returned this data:\\n{combined_tools}\\n\\nYou MUST now respond to the user based on this data.]"
+                })
+
             try:
+                # Deliberately omit tools array so the model is forced into pure text mode
                 followup = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=followup_trimmed,
+                    messages=flattened_messages,
                     temperature=0.3,
-                    tools=None,
-                    tool_choice="none",
                 )
-                followup_text = (followup.choices[0].message.content or "").strip()
-                print(f"[DEBUG] Follow-up text from model: {repr(followup_text)}")
                 
+                followup_text = (followup.choices[0].message.content or "").strip()
                 if followup_text:
                     messages.append({"role": "assistant", "content": followup_text})
                 else:
