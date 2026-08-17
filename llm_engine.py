@@ -11,7 +11,7 @@ plain Python data out, which means this exact file can later be dropped
 into a FastAPI/Flask route and served to a React/Vue frontend with zero
 changes.
 
-Public entry point: `call_llm(client, messages, flight_data, report_data)`
+Public entry point: `call_llm(client, messages, flight_data, report_data, ancillary_data)`
 """
 
 import json
@@ -294,7 +294,7 @@ def _select_active_tools(messages: list, flight_data: list, report_data):
 # Tool dispatch (one function call handled at a time)
 # --------------------------------------------------------------------------
 
-def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, flight_data: list, report_data):
+def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, flight_data: list, report_data, ancillary_data: dict | None = None):
     """
     Executes a single tool call, appending the resulting tool message(s) to
     `messages` in place and mutating `flight_data` in place where relevant.
@@ -378,6 +378,13 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
         else:
             report_data = tool_args
             report_data["booked_flights"] = list(flight_data)
+
+            # Inject ancillary selections so the final report can display them
+            _anc = ancillary_data or {}
+            report_data["seat_selections"] = _anc.get("seat_selections", [])
+            report_data["luggage_selections"] = _anc.get("luggage_selections", [])
+            report_data["extras_selections"] = _anc.get("extras_selections", [])
+
             flight_data.clear()
 
             booked_summary = "; ".join(
@@ -469,7 +476,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
 # Public entry point
 # --------------------------------------------------------------------------
 
-def call_llm(client, messages: list, flight_data: list, report_data):
+def call_llm(client, messages: list, flight_data: list, report_data, ancillary_data: dict | None = None):
     """
     Sends the current message history to the model, handles any tool calls
     it requests, and returns the updated state.
@@ -536,7 +543,8 @@ def call_llm(client, messages: list, flight_data: list, report_data):
                 continue
 
             report_data, call_skip = _dispatch_tool_call(
-                tool_call, function_name, tool_args, messages, flight_data, report_data
+                tool_call, function_name, tool_args, messages, flight_data, report_data,
+                ancillary_data=ancillary_data,
             )
             skip_followup = skip_followup or call_skip
 

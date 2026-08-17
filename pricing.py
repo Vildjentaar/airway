@@ -132,6 +132,47 @@ def calculate_total_price(
 
 
 # ---------------------------------------------------------------------------
+# Ancillary pricing (seats, luggage, extras)
+#
+# These costs are *additive*, not multiplicative on the base fare, so they
+# bypass PRICING_MODIFIERS and are computed independently.  The grand total
+# at report time is: fare_total + ancillary_total.
+# ---------------------------------------------------------------------------
+def calculate_ancillary_total(
+    seat_selections: list[dict] | None = None,
+    luggage_selections: list[dict] | None = None,
+    extras_selections: list[dict] | None = None,
+) -> dict:
+    """Compute add-on totals and return an itemized breakdown.
+
+    Parameters
+    ----------
+    seat_selections:
+        List of ``{"passenger_idx": int, "key": str, "price_tl": float, ...}``.
+    luggage_selections:
+        List of ``{"passenger_idx": int, "key": str, "price_tl": float, ...}``.
+    extras_selections:
+        List of ``{"service": str, "price_tl": float, ...}``.
+
+    Returns
+    -------
+    dict
+        ``seat_total_tl``, ``luggage_total_tl``, ``extras_total_tl``,
+        and ``ancillary_total_tl`` (the sum of the three).
+    """
+    seat_total = sum(s.get("price_tl", 0) for s in (seat_selections or []))
+    luggage_total = sum(l.get("price_tl", 0) for l in (luggage_selections or []))
+    extras_total = sum(e.get("price_tl", 0) for e in (extras_selections or []))
+
+    return {
+        "seat_total_tl": round(seat_total, 2),
+        "luggage_total_tl": round(luggage_total, 2),
+        "extras_total_tl": round(extras_total, 2),
+        "ancillary_total_tl": round(seat_total + luggage_total + extras_total, 2),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Self-check — verifies every stored booking's price still matches what
 # calculate_total_price() produces today. Lives here (not in
 # thall_lines_db.py) because it's a pricing self-test, not a flight-data

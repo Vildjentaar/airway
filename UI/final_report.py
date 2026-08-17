@@ -63,6 +63,21 @@ def render_final_report(report_data: dict):
                     card_last4 = pay.get("card_last4", "****")
                     st.text(f"Payment: **** **** **** {card_last4}")
 
+        if report_data.get("seat_selections"):
+            st.markdown("#### 💺 Seat Selections")
+            for s in report_data["seat_selections"]:
+                st.markdown(f"- Passenger {s['passenger_idx']+1}: Seat **{s['seat_id']}** ({s['type']}) — {s['price_tl']} TL")
+
+        if report_data.get("luggage_selections"):
+            st.markdown("#### 🧳 Luggage")
+            for l in report_data["luggage_selections"]:
+                st.markdown(f"- Passenger {l['passenger_idx']+1}: {l['tier']} — {l['price_tl']} TL")
+
+        if report_data.get("extras_selections"):
+            st.markdown("#### ✨ Extra Services")
+            for e in report_data["extras_selections"]:
+                st.markdown(f"- {e['service']} — {e['price_tl']} TL")
+
     st.divider()
     st.markdown("### 📊 Session Analytics Report")
 

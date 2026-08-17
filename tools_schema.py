@@ -321,8 +321,8 @@ render_secure_form_tool = [
                 "properties": {
                     "form_type": {
                         "type": "string",
-                        "enum": ["auth", "passenger_details", "payment"],
-                        "description": "Which form to render. Flow is ALWAYS: auth -> passenger_details -> payment."
+                        "enum": ["auth", "passenger_details", "seat_selection", "luggage", "extras", "payment"],
+                        "description": "Which form to render. Flow is ALWAYS: auth -> passenger_details -> seat_selection -> luggage -> extras -> payment."
                     }
                 },
                 "required": ["form_type"]

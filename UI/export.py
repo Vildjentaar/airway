@@ -67,6 +67,25 @@ def build_transcript(
             if fd.get("return_date"):
                 lines.append(f"- **Return:** {fd.get('return_date')}")
             total_price += fd.get("price_tl", 0)
+
+        if report_data.get("seat_selections"):
+            lines.append("### 💺 Seat Selections")
+            for s in report_data["seat_selections"]:
+                lines.append(f"- Passenger {s['passenger_idx']+1}: Seat **{s['seat_id']}** ({s['type']}) — {s['price_tl']} TL")
+                total_price += s.get("price_tl", 0)
+
+        if report_data.get("luggage_selections"):
+            lines.append("### 🧳 Luggage")
+            for l in report_data["luggage_selections"]:
+                lines.append(f"- Passenger {l['passenger_idx']+1}: {l['tier']} — {l['price_tl']} TL")
+                total_price += l.get("price_tl", 0)
+
+        if report_data.get("extras_selections"):
+            lines.append("### ✨ Extra Services")
+            for e in report_data["extras_selections"]:
+                lines.append(f"- {e['service']} — {e['price_tl']} TL")
+                total_price += e.get("price_tl", 0)
+
         lines.append(f"- **Total Price:** {total_price} TL")
 
     if report_data and not report_data.get("render_form"):

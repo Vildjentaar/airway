@@ -47,6 +47,11 @@ def _run_llm_turn():
         st.session_state.messages,
         st.session_state.flight_data,
         st.session_state.report_data,
+        ancillary_data={
+            "seat_selections": st.session_state.get("seat_selections", []),
+            "luggage_selections": st.session_state.get("luggage_selections", []),
+            "extras_selections": st.session_state.get("extras_selections", []),
+        },
     )
     st.session_state.messages = result["messages"]
     st.session_state.flight_data = result["flight_data"]
