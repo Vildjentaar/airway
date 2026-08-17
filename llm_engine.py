@@ -550,6 +550,12 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
             skip_followup = skip_followup or call_skip
 
         if not skip_followup:
+            print("\n[DEBUG] --- TOOL OUTPUTS BEFORE FOLLOW-UP ---")
+            for msg in messages:
+                if msg.get("role") == "tool" and msg.get("tool_call_id") in [tc.id for tc in response_message.tool_calls]:
+                    print(f"Tool {msg.get('tool_call_id')}: {msg.get('content')}")
+            print("[DEBUG] ---------------------------------------")
+
             followup_trimmed = _sanitize_for_gemini(_truncate_tool_results(
                 [messages[0]] + messages[1:][-MAX_HISTORY_MESSAGES:]
             ))
@@ -562,6 +568,8 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     tool_choice="none",
                 )
                 followup_text = (followup.choices[0].message.content or "").strip()
+                print(f"[DEBUG] Follow-up text from model: {repr(followup_text)}")
+                
                 if followup_text:
                     messages.append({"role": "assistant", "content": followup_text})
                 else:
