@@ -79,9 +79,9 @@ def render_extras_form() -> None:
         # --- action buttons -------------------------------------------------
         col_submit, col_skip = st.columns(2)
         with col_submit:
-            submitted = st.button("✅ Confirm Extras", key="extras_submit")
+            submitted = st.button("✅ Confirm Extras", key="extras_submit", disabled=st.session_state.get("is_thinking", False))
         with col_skip:
-            skipped = st.button("⏭️ Skip Extra Services", key="extras_skip")
+            skipped = st.button("⏭️ Skip Extra Services", key="extras_skip", disabled=st.session_state.get("is_thinking", False))
 
     # --- handle skip --------------------------------------------------------
     if skipped:

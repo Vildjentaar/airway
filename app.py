@@ -98,7 +98,7 @@ with st.sidebar:
         st.session_state.get("flight_data")
         and is_valid_flight_data(st.session_state.flight_data)
     ):
-        is_checkout_disabled = bool(st.session_state.get("report_data"))
+        is_checkout_disabled = bool(st.session_state.get("report_data")) or st.session_state.get("is_thinking", False)
         render_flight_card(st.session_state.flight_data, is_checkout_disabled)
 
     st.markdown("### 🛠️ Session Controls")

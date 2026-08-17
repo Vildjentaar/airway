@@ -41,7 +41,7 @@ def render_auth_form() -> None:
             first_name = st.text_input("First Name", max_chars=32)
             last_name = st.text_input("Last Name", max_chars=32)
 
-        submitted = st.form_submit_button("Submit & Continue")
+        submitted = st.form_submit_button("Submit & Continue", disabled=st.session_state.get("is_thinking", False))
 
     if not submitted:
         return

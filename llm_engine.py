@@ -564,24 +564,35 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                 [messages[0]] + messages[1:][-MAX_HISTORY_MESSAGES:]
             ))
             
-            # Remove the last 'tool' messages and replace with a standard user prompt
             flattened_messages = []
-            tool_outputs = []
             for msg in followup_trimmed:
                 if msg.get("role") == "tool":
-                    tool_outputs.append(msg.get("content", ""))
+                    flattened_messages.append({
+                        "role": "user",
+                        "content": f"[System: Tool returned data: {msg.get('content', '')}]"
+                    })
                 elif msg.get("role") == "assistant" and msg.get("tool_calls"):
-                    # skip assistant messages that are just tool calls
-                    continue
+                    content = msg.get("content", "")
+                    if isinstance(content, str) and content.strip():
+                        flattened_messages.append({"role": "assistant", "content": content.strip()})
+                    else:
+                        flattened_messages.append({"role": "assistant", "content": "[System: Assistant executed internal tool]"})
                 else:
-                    flattened_messages.append(msg)
+                    flattened_messages.append(dict(msg))
                     
-            if tool_outputs:
-                combined_tools = "\\n".join(tool_outputs)
-                flattened_messages.append({
-                    "role": "user",
-                    "content": f"[System: The system just executed a tool in the background and returned this data:\\n{combined_tools}\\n\\nYou MUST now respond to the user based on this data.]"
-                })
+            flattened_messages = _sanitize_for_gemini(flattened_messages)
+            
+            # Ensure the model knows it must respond to the user now
+            if flattened_messages:
+                last_msg = flattened_messages[-1]
+                prompt_suffix = "\n\n[System: You MUST now respond directly to the user based on the tool data above. Do not output tool calls.]"
+                if last_msg.get("role") == "user":
+                    last_msg["content"] = str(last_msg.get("content", "")) + prompt_suffix
+                else:
+                    flattened_messages.append({
+                        "role": "user",
+                        "content": prompt_suffix.strip()
+                    })
 
             try:
                 # Deliberately omit tools array so the model is forced into pure text mode

@@ -95,9 +95,9 @@ def render_seat_form() -> None:
         # --- action buttons -------------------------------------------------
         col_submit, col_skip = st.columns(2)
         with col_submit:
-            submitted = st.button("✅ Confirm Seats", key="seat_submit")
+            submitted = st.button("✅ Confirm Seats", key="seat_submit", disabled=st.session_state.get("is_thinking", False))
         with col_skip:
-            skipped = st.button("⏭️ Skip Seat Selection", key="seat_skip")
+            skipped = st.button("⏭️ Skip Seat Selection", key="seat_skip", disabled=st.session_state.get("is_thinking", False))
 
     # --- handle skip --------------------------------------------------------
     if skipped:

@@ -2,30 +2,25 @@ from __future__ import annotations
 
 import os
 
-from mysql.connector import pooling
 from dotenv import load_dotenv
 
 load_dotenv()
 
 import streamlit as st
+import mysql.connector
 
-from mysql.connector import pooling
+def get_secret(key, default):
+    if key in os.environ:
+        return os.environ[key]
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except FileNotFoundError:
+        pass
+    return default
 
-@st.cache_resource
-def get_pool():
-    def get_secret(key, default):
-        if key in os.environ:
-            return os.environ[key]
-        try:
-            if key in st.secrets:
-                return st.secrets[key]
-        except FileNotFoundError:
-            pass
-        return default
-
-    return pooling.MySQLConnectionPool(
-        pool_name="thall_pool",
-        pool_size=32,
+def get_connection():
+    return mysql.connector.connect(
         host=get_secret("MYSQL_HOST", "127.0.0.1"),
         port=int(get_secret("MYSQL_PORT", "3306")),
         database=get_secret("MYSQL_DATABASE", "thall_lines"),
@@ -34,9 +29,6 @@ def get_pool():
         charset="utf8mb4",
         collation="utf8mb4_unicode_ci",
     )
-
-def get_connection():
-    return get_pool().get_connection()
 
 
 def fetch_one(query: str, params: tuple = ()) -> dict | None:

@@ -40,7 +40,7 @@ def render_payment_form() -> None:
         with col3:
             cvc = st.text_input("CVC", type="password", max_chars=3)
 
-        submitted = st.form_submit_button("Submit & Continue")
+        submitted = st.form_submit_button("Submit & Continue", disabled=st.session_state.get("is_thinking", False))
 
     if not submitted:
         return

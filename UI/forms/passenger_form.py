@@ -130,7 +130,7 @@ def render_passenger_form() -> None:
                     "tckn": tckn,
                 })
 
-        submitted = st.button("Submit & Continue", key="passenger_submit")
+        submitted = st.button("Submit & Continue", key="passenger_submit", disabled=st.session_state.get("is_thinking", False))
 
     if not submitted:
         return

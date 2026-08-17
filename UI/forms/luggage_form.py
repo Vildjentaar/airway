@@ -129,7 +129,7 @@ def render_luggage_form() -> None:
         st.markdown(f"**Luggage total: {running_total:,.0f} TL**")
         st.divider()
 
-        submitted = st.button("✅ Confirm Luggage", key="luggage_submit")
+        submitted = st.button("✅ Confirm Luggage", key="luggage_submit", disabled=st.session_state.get("is_thinking", False))
 
     if not submitted:
         return
