@@ -432,9 +432,11 @@ def db_check_capacity(flight_number: str, departure_date: str, additional_passen
 
     booked = sum(
         b["passenger_count"] for b in BOOKINGS
-        if b["flight_number"] == flight_number
-        and b["departure_date"] == departure_date
-        and b["booking_status"] in _HOLDING_STATUSES
+        if b["booking_status"] in _HOLDING_STATUSES
+        and any(
+            seg["flight_number"] == flight_number and seg["departure_date"] == departure_date
+            for seg in b.get("segments", [])
+        )
     )
     max_capacity = flight["max_capacity"]
     remaining = max_capacity - booked
@@ -490,26 +492,347 @@ def route_catalogue() -> str:
 #  - Added Waitlisted and Failed status examples, a capacity-exceeding
 #    edge case, and bookings against the new destinations/connections.
 BOOKINGS: list[dict] = [
-    {"booking_id": 1,  "flight_number": "PX-0752", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-10-23", "return_date": None,         "total_price_tl": 6480.00,   "booking_status": BookingStatus.CONFIRMED},
-    {"booking_id": 2,  "flight_number": "PX-0101", "return_flight_number": "PX-0102", "passenger_count": 2,  "trip_type": "Round-trip", "departure_date": "2026-09-15", "return_date": "2026-09-22", "total_price_tl": 50000.00,  "booking_status": BookingStatus.CONFIRMED},  # CORRECTED (was 25000.00 — one-way price only)
-    {"booking_id": 3,  "flight_number": "PX-0990", "return_flight_number": "PX-0991", "passenger_count": 4,  "trip_type": "Round-trip", "departure_date": "2026-12-20", "return_date": "2027-01-05", "total_price_tl": 228000.00, "booking_status": BookingStatus.CONFIRMED},  # CORRECTED (was 114000.00)
-    {"booking_id": 4,  "flight_number": "PX-0010", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-08-10", "return_date": None,         "total_price_tl": 1250.00,   "booking_status": BookingStatus.CONFIRMED},
-    {"booking_id": 5,  "flight_number": "PX-0601", "return_flight_number": "PX-0602", "passenger_count": 3,  "trip_type": "Round-trip", "departure_date": "2026-11-01", "return_date": "2026-11-15", "total_price_tl": 67200.00,  "booking_status": BookingStatus.CONFIRMED},  # CORRECTED (was 33600.00) and now resolvable (PX-0602 previously didn't exist)
-    {"booking_id": 6,  "flight_number": "PX-C100", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-08-25", "return_date": None,         "total_price_tl": 29500.00,  "booking_status": BookingStatus.PENDING},
-    {"booking_id": 7,  "flight_number": "PX-0301", "return_flight_number": "PX-0302", "passenger_count": 2,  "trip_type": "Round-trip", "departure_date": "2026-09-10", "return_date": "2026-09-14", "total_price_tl": 30000.00,  "booking_status": BookingStatus.PENDING},    # CORRECTED (was 15000.00)
-    {"booking_id": 8,  "flight_number": "PX-0012", "return_flight_number": None,      "passenger_count": 5,  "trip_type": "One-way",    "departure_date": "2026-10-01", "return_date": None,         "total_price_tl": 7000.00,   "booking_status": BookingStatus.PENDING},
-    {"booking_id": 9,  "flight_number": "PX-0201", "return_flight_number": "PX-0202", "passenger_count": 2,  "trip_type": "Round-trip", "departure_date": "2026-08-15", "return_date": "2026-08-20", "total_price_tl": 39200.00,  "booking_status": BookingStatus.CANCELLED},  # CORRECTED (was 19600.00)
-    {"booking_id": 10, "flight_number": "PX-0880", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-09-05", "return_date": None,         "total_price_tl": 38000.00,  "booking_status": BookingStatus.CANCELLED},
-    {"booking_id": 11, "flight_number": "PX-0014", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-07-15", "return_date": None,         "total_price_tl": 1350.00,   "booking_status": BookingStatus.CANCELLED},
-    {"booking_id": 12, "flight_number": "PX-0015", "return_flight_number": None,      "passenger_count": 12, "trip_type": "One-way",    "departure_date": "2026-11-10", "return_date": None,         "total_price_tl": 18000.00,  "booking_status": BookingStatus.CONFIRMED},
-    {"booking_id": 13, "flight_number": "PX-0420", "return_flight_number": "PX-0421", "passenger_count": 8,  "trip_type": "Round-trip", "departure_date": "2026-12-05", "return_date": "2026-12-12", "total_price_tl": 156800.00, "booking_status": BookingStatus.CONFIRMED},  # already correct in the original data
-    # --- new edge-case bookings -----------------------------------------
-    {"booking_id": 14, "flight_number": "PX-0015", "return_flight_number": None,      "passenger_count": 215, "trip_type": "One-way",   "departure_date": "2026-11-10", "return_date": None,         "total_price_tl": 0.00,      "booking_status": BookingStatus.FAILED, "notes": "Rejected: only 208 of 220 seats remained on PX-0015/2026-11-10 after booking_id 12's 12 passengers — db_check_capacity('PX-0015','2026-11-10',215) returns can_accommodate=False"},
-    {"booking_id": 15, "flight_number": "PX-0940", "return_flight_number": "PX-0941", "passenger_count": 6,  "trip_type": "Round-trip", "departure_date": "2027-01-10", "return_date": "2027-01-24", "total_price_tl": None,      "booking_status": BookingStatus.WAITLISTED, "notes": "Waitlisted pending a fare-class release on the IST-SYD ultra-long-haul route"},
-    {"booking_id": 16, "flight_number": "PX-C100", "return_flight_number": None,      "passenger_count": 2,  "trip_type": "One-way",    "departure_date": "2026-09-01", "return_date": None,         "total_price_tl": 59000.00,  "booking_status": BookingStatus.CONFIRMED, "notes": "Booked on the ESB→JFK connecting itinerary (via IST)"},
-    {"booking_id": 17, "flight_number": "PX-0700", "return_flight_number": "PX-0701", "passenger_count": 2,  "trip_type": "Round-trip", "departure_date": "2026-10-12", "return_date": "2026-10-19", "total_price_tl": 24800.00,  "booking_status": BookingStatus.CONFIRMED, "notes": "New Cairo route"},
-    {"booking_id": 18, "flight_number": "PX-0921", "return_flight_number": None,      "passenger_count": 1,  "trip_type": "One-way",    "departure_date": "2026-08-09", "return_date": None,         "total_price_tl": 0.00,      "booking_status": BookingStatus.FAILED, "notes": "Payment declined at checkout"},
-    {"booking_id": 19, "flight_number": "PX-0010", "return_flight_number": None,      "passenger_count": 218,"trip_type": "One-way",    "departure_date": "2026-08-12", "return_date": None,         "total_price_tl": 272500.00, "booking_status": BookingStatus.CONFIRMED, "notes": "Corporate group. Leaves exactly 2 seats remaining on this 220-seat A321neo."},
+    # --- Migrated Original Bookings (1-19) ---
+    {
+        "booking_id": 1,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0752", "departure_date": "2026-10-23"}
+        ],
+        "total_price_tl": 6480.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 2,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0101", "departure_date": "2026-09-15"},
+            {"flight_number": "PX-0102", "departure_date": "2026-09-22"}
+        ],
+        "total_price_tl": 50000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 3,
+        "trip_type": "Round-trip",
+        "passenger_count": 4,
+        "segments": [
+            {"flight_number": "PX-0990", "departure_date": "2026-12-20"},
+            {"flight_number": "PX-0991", "departure_date": "2027-01-05"}
+        ],
+        "total_price_tl": 228000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 4,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0010", "departure_date": "2026-08-10"}
+        ],
+        "total_price_tl": 1250.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 5,
+        "trip_type": "Round-trip",
+        "passenger_count": 3,
+        "segments": [
+            {"flight_number": "PX-0601", "departure_date": "2026-11-01"},
+            {"flight_number": "PX-0602", "departure_date": "2026-11-15"}
+        ],
+        "total_price_tl": 67200.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 6,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-C100", "departure_date": "2026-08-25"}
+        ],
+        "total_price_tl": 29500.00,
+        "booking_status": BookingStatus.PENDING
+    },
+    {
+        "booking_id": 7,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0301", "departure_date": "2026-09-10"},
+            {"flight_number": "PX-0302", "departure_date": "2026-09-14"}
+        ],
+        "total_price_tl": 30000.00,
+        "booking_status": BookingStatus.PENDING
+    },
+    {
+        "booking_id": 8,
+        "trip_type": "One-way",
+        "passenger_count": 5,
+        "segments": [
+            {"flight_number": "PX-0012", "departure_date": "2026-10-01"}
+        ],
+        "total_price_tl": 7000.00,
+        "booking_status": BookingStatus.PENDING
+    },
+    {
+        "booking_id": 9,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0201", "departure_date": "2026-08-15"},
+            {"flight_number": "PX-0202", "departure_date": "2026-08-20"}
+        ],
+        "total_price_tl": 39200.00,
+        "booking_status": BookingStatus.CANCELLED
+    },
+    {
+        "booking_id": 10,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0880", "departure_date": "2026-09-05"}
+        ],
+        "total_price_tl": 38000.00,
+        "booking_status": BookingStatus.CANCELLED
+    },
+    {
+        "booking_id": 11,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0014", "departure_date": "2026-07-15"}
+        ],
+        "total_price_tl": 1350.00,
+        "booking_status": BookingStatus.CANCELLED
+    },
+    {
+        "booking_id": 12,
+        "trip_type": "One-way",
+        "passenger_count": 12,
+        "segments": [
+            {"flight_number": "PX-0015", "departure_date": "2026-11-10"}
+        ],
+        "total_price_tl": 18000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 13,
+        "trip_type": "Round-trip",
+        "passenger_count": 8,
+        "segments": [
+            {"flight_number": "PX-0420", "departure_date": "2026-12-05"},
+            {"flight_number": "PX-0421", "departure_date": "2026-12-12"}
+        ],
+        "total_price_tl": 156800.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 14,
+        "trip_type": "One-way",
+        "passenger_count": 215,
+        "segments": [
+            {"flight_number": "PX-0015", "departure_date": "2026-11-10"}
+        ],
+        "total_price_tl": 0.00,
+        "booking_status": BookingStatus.FAILED,
+        "notes": "Rejected: only 208 of 220 seats remained on PX-0015/2026-11-10 after booking_id 12's 12 passengers — db_check_capacity('PX-0015','2026-11-10',215) returns can_accommodate=False"
+    },
+    {
+        "booking_id": 15,
+        "trip_type": "Round-trip",
+        "passenger_count": 6,
+        "segments": [
+            {"flight_number": "PX-0940", "departure_date": "2027-01-10"},
+            {"flight_number": "PX-0941", "departure_date": "2027-01-24"}
+        ],
+        "total_price_tl": None,
+        "booking_status": BookingStatus.WAITLISTED,
+        "notes": "Waitlisted pending a fare-class release on the IST-SYD ultra-long-haul route"
+    },
+    {
+        "booking_id": 16,
+        "trip_type": "One-way",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-C100", "departure_date": "2026-09-01"}
+        ],
+        "total_price_tl": 59000.00,
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "Booked on the ESB→JFK connecting itinerary (via IST)"
+    },
+    {
+        "booking_id": 17,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0700", "departure_date": "2026-10-12"},
+            {"flight_number": "PX-0701", "departure_date": "2026-10-19"}
+        ],
+        "total_price_tl": 24800.00,
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "New Cairo route"
+    },
+    {
+        "booking_id": 18,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0921", "departure_date": "2026-08-09"}
+        ],
+        "total_price_tl": 0.00,
+        "booking_status": BookingStatus.FAILED,
+        "notes": "Payment declined at checkout"
+    },
+    {
+        "booking_id": 19,
+        "trip_type": "One-way",
+        "passenger_count": 218,
+        "segments": [
+            {"flight_number": "PX-0010", "departure_date": "2026-08-12"}
+        ],
+        "total_price_tl": 272500.00,
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "Corporate group. Leaves exactly 2 seats remaining on this 220-seat A321neo."
+    },
+
+    # --- True Multi-City Example ---
+    {
+        "booking_id": 20, 
+        "trip_type": "Multi-city",
+        "passenger_count": 2,  
+        "segments": [
+            {"flight_number": "PX-0010", "departure_date": "2026-08-10"}, # ESB -> IST
+            {"flight_number": "PX-0601", "departure_date": "2026-08-10"}, # IST -> GOT
+            {"flight_number": "PX-0602", "departure_date": "2026-08-14"}, # GOT -> IST
+            {"flight_number": "PX-0401", "departure_date": "2026-08-14"}, # IST -> AMS
+            {"flight_number": "PX-0402", "departure_date": "2026-08-18"}, # AMS -> IST
+            {"flight_number": "PX-0011", "departure_date": "2026-08-18"}  # IST -> ESB
+        ],
+        "total_price_tl": 85000.00,  
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "Custom priced multi-city itinerary, bags checked through."
+    },
+    
+    # --- New Additional Bookings (21-30) ---
+    {
+        "booking_id": 21,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0301", "departure_date": "2026-09-01"}
+        ],
+        "total_price_tl": 7500.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 22,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0102", "departure_date": "2026-10-10"},
+            {"flight_number": "PX-0101", "departure_date": "2026-10-17"}
+        ],
+        "total_price_tl": 50000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 23,
+        "trip_type": "Multi-city",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0991", "departure_date": "2026-09-01"}, # JFK -> IST
+            {"flight_number": "PX-0420", "departure_date": "2026-09-05"}, # IST -> DXB
+            {"flight_number": "PX-0421", "departure_date": "2026-09-12"}, # DXB -> IST
+            {"flight_number": "PX-0990", "departure_date": "2026-09-15"}  # IST -> JFK
+        ],
+        "total_price_tl": 65000.00,
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "Business trip across multiple continents."
+    },
+    {
+        "booking_id": 24,
+        "trip_type": "Multi-city",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0026", "departure_date": "2026-10-01"}, # ADB -> IST
+            {"flight_number": "PX-0201", "departure_date": "2026-10-02"}, # IST -> CDG
+            {"flight_number": "PX-0202", "departure_date": "2026-10-10"}, # CDG -> IST
+            {"flight_number": "PX-0027", "departure_date": "2026-10-11"}  # IST -> ADB
+        ],
+        "total_price_tl": 42000.00,
+        "booking_status": BookingStatus.PENDING
+    },
+    {
+        "booking_id": 25,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0921", "departure_date": "2026-11-05"}
+        ],
+        "total_price_tl": 42000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 26,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0941", "departure_date": "2026-12-01"},
+            {"flight_number": "PX-0940", "departure_date": "2026-12-15"}
+        ],
+        "total_price_tl": 104000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 27,
+        "trip_type": "Multi-city",
+        "passenger_count": 3,
+        "segments": [
+            {"flight_number": "PX-0014", "departure_date": "2026-08-20"}, # ESB -> AYT
+            {"flight_number": "PX-0015", "departure_date": "2026-08-25"}, # AYT -> IST
+            {"flight_number": "PX-0010", "departure_date": "2026-08-30"}  # IST -> ESB
+        ],
+        "total_price_tl": 12000.00,
+        "booking_status": BookingStatus.CONFIRMED,
+        "notes": "Domestic multi-city holiday."
+    },
+    {
+        "booking_id": 28,
+        "trip_type": "One-way",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0881", "departure_date": "2027-02-14"}
+        ],
+        "total_price_tl": 38000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 29,
+        "trip_type": "Round-trip",
+        "passenger_count": 2,
+        "segments": [
+            {"flight_number": "PX-0931", "departure_date": "2027-03-10"},
+            {"flight_number": "PX-0930", "departure_date": "2027-03-24"}
+        ],
+        "total_price_tl": 91000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    },
+    {
+        "booking_id": 30,
+        "trip_type": "Multi-city",
+        "passenger_count": 1,
+        "segments": [
+            {"flight_number": "PX-0811", "departure_date": "2026-11-01"}, # SIN -> IST
+            {"flight_number": "PX-0501", "departure_date": "2026-11-05"}, # IST -> FCO
+            {"flight_number": "PX-0502", "departure_date": "2026-11-10"}, # FCO -> IST
+            {"flight_number": "PX-0810", "departure_date": "2026-11-12"}  # IST -> SIN
+        ],
+        "total_price_tl": 78000.00,
+        "booking_status": BookingStatus.CONFIRMED
+    }
 ]
 
 _BOOKING_BY_ID: dict[int, dict] = {b["booking_id"]: b for b in BOOKINGS}

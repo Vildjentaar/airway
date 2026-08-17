@@ -10,6 +10,7 @@ DROP VIEW IF EXISTS v_sellable_routes;
 
 DROP TABLE IF EXISTS booking_passenger_counts;
 DROP TABLE IF EXISTS booking_price_breakdowns;
+DROP TABLE IF EXISTS booking_segments;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS flight_legs;
 DROP TABLE IF EXISTS flights;
@@ -190,14 +191,8 @@ CREATE TABLE bookings (
     booking_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NULL,
 
-    flight_id INT UNSIGNED NOT NULL,
-    return_flight_id INT UNSIGNED NULL,
-
     passenger_count SMALLINT UNSIGNED NOT NULL,
-    trip_type ENUM('One-way', 'Round-trip') NOT NULL,
-
-    departure_date DATE NOT NULL,
-    return_date DATE NULL,
+    trip_type ENUM('One-way', 'Round-trip', 'Multi-city') NOT NULL,
 
     ticket_class VARCHAR(20) NOT NULL DEFAULT 'Economy',
 
@@ -219,7 +214,6 @@ CREATE TABLE bookings (
 
     PRIMARY KEY (booking_id),
 
-    KEY idx_bookings_flight_date (flight_id, departure_date),
     KEY idx_bookings_status (booking_status),
 
     CONSTRAINT fk_bookings_user
@@ -227,37 +221,38 @@ CREATE TABLE bookings (
         REFERENCES users (user_id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_bookings_flight
-        FOREIGN KEY (flight_id)
-        REFERENCES flights (flight_id),
-
-    CONSTRAINT fk_bookings_return_flight
-        FOREIGN KEY (return_flight_id)
-        REFERENCES flights (flight_id),
-
     CONSTRAINT chk_bookings_passenger_count
         CHECK (passenger_count > 0),
 
-    CONSTRAINT chk_bookings_roundtrip_requires_return_flight
-        CHECK (
-            trip_type <> 'Round-trip'
-            OR return_flight_id IS NOT NULL
-        ),
-
-    CONSTRAINT chk_bookings_oneway_has_no_return_flight
-        CHECK (
-            trip_type <> 'One-way'
-            OR return_flight_id IS NULL
-        ),
-
-    CONSTRAINT chk_bookings_roundtrip_requires_return_date
-        CHECK (
-            trip_type <> 'Round-trip'
-            OR return_date IS NOT NULL
-        ),
-
     CONSTRAINT chk_bookings_ticket_class
         CHECK (ticket_class IN ('Economy', 'Business'))
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Booking Segments (Line Items)
+-- ------------------------------------------------------------
+CREATE TABLE booking_segments (
+    booking_id INT UNSIGNED NOT NULL,
+    segment_order TINYINT UNSIGNED NOT NULL,
+    flight_id INT UNSIGNED NOT NULL,
+    departure_date DATE NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (booking_id, segment_order),
+    
+    KEY idx_booking_segments_flight_date (flight_id, departure_date),
+
+    CONSTRAINT fk_booking_segments_booking
+        FOREIGN KEY (booking_id)
+        REFERENCES bookings (booking_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_booking_segments_flight
+        FOREIGN KEY (flight_id)
+        REFERENCES flights (flight_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

@@ -608,36 +608,48 @@ def db_list_bookings() -> dict:
         """
         SELECT
             b.booking_id,
-            outbound_flight.flight_number,
-            return_flight.flight_number AS return_flight_number,
             b.passenger_count,
             b.trip_type,
-            b.departure_date,
-            b.return_date,
             b.total_price_tl,
             b.booking_status,
             b.notes
         FROM bookings b
-        JOIN flights outbound_flight
-            ON outbound_flight.flight_id = b.flight_id
-        LEFT JOIN flights return_flight
-            ON return_flight.flight_id = b.return_flight_id
         ORDER BY b.booking_id
         """
     )
 
-    bookings = []
+    segments_rows = fetch_all(
+        """
+        SELECT
+            s.booking_id,
+            s.segment_order,
+            f.flight_number,
+            s.departure_date
+        FROM booking_segments s
+        JOIN flights f ON f.flight_id = s.flight_id
+        ORDER BY s.booking_id, s.segment_order
+        """
+    )
 
+    segments_by_booking = {}
+    for sr in segments_rows:
+        bid = sr["booking_id"]
+        if bid not in segments_by_booking:
+            segments_by_booking[bid] = []
+        segments_by_booking[bid].append({
+            "flight_number": sr["flight_number"],
+            "departure_date": _date_to_str(sr["departure_date"])
+        })
+
+    bookings = []
     for row in rows:
+        bid = row["booking_id"]
         bookings.append(
             {
-                "booking_id": row["booking_id"],
-                "flight_number": row["flight_number"],
-                "return_flight_number": row["return_flight_number"],
+                "booking_id": bid,
                 "passenger_count": row["passenger_count"],
                 "trip_type": row["trip_type"],
-                "departure_date": _date_to_str(row["departure_date"]),
-                "return_date": _date_to_str(row["return_date"]),
+                "segments": segments_by_booking.get(bid, []),
                 "total_price_tl": float(row["total_price_tl"]) if row.get("total_price_tl") is not None else None,
                 "booking_status": row["booking_status"],
                 "notes": row.get("notes"),
@@ -666,20 +678,12 @@ def get_booking_details(booking_id: int | str) -> dict:
         """
         SELECT
             b.booking_id,
-            outbound_flight.flight_number,
-            return_flight.flight_number AS return_flight_number,
             b.passenger_count,
             b.trip_type,
-            b.departure_date,
-            b.return_date,
             b.total_price_tl,
             b.booking_status,
             b.notes
         FROM bookings b
-        JOIN flights outbound_flight
-            ON outbound_flight.flight_id = b.flight_id
-        LEFT JOIN flights return_flight
-            ON return_flight.flight_id = b.return_flight_id
         WHERE b.booking_id = %s
         """,
         (booking_id,),
@@ -688,29 +692,42 @@ def get_booking_details(booking_id: int | str) -> dict:
     if not row:
         return {"error": f"Booking {booking_id} not found."}
 
+    segments_rows = fetch_all(
+        """
+        SELECT
+            s.segment_order,
+            f.flight_number,
+            s.departure_date
+        FROM booking_segments s
+        JOIN flights f ON f.flight_id = s.flight_id
+        WHERE s.booking_id = %s
+        ORDER BY s.segment_order
+        """,
+        (booking_id,)
+    )
+
+    segments = []
+    flights_info = []
+    for sr in segments_rows:
+        segments.append({
+            "flight_number": sr["flight_number"],
+            "departure_date": _date_to_str(sr["departure_date"])
+        })
+        flights_info.append(get_flight_by_number(sr["flight_number"]))
+
     booking = {
         "booking_id": row["booking_id"],
-        "flight_number": row["flight_number"],
-        "return_flight_number": row["return_flight_number"],
         "passenger_count": row["passenger_count"],
         "trip_type": row["trip_type"],
-        "departure_date": _date_to_str(row["departure_date"]),
-        "return_date": _date_to_str(row["return_date"]),
+        "segments": segments,
         "total_price_tl": float(row["total_price_tl"]) if row.get("total_price_tl") is not None else None,
         "booking_status": row["booking_status"],
         "notes": row.get("notes"),
     }
 
-    outbound_flight = get_flight_by_number(row["flight_number"])
-    return_flight = None
-
-    if row["return_flight_number"]:
-        return_flight = get_flight_by_number(row["return_flight_number"])
-
     return {
         "booking": booking,
-        "outbound_flight": outbound_flight,
-        "return_flight": return_flight,
+        "segments_flights": flights_info,
     }
 
 

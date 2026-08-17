@@ -103,6 +103,7 @@ def reset_tables(cursor) -> None:
     tables = [
         "booking_passenger_counts",
         "booking_price_breakdowns",
+        "booking_segments",
         "bookings",
         "flight_legs",
         "flights",
@@ -353,30 +354,35 @@ def migrate_bookings(cursor) -> None:
         INSERT INTO bookings (
             booking_id,
             user_id,
-            flight_id,
-            return_flight_id,
             passenger_count,
             trip_type,
-            departure_date,
-            return_date,
             ticket_class,
             total_price_tl,
             booking_status,
             notes
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             user_id = VALUES(user_id),
-            flight_id = VALUES(flight_id),
-            return_flight_id = VALUES(return_flight_id),
             passenger_count = VALUES(passenger_count),
             trip_type = VALUES(trip_type),
-            departure_date = VALUES(departure_date),
-            return_date = VALUES(return_date),
             ticket_class = VALUES(ticket_class),
             total_price_tl = VALUES(total_price_tl),
             booking_status = VALUES(booking_status),
             notes = VALUES(notes)
+    """
+
+    segment_sql = """
+        INSERT INTO booking_segments (
+            booking_id,
+            segment_order,
+            flight_id,
+            departure_date
+        )
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            flight_id = VALUES(flight_id),
+            departure_date = VALUES(departure_date)
     """
 
     passenger_count_sql = """
@@ -391,21 +397,6 @@ def migrate_bookings(cursor) -> None:
     """
 
     for booking in BOOKINGS:
-        flight_number = clean(booking["flight_number"])
-        return_flight_number = clean(booking.get("return_flight_number"))
-
-        flight_id = flight_id_by_number.get(flight_number)
-        if flight_id is None:
-            raise ValueError(f"Booking {booking['booking_id']} references unknown flight {flight_number}")
-
-        return_flight_id = None
-        if return_flight_number:
-            return_flight_id = flight_id_by_number.get(return_flight_number)
-            if return_flight_id is None:
-                raise ValueError(
-                    f"Booking {booking['booking_id']} references unknown return flight {return_flight_number}"
-                )
-
         booking_status = booking["booking_status"]
         if hasattr(booking_status, "value"):
             booking_status = booking_status.value
@@ -419,18 +410,30 @@ def migrate_bookings(cursor) -> None:
             (
                 int(booking["booking_id"]),
                 None,  # user_id is not present in current mock bookings
-                flight_id,
-                return_flight_id,
                 int(booking["passenger_count"]),
                 clean(booking["trip_type"]),
-                clean(booking["departure_date"]),
-                clean(booking.get("return_date")),
                 "Economy",  # current mock bookings do not store ticket class
                 total_price_tl,
                 booking_status,
                 clean(booking.get("notes")),
             ),
         )
+
+        for i, segment in enumerate(booking.get("segments", []), start=1):
+            flight_number = clean(segment["flight_number"])
+            flight_id = flight_id_by_number.get(flight_number)
+            if flight_id is None:
+                raise ValueError(f"Booking {booking['booking_id']} references unknown flight {flight_number}")
+            
+            cursor.execute(
+                segment_sql,
+                (
+                    int(booking["booking_id"]),
+                    i,
+                    flight_id,
+                    clean(segment["departure_date"]),
+                )
+            )
 
         # Current mock data only has total passenger_count.
         # Treat all existing passengers as Adult.
