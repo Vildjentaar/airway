@@ -17,6 +17,7 @@ Public entry point: `call_llm(client, messages, flight_data, report_data, ancill
 import json
 import re as _re
 from datetime import datetime
+from typing import Optional
 
 from thall_lines_db import (
     find_flight, AIRLINE_NAME,
@@ -294,7 +295,7 @@ def _select_active_tools(messages: list, flight_data: list, report_data):
 # Tool dispatch (one function call handled at a time)
 # --------------------------------------------------------------------------
 
-def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, flight_data: list, report_data, ancillary_data: dict | None = None):
+def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, flight_data: list, report_data, ancillary_data: Optional[dict] = None):
     """
     Executes a single tool call, appending the resulting tool message(s) to
     `messages` in place and mutating `flight_data` in place where relevant.
@@ -476,7 +477,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
 # Public entry point
 # --------------------------------------------------------------------------
 
-def call_llm(client, messages: list, flight_data: list, report_data, ancillary_data: dict | None = None):
+def call_llm(client, messages: list, flight_data: list, report_data, ancillary_data: Optional[dict] = None):
     """
     Sends the current message history to the model, handles any tool calls
     it requests, and returns the updated state.
