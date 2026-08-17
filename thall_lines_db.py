@@ -245,6 +245,53 @@ def find_flight(departure: str, arrival: str) -> dict | None:
     return flights[0]
 
 
+def db_find_alternative_routes(departure: str, arrival: str) -> dict:
+    """
+    Find alternative routes when a direct search fails.
+    Returns destinations reachable from the departure airport,
+    and origins that can reach the arrival airport.
+    """
+    origin_code = _resolve_code(departure)
+    dest_code = _resolve_code(arrival)
+    
+    alternatives = {
+        "reachable_from_departure": [],
+        "reachable_to_arrival": []
+    }
+    
+    if origin_code:
+        rows_from = fetch_all(
+            """
+            SELECT DISTINCT a.code, a.city, a.country
+            FROM flights f
+            JOIN airports a ON f.dest_code = a.code
+            WHERE f.origin_code = %s AND f.is_leg = 0
+            ORDER BY a.city
+            """,
+            (origin_code,)
+        )
+        alternatives["reachable_from_departure"] = [
+            f"{row['code']} - {row['city']}, {row['country']}" for row in rows_from
+        ]
+        
+    if dest_code:
+        rows_to = fetch_all(
+            """
+            SELECT DISTINCT a.code, a.city, a.country
+            FROM flights f
+            JOIN airports a ON f.origin_code = a.code
+            WHERE f.dest_code = %s AND f.is_leg = 0
+            ORDER BY a.city
+            """,
+            (dest_code,)
+        )
+        alternatives["reachable_to_arrival"] = [
+            f"{row['code']} - {row['city']}, {row['country']}" for row in rows_to
+        ]
+        
+    return alternatives
+
+
 # ---------------------------------------------------------------------------
 # Capacity / overbooking
 # ---------------------------------------------------------------------------

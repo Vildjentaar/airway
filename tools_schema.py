@@ -194,6 +194,27 @@ db_tools = [
     {
         "type": "function",
         "function": {
+            "name": "find_alternative_routes",
+            "description": "Find alternative routes when a direct search fails. Returns destinations reachable from the departure airport, and origins that can reach the arrival airport.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "departure": {
+                        "type": "string",
+                        "description": "Departure city name or airport code, for example Istanbul or IST."
+                    },
+                    "arrival": {
+                        "type": "string",
+                        "description": "Arrival city name or airport code, for example London or LHR."
+                    }
+                },
+                "required": ["departure", "arrival"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_route_details",
             "description": "Get full route details (including connecting legs) for a flight between departure and arrival points.",
             "parameters": {

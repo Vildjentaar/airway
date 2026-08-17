@@ -26,6 +26,7 @@ SAFE_TOOLS: dict[str, Callable[..., Any]] = {
     # Flight/route tools
     "search_flights": thall_lines_db.search_flights,
     "find_flight": thall_lines_db.find_flight,
+    "find_alternative_routes": thall_lines_db.db_find_alternative_routes,
     "get_route_details": thall_lines_db.db_get_route_details,
     "list_all_routes": thall_lines_db.db_list_all_routes,
     "route_catalogue": thall_lines_db.route_catalogue,
