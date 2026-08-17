@@ -224,12 +224,19 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         except ValueError:
             return {"error": f"Invalid departure_date format: {dep_date_str}. Must be YYYY-MM-DD."}
 
-        found = find_flight(dep, arr)
-        if not found:
-            return {"error": (
-                f"No route found from '{dep}' to '{arr}'. "
-                f"{AIRLINE_NAME} does not operate that route."
-            )}
+        flight_number_provided = seg.get("flight_number")
+        if flight_number_provided:
+            from thall_lines_db import get_flight_by_number
+            found = get_flight_by_number(flight_number_provided)
+            if not found or found["origin_code"] != dep or found["dest_code"] != arr:
+                return {"error": f"Invalid flight number '{flight_number_provided}' for route {dep} to {arr}."}
+        else:
+            found = find_flight(dep, arr)
+            if not found:
+                return {"error": (
+                    f"No route found from '{dep}' to '{arr}'. "
+                    f"{AIRLINE_NAME} does not operate that route."
+                )}
 
         verified_segments.append({
             "departure_point": dep,
@@ -479,160 +486,130 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
     """
     Sends the current message history to the model, handles any tool calls
     it requests, and returns the updated state.
-
-    Pure(ish) function: `messages` and `flight_data` are copied before
-    mutation, so the caller's original objects are left untouched — the
-    caller is expected to persist the returned state (e.g. back into
-    st.session_state, or a database row, or an HTTP response body).
-
-    Returns a dict:
-        {
-            "messages": [...],       # updated message history
-            "flight_data": [...],    # updated cart
-            "report_data": {...} | None,
-            "success": bool,
-            "error": str | None,     # human-readable error, if any
-        }
     """
     messages = [dict(m) for m in messages]
     flight_data = [dict(f) for f in flight_data] if flight_data else []
     last_error = None
 
-    system_msg = [messages[0]]
-    recent = messages[1:][-MAX_HISTORY_MESSAGES:]
-    trimmed = _sanitize_for_gemini(_truncate_tool_results(system_msg + recent))
-
     active_tools, active_tool_choice = _select_active_tools(messages, flight_data, report_data)
 
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=trimmed,
-            temperature=0.4,
-            tools=active_tools if active_tools else None,
-            tool_choice=active_tool_choice if active_tools else "none",
-        )
-    except Exception as e:
-        return {
-            "messages": messages,
-            "flight_data": flight_data,
-            "report_data": report_data,
-            "success": False,
-            "error": str(e),
-        }
+    max_turns = 5
+    for turn in range(max_turns):
+        system_msg = [messages[0]]
+        recent = messages[1:][-MAX_HISTORY_MESSAGES:]
+        
+        # Flatten the history to avoid Gemini API tool-parsing bugs (thought_signature)
+        # We must flatten the entire history on every loop iteration before sending it.
+        trimmed_recent = _truncate_tool_results(recent)
+        
+        # Map tool_call_id to function name so we can label tool results clearly
+        tool_id_to_name = {}
+        for msg in recent:
+            if msg.get("role") == "assistant" and msg.get("tool_calls"):
+                for tc in msg.get("tool_calls", []):
+                    name = tc.get("function", {}).get("name") if isinstance(tc, dict) else getattr(tc.function, "name", "tool")
+                    tid = tc.get("id") if isinstance(tc, dict) else getattr(tc, "id", "")
+                    if tid and name:
+                        tool_id_to_name[tid] = name
+                        
+        flattened_messages = []
+        for msg in trimmed_recent:
+            if msg.get("role") == "tool":
+                tid = msg.get("tool_call_id", "")
+                name = tool_id_to_name.get(tid, "unknown_tool")
+                flattened_messages.append({
+                    "role": "user",
+                    "content": f"<tool_result tool_name=\"{name}\">\n{msg.get('content', '')}\n</tool_result>"
+                })
+            elif msg.get("role") == "assistant" and msg.get("tool_calls"):
+                content = msg.get("content", "")
+                if isinstance(content, str) and content.strip():
+                    flattened_messages.append({"role": "assistant", "content": content.strip()})
+                # Completely omit the assistant's tool-call message.
+                # The presence of <tool_result> is enough for Gemini to understand the flow.
+            else:
+                flattened_messages.append(dict(msg))
+                
+        flattened_history = _sanitize_for_gemini(system_msg + flattened_messages)
 
-    response_message = response.choices[0].message
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=flattened_history,
+                temperature=0.3,
+                tools=active_tools if active_tools else None,
+                tool_choice=active_tool_choice if active_tools else "none",
+            )
+        except Exception as e:
+            last_error = str(e)
+            break
 
-    if response_message.tool_calls:
-        messages.append(response_message.model_dump(exclude_none=True))
+        response_message = response.choices[0].message
 
-        skip_followup = False
-        forms_called_this_turn = 0
-        for tool_call in response_message.tool_calls:
-            function_name = tool_call.function.name
-            
-            if function_name == "render_secure_form":
-                if forms_called_this_turn > 0:
+        if response_message.tool_calls:
+            # We append the original tool call to our permanent messages array
+            messages.append(response_message.model_dump(exclude_none=True))
+
+            skip_followup = False
+            forms_called_this_turn = 0
+            for tool_call in response_message.tool_calls:
+                function_name = tool_call.function.name
+                
+                if function_name == "render_secure_form":
+                    if forms_called_this_turn > 0:
+                        messages.append({
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": "Error: You can only call render_secure_form ONCE per turn. Please wait for the user to submit the current form before calling the next one."
+                        })
+                        continue
+                    forms_called_this_turn += 1
+
+                try:
+                    tool_args = json.loads(tool_call.function.arguments)
+                except json.JSONDecodeError as parse_err:
                     messages.append({
                         "role": "tool",
                         "tool_call_id": tool_call.id,
-                        "content": "Error: You can only call render_secure_form ONCE per turn. Please wait for the user to submit the current form before calling the next one."
+                        "content": f"Error: Malformed JSON in tool arguments — {parse_err}",
                     })
+                    last_error = f"`{function_name}` returned malformed JSON: {parse_err}"
                     continue
-                forms_called_this_turn += 1
 
-            try:
-                tool_args = json.loads(tool_call.function.arguments)
-            except json.JSONDecodeError as parse_err:
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": f"Error: Malformed JSON in tool arguments — {parse_err}",
-                })
-                last_error = f"`{function_name}` returned malformed JSON: {parse_err}"
-                continue
-
-            report_data, call_skip = _dispatch_tool_call(
-                tool_call, function_name, tool_args, messages, flight_data, report_data,
-                ancillary_data=ancillary_data,
-            )
-            skip_followup = skip_followup or call_skip
-
-        if not skip_followup:
-            # Flatten the history for the follow up to avoid Gemini API tool-parsing bugs
-            followup_trimmed = _sanitize_for_gemini(_truncate_tool_results(
-                [messages[0]] + messages[1:][-MAX_HISTORY_MESSAGES:]
-            ))
-            
-            flattened_messages = []
-            for msg in followup_trimmed:
-                if msg.get("role") == "tool":
-                    flattened_messages.append({
-                        "role": "user",
-                        "content": f"[System: Tool returned data: {msg.get('content', '')}]"
-                    })
-                elif msg.get("role") == "assistant" and msg.get("tool_calls"):
-                    content = msg.get("content", "")
-                    if isinstance(content, str) and content.strip():
-                        flattened_messages.append({"role": "assistant", "content": content.strip()})
-                    else:
-                        flattened_messages.append({"role": "assistant", "content": "[System: Assistant executed internal tool]"})
-                else:
-                    flattened_messages.append(dict(msg))
-                    
-            flattened_messages = _sanitize_for_gemini(flattened_messages)
-            
-            # Ensure the model knows it must respond to the user now
-            if flattened_messages:
-                last_msg = flattened_messages[-1]
-                prompt_suffix = "\n\n[System: You MUST now respond directly to the user based on the tool data above. Do not output tool calls.]"
-                if last_msg.get("role") == "user":
-                    last_msg["content"] = str(last_msg.get("content", "")) + prompt_suffix
-                else:
-                    flattened_messages.append({
-                        "role": "user",
-                        "content": prompt_suffix.strip()
-                    })
-
-            try:
-                # Deliberately omit tools array so the model is forced into pure text mode
-                followup = client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=flattened_messages,
-                    temperature=0.3,
+                report_data, call_skip = _dispatch_tool_call(
+                    tool_call, function_name, tool_args, messages, flight_data, report_data,
+                    ancillary_data=ancillary_data,
                 )
-                
-                followup_text = (followup.choices[0].message.content or "").strip()
-                if followup_text:
-                    messages.append({"role": "assistant", "content": followup_text})
-                else:
-                    messages.append({
-                        "role": "assistant",
-                        "content": "I've processed your request, but I'm having trouble formatting the response. Could you let me know how you'd like to proceed?"
-                    })
-            except Exception as follow_err:
-                last_error = str(follow_err)
-                messages.append({
-                    "role": "assistant",
-                    "content": "I encountered an error connecting to the server. Please try again.",
-                })
+                skip_followup = skip_followup or call_skip
 
-    else:
-        bot_reply = response_message.content or ""
-        stripped = bot_reply.strip()
-        looks_like_text_tool_call = (
-            ('{"name":' in stripped or '{"function":' in stripped or '{"tool":' in stripped)
-            and '"parameters":' in stripped
-        )
-        if looks_like_text_tool_call:
-            last_error = (
-                "The model tried to perform an action but used the wrong format. "
-                "Please repeat your last message and it will be handled correctly."
-            )
+            if skip_followup:
+                break
+            # Otherwise, loop around to make the follow-up request with the new tool results
+
         else:
-            if not stripped:
-                bot_reply = "I'm sorry, There was a connection glitch and I couldn't process that. Could you please repeat?"
-            messages.append({"role": "assistant", "content": bot_reply})
+            bot_reply = response_message.content or ""
+            stripped = bot_reply.strip()
+            looks_like_text_tool_call = (
+                ('{"name":' in stripped or '{"function":' in stripped or '{"tool":' in stripped)
+                and '"parameters":' in stripped
+            )
+            if looks_like_text_tool_call:
+                last_error = (
+                    "The model tried to perform an action but used the wrong format. "
+                    "Please repeat your last message and it will be handled correctly."
+                )
+            else:
+                if not stripped:
+                    bot_reply = "I'm sorry, There was a connection glitch and I couldn't process that. Could you please repeat?"
+                messages.append({"role": "assistant", "content": bot_reply})
+            break
+    else:
+        # If we exhausted max_turns without breaking, the LLM got stuck in a tool loop.
+        messages.append({
+            "role": "assistant", 
+            "content": "I apologize, but I'm having trouble processing that request right now. Could you please rephrase it?"
+        })
+        last_error = "LLM exhausted max tool turns."
 
     return {
         "messages": messages,
