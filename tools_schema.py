@@ -20,51 +20,57 @@ flight_widget_tool = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "departure_point": {
-                        "type": "string",
-                        "description": "The city or airport code the user is flying from (e.g., Istanbul, IST)."
-                    },
-                    "arrival_point": {
-                        "type": "string",
-                        "description": "The city or airport code the user is flying to (e.g., Baku, GYD)."
-                    },
                     "trip_type": {
                         "type": "string",
                         "enum": ["One-way", "Round-trip", "Multi-city"],
                         "description": "Whether the flight is one-way, round-trip, or multi-city."
                     },
-                    "departure_date": {
-                        "type": "string",
-                        "description": "The departure date agreed upon (format MUST be YYYY-MM-DD)."
-                    },
-                    "return_date": {
-                        "type": "string",
-                        "description": "The return date, if applicable. Leave blank if One-way or Multi-city."
-                    },
-                    "departure_time": {
-                        "type": "string",
-                        "description": "Generate a realistic mock departure time (e.g., 08:15)."
-                    },
-                    "arrival_time": {
-                        "type": "string",
-                        "description": "Generate a realistic mock arrival time based on the distance (e.g., 10:30)."
-                    },
-                    "flight_duration": {
-                        "type": "string",
-                        "description": "Generate a realistic mock flight duration (e.g., 2h 15m)."
-                    },
-                    "transfer_status": {
-                        "type": "string",
-                        "enum": ["Direct", "Connecting"],
-                        "description": "Transfer status from the flight database."
-                    },
-                    "airline_name": {
-                        "type": "string",
-                        "description": f"The airline name (always {AIRLINE_NAME})."
-                    },
-                    "flight_number": {
-                        "type": "string",
-                        "description": "Flight number from the flight database (e.g., PX-0752)."
+                    "segments": {
+                        "type": "array",
+                        "description": "An array of flight segments in chronological order.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "departure_point": {
+                                    "type": "string",
+                                    "description": "The city or airport code the user is flying from (e.g., Istanbul, IST)."
+                                },
+                                "arrival_point": {
+                                    "type": "string",
+                                    "description": "The city or airport code the user is flying to (e.g., Baku, GYD)."
+                                },
+                                "departure_date": {
+                                    "type": "string",
+                                    "description": "The departure date agreed upon (format MUST be YYYY-MM-DD)."
+                                },
+                                "departure_time": {
+                                    "type": "string",
+                                    "description": "Generate a realistic mock departure time (e.g., 08:15)."
+                                },
+                                "arrival_time": {
+                                    "type": "string",
+                                    "description": "Generate a realistic mock arrival time based on the distance (e.g., 10:30)."
+                                },
+                                "flight_duration": {
+                                    "type": "string",
+                                    "description": "Generate a realistic mock flight duration (e.g., 2h 15m)."
+                                },
+                                "transfer_status": {
+                                    "type": "string",
+                                    "enum": ["Direct", "Connecting"],
+                                    "description": "Transfer status from the flight database."
+                                },
+                                "flight_number": {
+                                    "type": "string",
+                                    "description": "Flight number from the flight database (e.g., PX-0752)."
+                                }
+                            },
+                            "required": [
+                                "departure_point", "arrival_point", "departure_date",
+                                "departure_time", "arrival_time", "flight_duration",
+                                "transfer_status", "flight_number"
+                            ]
+                        }
                     },
                     "price_tl": {
                         "type": "integer",
@@ -89,9 +95,7 @@ flight_widget_tool = [
                     }
                 },
                 "required": [
-                    "departure_point", "arrival_point", "trip_type", "departure_date",
-                    "departure_time", "arrival_time", "flight_duration",
-                    "transfer_status", "airline_name", "flight_number", "price_tl",
+                    "trip_type", "segments", "price_tl",
                     "ticket_class", "adult_count", "child_count", "baby_count"
                 ]
             }
@@ -336,7 +340,7 @@ render_secure_form_tool = [
         "type": "function",
         "function": {
             "name": "render_secure_form",
-            "description": "Render a secure UI form during the checkout flow to collect sensitive info. Use this INSTEAD of asking for auth, passenger details, or credit cards in the chat.",
+            "description": "Render a secure UI form during the checkout flow to collect sensitive info. Use this INSTEAD of asking for auth, passenger details, or credit cards in the chat. CRITICAL: Call only ONE form per turn. DO NOT batch multiple calls. Wait for the user's submission before calling the next one.",
             "parameters": {
                 "type": "object",
                 "properties": {

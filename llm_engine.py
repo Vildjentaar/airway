@@ -57,9 +57,15 @@ def is_valid_flight_data(data) -> bool:
     if not data or not isinstance(data, list):
         return False
     for flight in data:
-        all_filled = all(str(flight.get(f, "")).strip() for f in FLIGHT_REQUIRED)
+        segments = flight.get("segments", [])
+        if not segments:
+            return False
+        for segment in segments:
+            all_filled = all(str(segment.get(f, "")).strip() for f in FLIGHT_REQUIRED)
+            if not all_filled:
+                return False
         price_ok = bool(flight.get("price_tl", 0))
-        if not (all_filled and price_ok):
+        if not price_ok:
             return False
     return True
 
@@ -183,10 +189,11 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
 
     Returns {"error": "..."} or {"flight": {...}}.
     """
-    dep = _extract_code(tool_args.get("departure_point", ""))
-    arr = _extract_code(tool_args.get("arrival_point", ""))
-    trip_type = tool_args.get("trip_type", "One-way")
+    segments = tool_args.get("segments", [])
+    if not segments:
+        return {"error": "No flight segments provided."}
 
+    trip_type = tool_args.get("trip_type", "One-way")
     adult_count = int(tool_args.get("adult_count", 0))
     child_count = int(tool_args.get("child_count", 0))
     baby_count = int(tool_args.get("baby_count", 0))
@@ -203,79 +210,67 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
     if passengers <= 0 or passengers > 9:
         return {"error": "Invalid passenger count. Cannot book more than 9 passengers per transaction."}
 
-    dep_date_str = tool_args.get("departure_date", "")
-    try:
-        dep_date_parsed = datetime.strptime(dep_date_str, "%Y-%m-%d")
-        if dep_date_parsed.date() < datetime.now().date():
-            return {"error": "Departure date cannot be in the past."}
-    except ValueError:
-        return {"error": "Invalid departure_date format. Must be YYYY-MM-DD."}
+    verified_segments = []
 
-    missing_user_fields = [
-        f for f in ["departure_point", "arrival_point", "departure_date"]
-        if not str(tool_args.get(f, "")).strip()
-    ]
-    if missing_user_fields:
-        return {"error": (
-            f"Cannot render the flight widget yet. "
-            f"Still missing: {', '.join(missing_user_fields)}. "
-            f"Resume the booking sequence."
-        )}
+    for seg in segments:
+        dep = _extract_code(seg.get("departure_point", ""))
+        arr = _extract_code(seg.get("arrival_point", ""))
+        dep_date_str = seg.get("departure_date", "")
 
-    outbound = find_flight(dep, arr)
-    if not outbound:
-        return {"error": (
-            f"No route found from '{dep}' to '{arr}'. "
-            f"{AIRLINE_NAME} does not operate that route. "
-            f"Inform the user and offer available alternatives."
-        )}
+        try:
+            dep_date_parsed = datetime.strptime(dep_date_str, "%Y-%m-%d")
+            if dep_date_parsed.date() < datetime.now().date():
+                return {"error": f"Departure date {dep_date_str} cannot be in the past."}
+        except ValueError:
+            return {"error": f"Invalid departure_date format: {dep_date_str}. Must be YYYY-MM-DD."}
 
-    inbound = find_flight(arr, dep) if trip_type == "Round-trip" else None
-    if trip_type == "Round-trip" and not inbound:
-        return {"error": (
-            f"No return route found from '{arr}' to '{dep}'. "
-            f"{AIRLINE_NAME} does not operate that return route. Inform the user."
-        )}
+        found = find_flight(dep, arr)
+        if not found:
+            return {"error": (
+                f"No route found from '{dep}' to '{arr}'. "
+                f"{AIRLINE_NAME} does not operate that route."
+            )}
+
+        verified_segments.append({
+            "departure_point": dep,
+            "arrival_point": arr,
+            "departure_date": dep_date_str,
+            "departure_time": found["departure_time"],
+            "arrival_time": found["arrival_time"],
+            "flight_duration": found["duration"],
+            "transfer_status": found["transfer_status"].value if hasattr(found["transfer_status"], "value") else found["transfer_status"],
+            "airline_name": AIRLINE_NAME,
+            "flight_number": found["flight_number"],
+            "base_price_tl": found["base_price_tl"]
+        })
 
     pricing_details = calculate_total_price(
-        outbound, passengers, trip_type, inbound,
+        verified_segments, passengers, trip_type,
         detailed=True, ticket_class=ticket_class, passengers_breakdown=passengers_breakdown
     )
+    
+    first_seg = verified_segments[0]
+    
     verified = {
-        "departure_point": dep,
-        "arrival_point": arr,
         "trip_type": trip_type,
-        "departure_date": tool_args.get("departure_date", ""),
-        "return_date": tool_args.get("return_date", ""),
         "passenger_count": passengers,
         "adult_count": adult_count,
         "child_count": child_count,
         "baby_count": baby_count,
         "ticket_class": ticket_class,
-        "departure_time": outbound["departure_time"],
-        "arrival_time": outbound["arrival_time"],
-        "flight_duration": outbound["duration"],
-        "transfer_status": outbound["transfer_status"].value if hasattr(outbound["transfer_status"], "value") else outbound["transfer_status"],
-        "airline_name": AIRLINE_NAME,
-        "flight_number": outbound["flight_number"],
         "price_tl": pricing_details["total_tl"],
         "pricing_details": pricing_details,
+        "segments": verified_segments,
     }
 
-    if trip_type == "Round-trip" and inbound:
-        verified["return_flight_number"] = inbound["flight_number"]
-        verified["return_departure_time"] = inbound["departure_time"]
-        verified["return_arrival_time"] = inbound["arrival_time"]
-        verified["return_duration"] = inbound["duration"]
-        verified["return_transfer_status"] = inbound["transfer_status"].value if hasattr(inbound["transfer_status"], "value") else inbound["transfer_status"]
-
     is_duplicate = any(
-        f["flight_number"] == verified["flight_number"]
-        and f["departure_date"] == verified["departure_date"]
+        f.get("segments") and 
+        f["segments"][0]["flight_number"] == first_seg["flight_number"] and 
+        f["segments"][0]["departure_date"] == first_seg["departure_date"]
         for f in flight_data
     )
     if is_duplicate:
-        return {"error": f"Flight {verified['flight_number']} on {verified['departure_date']} is already in the cart."}
+        return {"error": f"Flight {first_seg['flight_number']} on {first_seg['departure_date']} is already in the cart."}
 
     return {"flight": verified}
 
@@ -319,12 +314,15 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
         flight_data.append(verified)
 
         pricing = verified.get("pricing_details", {})
+        first_seg = verified["segments"][0]
+        last_seg = verified["segments"][-1]
+        
         messages.append({
             "role": "tool",
             "tool_call_id": tool_call.id,
             "content": (
-                f"Flight {verified['flight_number']} ({verified['departure_point']} → {verified['arrival_point']}, "
-                f"{verified['ticket_class']}, {verified['departure_date']}) added to cart. "
+                f"Flight {first_seg['flight_number']} ({first_seg['departure_point']} → {last_seg['arrival_point']}, "
+                f"{verified['ticket_class']}, {first_seg['departure_date']}) added to cart. "
                 f"Price breakdown — subtotal: {pricing.get('subtotal_tl', 'N/A')} TL, "
                 f"tax: {pricing.get('tax_tl', 'N/A')} TL, "
                 f"fees: {pricing.get('fees_tl', 'N/A')} TL, "
@@ -337,7 +335,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
     elif function_name == "remove_flight_from_cart":
         fn_to_remove = tool_args.get("flight_number")
         original_len = len(flight_data)
-        flight_data[:] = [f for f in flight_data if f["flight_number"] != fn_to_remove]
+        flight_data[:] = [f for f in flight_data if not (f.get("segments") and f["segments"][0]["flight_number"] == fn_to_remove)]
         if len(flight_data) < original_len:
             content = f"Successfully removed {fn_to_remove} from cart."
         else:
@@ -389,9 +387,9 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             flight_data.clear()
 
             booked_summary = "; ".join(
-                f"{f.get('flight_number')} {f.get('departure_point')}→{f.get('arrival_point')} "
-                f"({f.get('ticket_class')}, {f.get('departure_date')})"
-                for f in report_data["booked_flights"]
+                f"{f['segments'][0]['flight_number']} {f['segments'][0]['departure_point']}→{f['segments'][-1]['arrival_point']} "
+                f"({f.get('ticket_class')}, {f['segments'][0]['departure_date']})"
+                for f in report_data["booked_flights"] if f.get("segments")
             )
             messages.append({
                 "role": "tool",
@@ -529,8 +527,20 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
         messages.append(response_message.model_dump(exclude_none=True))
 
         skip_followup = False
+        forms_called_this_turn = 0
         for tool_call in response_message.tool_calls:
             function_name = tool_call.function.name
+            
+            if function_name == "render_secure_form":
+                if forms_called_this_turn > 0:
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": "Error: You can only call render_secure_form ONCE per turn. Please wait for the user to submit the current form before calling the next one."
+                    })
+                    continue
+                forms_called_this_turn += 1
+
             try:
                 tool_args = json.loads(tool_call.function.arguments)
             except json.JSONDecodeError as parse_err:

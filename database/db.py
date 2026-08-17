@@ -26,7 +26,7 @@ def get_connection():
 
         _pool = pooling.MySQLConnectionPool(
             pool_name="thall_pool",
-            pool_size=5,
+            pool_size=32,
             host=get_secret("MYSQL_HOST", "127.0.0.1"),
             port=int(get_secret("MYSQL_PORT", "3306")),
             database=get_secret("MYSQL_DATABASE", "thall_lines"),
@@ -40,19 +40,25 @@ def get_connection():
 
 def fetch_one(query: str, params: tuple = ()) -> dict | None:
     conn = get_connection()
+    cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, params)
         return cursor.fetchone()
     finally:
+        if cursor:
+            cursor.close()
         conn.close()
 
 
 def fetch_all(query: str, params: tuple = ()) -> list[dict]:
     conn = get_connection()
+    cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, params)
         return cursor.fetchall()
     finally:
+        if cursor:
+            cursor.close()
         conn.close()

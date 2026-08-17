@@ -77,10 +77,9 @@ def _unit_fare(base_price_tl: float, ticket_class: str, passenger_type: str) -> 
 
 
 def calculate_total_price(
-    outbound: dict,
+    segments: list[dict],
     passengers: int,
     trip_type: str,
-    inbound: dict | None = None,
     *,
     detailed: bool = False,
     ticket_class: str = "Economy",
@@ -90,13 +89,6 @@ def calculate_total_price(
     Total price in TL. Round-trip uses outbound + inbound base prices.
 
     passengers_breakdown: {"Adult": n, "Child": n, "Baby": n}
-
-    Public signature is unchanged from the original module on purpose —
-    every existing caller (llm_engine.py, self-tests) keeps working. What
-    changed is internal: the actual per-passenger fare math now runs
-    through PRICING_MODIFIERS instead of being hardcoded inline, so this
-    function's body doesn't need to change again when a new pricing
-    dimension shows up.
     """
     if passengers_breakdown is None:
         passengers_breakdown = {"Adult": passengers, "Child": 0, "Baby": 0}
@@ -108,13 +100,10 @@ def calculate_total_price(
             for ptype, count in passengers_breakdown.items()
         )
 
-    subtotal = _leg_total(outbound)
+    subtotal = sum(_leg_total(leg) for leg in segments)
 
-    if trip_type == "Round-trip":
-        if inbound:
-            subtotal += _leg_total(inbound)
-        else:
-            subtotal *= 2
+    if trip_type == "Round-trip" and len(segments) == 1:
+        subtotal *= 2
 
     total_pax = sum(passengers_breakdown.values())
 
@@ -202,15 +191,17 @@ def self_test_booking_prices() -> list[str]:
             continue
 
         inbound = None
+        segments = [outbound]
 
         if b["return_flight_number"]:
             inbound = get_flight_by_number(b["return_flight_number"])
+            if inbound:
+                segments.append(inbound)
 
         expected = calculate_total_price(
-            outbound,
+            segments,
             b["passenger_count"],
             b["trip_type"],
-            inbound,
         )
 
         stored_total = b.get("total_price_tl")

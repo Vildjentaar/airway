@@ -116,6 +116,7 @@ class DatabaseAuthProvider(AuthProvider):
         hashed_pw = hash_password(profile.get("password", ""))
         
         conn = get_connection()
+        cursor = None
         try:
             cursor = conn.cursor(dictionary=True)
             
@@ -154,6 +155,8 @@ class DatabaseAuthProvider(AuthProvider):
             conn.rollback()
             return {"success": False, "error": f"Registration failed: {e}"}
         finally:
+            if cursor:
+                cursor.close()
             conn.close()
 
 

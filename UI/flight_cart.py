@@ -20,68 +20,55 @@ def render_flight_card(flight_cart: list, is_disabled: bool = False):
         total_price = 0
         for i, flight_data in enumerate(flight_cart):
             trip_type = flight_data.get("trip_type", "")
-            return_date = flight_data.get("return_date", "")
+            segments = flight_data.get("segments", [])
 
             if i > 0:
                 st.divider()
 
+            if not segments:
+                continue
+
+            first_seg = segments[0]
+            last_seg = segments[-1]
+
             st.markdown(
-                f"**{flight_data.get('departure_point', '')} ➔ {flight_data.get('arrival_point', '')}**"
+                f"**{first_seg.get('departure_point', '')} ➔ {last_seg.get('arrival_point', '')}**"
             )
 
-            caption = f"Departure: {flight_data.get('departure_date', '')}"
-            if trip_type == "Round-trip" and return_date:
-                caption += f" | Return: {return_date}"
+            caption = f"Departure: {first_seg.get('departure_date', '')}"
+            if trip_type == "Round-trip" and len(segments) > 1:
+                caption += f" | Return: {last_seg.get('departure_date', '')}"
             st.caption(caption)
 
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric(
-                    label="Outbound",
-                    value=flight_data.get("departure_time", "08:15"),
-                    delta=flight_data.get("transfer_status", "Direct"),
-                )
-                st.text(flight_data.get("departure_point", ""))
-            with col2:
-                st.metric(label="Duration", value=flight_data.get("flight_duration", ""), delta_color="off")
-            with col3:
-                st.metric(
-                    label="Arrival",
-                    value=flight_data.get("arrival_time", ""),
-                    delta=flight_data.get("transfer_status", "Direct"),
-                )
-                st.text(flight_data.get("arrival_point", ""))
-
-            if trip_type == "Round-trip" and flight_data.get("return_flight_number"):
-                st.divider()
-                st.markdown(f"**{flight_data.get('arrival_point', '')} ➔ {flight_data.get('departure_point', '')}**")
+            for idx, segment in enumerate(segments):
+                if idx > 0:
+                    st.divider()
+                    st.markdown(f"**{segment.get('departure_point', '')} ➔ {segment.get('arrival_point', '')}**")
                 
-                col4, col5, col6 = st.columns(3)
-                with col4:
+                col1, col2, col3 = st.columns(3)
+                with col1:
                     st.metric(
-                        label="Inbound",
-                        value=flight_data.get("return_departure_time", ""),
-                        delta=flight_data.get("return_transfer_status", "Direct"),
+                        label="Departure" if idx == 0 else "Departure (Leg " + str(idx + 1) + ")",
+                        value=segment.get("departure_time", "08:15"),
+                        delta=segment.get("transfer_status", "Direct"),
                     )
-                    st.text(flight_data.get("arrival_point", ""))
-                with col5:
-                    st.metric(label="Duration", value=flight_data.get("return_duration", ""), delta_color="off")
-                with col6:
+                    st.text(segment.get("departure_point", ""))
+                with col2:
+                    st.metric(label="Duration", value=segment.get("flight_duration", ""), delta_color="off")
+                with col3:
                     st.metric(
                         label="Arrival",
-                        value=flight_data.get("return_arrival_time", ""),
-                        delta=flight_data.get("return_transfer_status", "Direct"),
+                        value=segment.get("arrival_time", ""),
+                        delta=segment.get("transfer_status", "Direct"),
                     )
-                    st.text(flight_data.get("departure_point", ""))
+                    st.text(segment.get("arrival_point", ""))
 
             pax = flight_data.get("passenger_count", 1)
-            fn = flight_data.get("flight_number", "")
-            if trip_type == "Round-trip" and flight_data.get("return_flight_number"):
-                fn = f"{fn} & {flight_data.get('return_flight_number')}"
+            fn_list = " & ".join(s.get("flight_number", "") for s in segments)
             price = flight_data.get("price_tl", 0)
             details = flight_data.get("pricing_details")
             total_price += price
-            st.caption(f"{fn} · {pax} passenger{'s' if pax != 1 else ''} · {price:,} TL")
+            st.caption(f"{fn_list} · {pax} passenger{'s' if pax != 1 else ''} · {price:,} TL")
             if details:
                 st.caption(
                     f"↳ Subtotal: {details['subtotal_tl']:,.2f} TL | "
