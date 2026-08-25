@@ -9,8 +9,7 @@ Backward-compatible shim — `app.py` only needs to change its import
 path from `llm_engine` to `llm`.
 """
 
-# During migration, individual modules are landed one at a time.
-# The final step will wire `call_llm` through from engine.py;
-# until then this file stays minimal so the package is importable.
+from .engine import call_llm
+from .flight_validation import is_valid_flight_data
 
-__all__: list[str] = []
+__all__ = ["call_llm", "is_valid_flight_data"]

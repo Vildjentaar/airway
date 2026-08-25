@@ -20,7 +20,7 @@ from openai import OpenAI
 
 from system_prompt import get_system_prompt
 from thall_lines_db import AIRLINE_NAME
-from llm_engine import call_llm, is_valid_flight_data
+from llm import call_llm, is_valid_flight_data
 from UI import (
     render_flight_card,
     render_final_report,
