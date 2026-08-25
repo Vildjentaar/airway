@@ -69,6 +69,9 @@ def _process_auth_submission(
         return {"success": False, "error": "Please enter a valid email address."}
 
     if mode == "Guest":
+        # Persist the guest email so the backend email service can use it
+        # without requiring a full user_profile object.
+        st.session_state.guest_email = email
         return {"success": True, "detail": "Continuing as guest."}
 
     if mode == "Login":

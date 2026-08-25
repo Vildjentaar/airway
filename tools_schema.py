@@ -376,6 +376,44 @@ validate_tckn_tool = [
     }
 ]
 
+send_itinerary_email_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "send_itinerary_email",
+            "description": (
+                "Call this tool IMMEDIATELY after `generate_final_report` succeeds to dispatch "
+                "the booking confirmation email to the passenger. "
+                "The system will retrieve the destination email address automatically from the "
+                "authenticated session — do NOT ask the user for their email address. "
+                "Supply the PNR code and a brief passenger name summary for the email subject line."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pnr_code": {
+                        "type": "string",
+                        "description": (
+                            "The Passenger Name Record / booking reference code to embed in the "
+                            "email subject line (e.g. 'PNR-20240825-0001'). "
+                            "Derive it from the booked flight numbers and today's date."
+                        )
+                    },
+                    "passenger_name_summary": {
+                        "type": "string",
+                        "description": (
+                            "A short, display-safe summary of who the ticket is for "
+                            "(e.g. '2 passengers — A. Smith, B. Jones'). "
+                            "Used only for audit logging; not inserted into the email body."
+                        )
+                    }
+                },
+                "required": ["pnr_code", "passenger_name_summary"]
+            }
+        }
+    }
+]
+
 # Convenience bundles, mirroring how app.py assembles the active tool list
 # depending on chatbot state.
 ALL_TOOLS = (
@@ -387,6 +425,7 @@ ALL_TOOLS = (
     + remove_flight_tool
     + render_secure_form_tool
     + validate_tckn_tool
+    + send_itinerary_email_tool
 )
 
 PRE_CART_TOOLS = flight_widget_tool + db_tools + context_tool + check_capacity_tool
@@ -400,4 +439,5 @@ POST_CART_TOOLS = (
     + remove_flight_tool
     + render_secure_form_tool
     + validate_tckn_tool
+    + send_itinerary_email_tool
 )

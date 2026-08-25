@@ -42,6 +42,12 @@ client = OpenAI(
 
 def _run_llm_turn():
     """Calls the engine with current session state and writes the result back."""
+    # Resolve the authenticated user's email address server-side.
+    # This is the ONLY place the recipient address is set for the email tool.
+    # It is never read from LLM output to prevent hallucinations or injection.
+    user_profile = st.session_state.get("user_profile") or {}
+    user_email = user_profile.get("email") or st.session_state.get("guest_email")
+
     result = call_llm(
         client,
         st.session_state.messages,
@@ -52,10 +58,13 @@ def _run_llm_turn():
             "luggage_selections": st.session_state.get("luggage_selections", []),
             "extras_selections": st.session_state.get("extras_selections", []),
         },
+        user_email=user_email,
+        email_sent=st.session_state.get("email_sent", False),
     )
     st.session_state.messages = result["messages"]
     st.session_state.flight_data = result["flight_data"]
     st.session_state.report_data = result["report_data"]
+    st.session_state.email_sent = result.get("email_sent", st.session_state.get("email_sent", False))
     if result["error"]:
         st.session_state.last_error = result["error"]
     return result["success"]
@@ -88,6 +97,8 @@ if "last_error" not in st.session_state:
     st.session_state.last_error = None
 if "pending_user_message" not in st.session_state:
     st.session_state.pending_user_message = None
+if "email_sent" not in st.session_state:
+    st.session_state.email_sent = False
 
 # --------------------------------------------------------------------------
 # Sidebar: cart widget + session controls + export

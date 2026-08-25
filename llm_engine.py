@@ -31,8 +31,9 @@ from accounts import validate_tckn
 from tools_schema import (
     flight_widget_tool, final_report_tool, check_capacity_tool,
     remove_flight_tool, db_tools, context_tool,
-    PRE_CART_TOOLS, POST_CART_TOOLS,
+    PRE_CART_TOOLS, POST_CART_TOOLS, send_itinerary_email_tool,
 )
+from email_service import send_itinerary_email as _send_itinerary_email
 
 MODEL_NAME = "gemini-3.5-flash-lite"
 MAX_HISTORY_MESSAGES = 100
@@ -305,9 +306,20 @@ def _build_verified_flight(tool_args: dict, flight_data: list) -> dict:
     return {"flight": verified}
 
 
-def _select_active_tools(messages: list, flight_data: list, report_data):
+# A minimal tool list offered to the LLM in the brief window immediately
+# after `generate_final_report` succeeds. It contains only the email tool
+# so the model can fire it once and then be told to produce a text reply.
+POST_REPORT_TOOLS = send_itinerary_email_tool
+
+
+def _select_active_tools(messages: list, flight_data: list, report_data, email_sent: bool):
     """Decide which tools (if any) should be offered to the model on this turn."""
     if report_data is not None:
+        # After generate_final_report, give the LLM exactly one chance to
+        # call send_itinerary_email. Once the email has been sent (or if no
+        # report exists), lock down to no tools.
+        if not email_sent:
+            return POST_REPORT_TOOLS, "required"
         return [], "none"
     if flight_data:
         return POST_CART_TOOLS, "auto"
@@ -318,14 +330,20 @@ def _select_active_tools(messages: list, flight_data: list, report_data):
 # Tool dispatch (one function call handled at a time)
 # --------------------------------------------------------------------------
 
-def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, flight_data: list, report_data, ancillary_data: Optional[dict] = None):
+def _dispatch_tool_call(
+    tool_call, function_name, tool_args, messages: list,
+    flight_data: list, report_data,
+    ancillary_data: Optional[dict] = None,
+    user_email: Optional[str] = None,
+):
     """
     Executes a single tool call, appending the resulting tool message(s) to
     `messages` in place and mutating `flight_data` in place where relevant.
 
-    Returns (new_report_data, skip_followup: bool).
+    Returns (new_report_data, skip_followup: bool, email_sent: bool).
     """
     skip_followup = False
+    email_sent = False
 
     if function_name == "generate_flight_widget":
         result = _build_verified_flight(tool_args, flight_data)
@@ -336,7 +354,7 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
                 "tool_call_id": tool_call.id,
                 "content": f"Error: {result['error']}",
             })
-            return report_data, skip_followup
+            return report_data, skip_followup, email_sent
 
         verified = result["flight"]
         flight_data.append(verified)
@@ -424,10 +442,76 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
                 "tool_call_id": tool_call.id,
                 "content": (
                     f"Final report generated. Booked flights: {booked_summary}. "
-                    f"Tell the user (in THEIR language) that the itinerary is finalized "
-                    f"and the summary report is shown below. Wish them a great trip."
+                    f"Now call send_itinerary_email immediately (the system will supply the "
+                    f"destination address — do NOT ask the user for their email). "
+                    f"Once the email tool returns, tell the user (in THEIR language) that "
+                    f"their itinerary is confirmed and the summary report is shown below."
                 ),
                 "report_data": report_data
+            })
+
+    elif function_name == "send_itinerary_email":
+        # ------------------------------------------------------------------ #
+        # PHASE 2 — Secure backend interception                               #
+        # The LLM is never given the user's email address.                    #
+        # We pull it exclusively from the authenticated session passed in     #
+        # via user_email (sourced from st.session_state in app.py).           #
+        # ------------------------------------------------------------------ #
+        pnr = tool_args.get("pnr_code", "N/A")
+        passenger_summary = tool_args.get("passenger_name_summary", "")
+
+        destination_email = user_email  # server-controlled; never from LLM output
+
+        # report_data may still be None if the LLM jumped the gun before
+        # generate_final_report ran. Guard defensively.
+        current_report = report_data or {}
+
+        try:
+            send_result = _send_itinerary_email(
+                to_email=destination_email or "",
+                report_data=current_report,
+                pnr=pnr,
+            )
+        except Exception as unexpected:
+            # Belt-and-suspenders: _send_itinerary_email already catches all
+            # exceptions internally, but this outer block ensures the chatbot
+            # never crashes even if something truly unexpected occurs.
+            import logging
+            logging.getLogger(__name__).exception(
+                "Unexpected error in send_itinerary_email dispatch: %s", unexpected
+            )
+            send_result = {
+                "success": False,
+                "error_code": "SERVICE_UNAVAILABLE",
+                "detail": str(unexpected),
+            }
+
+        if send_result["success"]:
+            email_sent = True
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": (
+                    f"EMAIL_SENT: Itinerary confirmation dispatched to the passenger's "
+                    f"registered address (PNR: {pnr}, passengers: {passenger_summary}). "
+                    f"Tell the user their booking confirmation is on its way to their inbox. "
+                    f"Wish them a great trip."
+                ),
+            })
+        else:
+            # Return only the sanitised error code to the LLM;
+            # the technical detail stays in the server log.
+            error_code = send_result.get("error_code", "SERVICE_UNAVAILABLE")
+            email_sent = True  # mark as "attempted" so we don't retry endlessly
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": (
+                    f"EMAIL_FAILED: status={error_code}. "
+                    f"Activate the email-failure fallback protocol: reassure the user "
+                    f"that their booking IS confirmed, display the ticket details directly "
+                    f"in the chat, and direct them to the My Trips section of the app."
+                ),
             })
 
     elif function_name in [
@@ -496,14 +580,22 @@ def _dispatch_tool_call(tool_call, function_name, tool_args, messages: list, fli
             "content": f"Error: Unknown function '{function_name}'.",
         })
 
-    return report_data, skip_followup
+    return report_data, skip_followup, email_sent
 
 
 # --------------------------------------------------------------------------
 # Public entry point
 # --------------------------------------------------------------------------
 
-def call_llm(client, messages: list, flight_data: list, report_data, ancillary_data: Optional[dict] = None):
+def call_llm(
+    client,
+    messages: list,
+    flight_data: list,
+    report_data,
+    ancillary_data: Optional[dict] = None,
+    user_email: Optional[str] = None,
+    email_sent: bool = False,
+):
     """
     Sends the current message history to the model, handles any tool calls
     it requests, and returns the updated state.
@@ -512,14 +604,14 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
     flight_data = [dict(f) for f in flight_data] if flight_data else []
     last_error = None
 
-    max_turns = 5
+    max_turns = 6  # increased by 1 to accommodate the extra email tool turn
     for turn in range(max_turns):
         # Recompute available tools each iteration — flight_data and
         # report_data are mutated inside the loop (e.g. generate_final_report
         # clears flight_data and sets report_data), so the tool list must
         # reflect the *current* state, not the state at call_llm entry.
         active_tools, active_tool_choice = _select_active_tools(
-            messages, flight_data, report_data
+            messages, flight_data, report_data, email_sent
         )
 
         system_msg = [messages[0]]
@@ -545,27 +637,30 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
         flattened_messages = []
         for msg in trimmed_recent:
             if msg.get("role") == "tool":
-                # Convert tool responses to user messages with XML tags so Gemini
-                # can parse them without native tool-call schema.
+                # Convert tool responses to user messages. Prefix each result with
+                # the tool name so the model knows which call produced this result.
+                # Context is embedded on the *user* role so there is no assistant-side
+                # pattern for the model to mimic when writing its own text reply.
                 tid = msg.get("tool_call_id", "")
                 name = tool_id_to_name.get(tid, "unknown_tool")
                 flattened_messages.append({
                     "role": "user",
-                    "content": f"<tool_result tool_name=\"{name}\">\n{msg.get('content', '')}\n</tool_result>"
+                    "content": (
+                        f"[You previously invoked: {name}]\n"
+                        f"<tool_result tool_name=\"{name}\">\n"
+                        f"{msg.get('content', '')}\n"
+                        f"</tool_result>"
+                    )
                 })
             elif msg.get("role") == "assistant" and msg.get("tool_calls"):
-                # Represent tool-call turns as a terse assistant stub so the model
-                # knows it already acted on this turn. Omitting this entirely causes
-                # the model to re-invoke the same tools on every subsequent turn.
-                tool_calls = msg.get("tool_calls", [])
-                call_labels = []
-                for tc in tool_calls:
-                    fn_name = tc.get("function", {}).get("name") if isinstance(tc, dict) else getattr(tc.function, "name", "tool")
-                    call_labels.append(f"[Called: {fn_name}]")
-                stub_text = (msg.get("content") or "").strip()
-                if call_labels:
-                    stub_text = (stub_text + "\n" if stub_text else "") + " ".join(call_labels)
-                flattened_messages.append({"role": "assistant", "content": stub_text.strip() or "[Tool call]"})
+                # Drop the assistant tool-call turn from flattened history.
+                # The "[You previously invoked: …]" prefix on each tool_result
+                # provides the same context without creating an assistant-side
+                # stub that the model could reproduce verbatim in its text reply.
+                # Keep any free-text the model may have emitted alongside the call.
+                inline_text = (msg.get("content") or "").strip()
+                if inline_text:
+                    flattened_messages.append({"role": "assistant", "content": inline_text})
             else:
                 flattened_messages.append(dict(msg))
 
@@ -631,11 +726,13 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
                     continue
 
 
-                report_data, call_skip = _dispatch_tool_call(
+                report_data, call_skip, call_email_sent = _dispatch_tool_call(
                     tool_call, function_name, tool_args, messages, flight_data, report_data,
                     ancillary_data=ancillary_data,
+                    user_email=user_email,
                 )
                 skip_followup = skip_followup or call_skip
+                email_sent = email_sent or call_email_sent
 
             if skip_followup:
                 break
@@ -678,6 +775,7 @@ def call_llm(client, messages: list, flight_data: list, report_data, ancillary_d
         "messages": messages,
         "flight_data": flight_data,
         "report_data": report_data,
+        "email_sent": email_sent,
         "success": last_error is None,
         "error": last_error,
     }
