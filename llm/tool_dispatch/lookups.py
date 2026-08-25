@@ -28,6 +28,7 @@ PASSTHROUGH_NAMES = [
     "get_airport_info",
     "list_bookings",
     "get_booking_details",
+    "find_alternative_routes",
 ]
 
 

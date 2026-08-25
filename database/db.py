@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +18,7 @@ def get_secret(key, default):
         pass
     return default
 
+@st.cache_resource
 def get_connection():
     return mysql.connector.connect(
         host=get_secret("MYSQL_HOST", "127.0.0.1"),
@@ -28,11 +28,13 @@ def get_connection():
         password=get_secret("MYSQL_PASSWORD", ""),
         charset="utf8mb4",
         collation="utf8mb4_unicode_ci",
+        autocommit=True,
     )
 
 
 def fetch_one(query: str, params: tuple = ()) -> dict | None:
     conn = get_connection()
+    conn.ping(reconnect=True, attempts=3, delay=1)
     cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
@@ -41,11 +43,11 @@ def fetch_one(query: str, params: tuple = ()) -> dict | None:
     finally:
         if cursor:
             cursor.close()
-        conn.close()
 
 
 def fetch_all(query: str, params: tuple = ()) -> list[dict]:
     conn = get_connection()
+    conn.ping(reconnect=True, attempts=3, delay=1)
     cursor = None
     try:
         cursor = conn.cursor(dictionary=True)
@@ -54,4 +56,3 @@ def fetch_all(query: str, params: tuple = ()) -> list[dict]:
     finally:
         if cursor:
             cursor.close()
-        conn.close()
