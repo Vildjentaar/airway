@@ -165,6 +165,10 @@ with st.sidebar:
         help="Full session state including tool calls and tool results.",
     )
 
+    st.divider()
+    st.markdown("### 🐛 Debugging")
+    st.image("diagrams/CONVERSATIONAL AI LOGIC.png", caption="Conversational AI Logic")
+
 
 # --------------------------------------------------------------------------
 # Main chat history render

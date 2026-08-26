@@ -200,45 +200,63 @@ DIAGRAM 7 — CONVERSATIONAL AI LOGIC
 Paste the block below into mermaid.live:
 
 flowchart TD
-    GREET["The AI greets the user and asks how it can help"] --> INTENT{"How should the user input be classified?"}
+    subgraph Pre-Booking & Intent
+        GREET["AI greets & asks how to help"] --> INTENT{"Classify Input"}
+        
+        INTENT -- "Off-Topic" --> PIVOT["Pivot back to booking"] --> INTENT
+        INTENT -- "Relative Dates" --> CTX["Resolve exact dates"] --> BOOKING_SEQ
+        INTENT -- "Unserviced Route" --> ALT["Offer closest alternative"]
+        ALT -- "User Accepts" --> BOOKING_SEQ
+        INTENT -- "Valid Request" --> BOOKING_SEQ
+    end
     
-    INTENT -- "Off-Topic" --> PIVOT["The AI pivots the conversation smoothly back to booking a flight"] --> INTENT
-    INTENT -- "Relative Dates" --> CTX["The AI checks the calendar to determine the exact travel dates"] --> BOOKING_SEQ
-    INTENT -- "Unserviced Route" --> ALT["The AI queries the MySQL database to see that the route is unavailable and offers the closest alternative"]
-    ALT -- "User Accepts" --> BOOKING_SEQ
-    INTENT -- "Valid Booking Request" --> BOOKING_SEQ
-    
-    BOOKING_SEQ{"Are any required booking fields missing?"}
-    BOOKING_SEQ -- "Fields Missing" --> INFER{"Can the missing fields be inferred from the conversation context?"}
-    INFER -- Yes --> PREFILL["The AI pre-fills the missing fields using context"] --> BOOKING_SEQ
-    INFER -- No --> ASK["The AI asks the user one specific question to fill the missing field"] --> WAIT_REPLY["The system waits for the user to reply"] --> BOOKING_SEQ
-    
-    BOOKING_SEQ -- "Invalid Data" --> CALLOUT["The AI informs the user about the invalid data and asks for correct information"] --> WAIT_REPLY
-    
-    BOOKING_SEQ -- "All Fields Collected" --> AVAIL["The AI queries the MySQL database to check if there are enough available seats"]
-    AVAIL --> RECAP["The AI presents a numbered recap of the trip including layovers and asks for confirmation"]
-    RECAP --> CONFIRM{"Does the user confirm the trip details?"}
-    
-    CONFIRM -- No --> EDIT["The AI asks the user what they want to change"] --> WAIT_REPLY
-    CONFIRM -- Yes --> WIDGET["The AI triggers a state update to add the flight to the shopping cart"]
-    
-    WIDGET --> PROMPT_CART["The AI asks if the user wants to add another flight or proceed to checkout"]
-    PROMPT_CART --> NEXT_STEP{"What does the user choose to do?"}
-    
+    subgraph Booking Sequence
+        BOOKING_SEQ{"Missing Fields?"}
+        BOOKING_SEQ -- "Yes" --> INFER{"Can infer from context?"}
+        INFER -- "Yes" --> PREFILL["Pre-fill missing fields"] --> BOOKING_SEQ
+        INFER -- "No" --> ASK["Ask for missing field"] --> WAIT_REPLY["Wait for reply"] --> BOOKING_SEQ
+        
+        BOOKING_SEQ -- "Invalid Data" --> CALLOUT["Inform & ask for correction"] --> WAIT_REPLY
+        
+        BOOKING_SEQ -- "No (All Collected)" --> AVAIL["Check seat availability"]
+        AVAIL --> RECAP["Present numbered recap"]
+        RECAP --> CONFIRM{"User confirms?"}
+        
+        CONFIRM -- "No" --> EDIT["Ask what to change"] --> WAIT_REPLY
+        CONFIRM -- "Yes" --> WIDGET["Add flight to cart"]
+        
+        WIDGET --> PROMPT_CART["Ask to add another or checkout"]
+        PROMPT_CART --> NEXT_STEP{"User choice"}
+    end
+
     NEXT_STEP -- "Add another flight" --> BOOKING_SEQ
-    NEXT_STEP -- "Check out" --> AUTH_FORM["The AI triggers the interface to render a secure authentication form"]
-    
-    AUTH_FORM --> AUTH_CHECK{"The authentication provider securely checks the credentials against the MySQL database"}
-    AUTH_CHECK -- "Invalid" --> AUTH_FORM
-    AUTH_CHECK -- "Valid" --> PAX_FORM["The AI triggers the interface to render a secure form for passenger details"]
 
-    PAX_FORM --> PAX_CHECK{"The system validates the passenger details and identity checksums"}
-    PAX_CHECK -- "Invalid" --> PAX_FORM
-    PAX_CHECK -- "Valid" --> PAY_FORM["The AI triggers the interface to render a secure payment form"]
+    subgraph Checkout Pipeline
+        NEXT_STEP -- "Check out" --> AUTH_FORM["Render Auth Form"]
+        AUTH_FORM --> AUTH_CHECK{"Credentials Valid?"}
+        AUTH_CHECK -- "No" --> AUTH_FORM
+        AUTH_CHECK -- "Yes" --> PAX_FORM["Render Pax Form"]
 
-    PAY_FORM --> PAY_CHECK{"The payment gateway validates the credit card information"}
-    PAY_CHECK -- "Invalid" --> PAY_FORM
-    PAY_CHECK -- "Valid" --> FINAL_REPORT["The AI generates a final report detailing the fare, taxes, and fees"]
+        PAX_FORM --> PAX_CHECK{"Details Valid?"}
+        PAX_CHECK -- "No" --> PAX_FORM
+        PAX_CHECK -- "Yes" --> SEAT_FORM["Render Seat Form (or skip)"]
+
+        SEAT_FORM --> LUGGAGE_FORM["Render Luggage Form"]
+        LUGGAGE_FORM --> EXTRAS_FORM["Render Extras Form (or skip)"]
+        EXTRAS_FORM --> PAY_FORM["Render Payment Form"]
+
+        PAY_FORM --> PAY_CHECK{"Card Valid?"}
+        PAY_CHECK -- "No" --> PAY_FORM
+    end
+
+    subgraph Finalization
+        PAY_CHECK -- "Yes" --> FINAL_REPORT["Generate Final Report"]
+        FINAL_REPORT --> EMAIL_SEND["Send Itinerary Email"]
+        
+        EMAIL_SEND --> EMAIL_CHECK{"Email Success?"}
+        EMAIL_CHECK -- "Yes" --> DONE["Flow Complete"]
+        EMAIL_CHECK -- "No" --> EMAIL_FALLBACK["Fallback: Display details in chat"]
+    end
     
     style GREET fill:#1a1a2e,stroke:#e94560,color:#fff
     style FINAL_REPORT fill:#e94560,stroke:#1a1a2e,color:#fff
@@ -246,4 +264,9 @@ flowchart TD
     style WIDGET fill:#0f3460,stroke:#16213e,color:#fff
     style AUTH_FORM fill:#0f3460,stroke:#16213e,color:#fff
     style PAX_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style SEAT_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style LUGGAGE_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style EXTRAS_FORM fill:#0f3460,stroke:#16213e,color:#fff
     style PAY_FORM fill:#0f3460,stroke:#16213e,color:#fff
+    style EMAIL_SEND fill:#0f3460,stroke:#16213e,color:#fff
+    style EMAIL_FALLBACK fill:#533483,stroke:#2b2d42,color:#fff

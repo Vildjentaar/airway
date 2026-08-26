@@ -65,8 +65,6 @@ def handle_generate_final_report(
     report_data["luggage_selections"] = _anc.get("luggage_selections", [])
     report_data["extras_selections"] = _anc.get("extras_selections", [])
 
-    flight_data.clear()
-
     booked_summary = "; ".join(
         f"{f['segments'][0]['flight_number']} {f['segments'][0]['departure_point']}→{f['segments'][-1]['arrival_point']} "
         f"({f.get('ticket_class')}, {f['segments'][0]['departure_date']})"
