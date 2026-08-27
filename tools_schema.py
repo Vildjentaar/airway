@@ -16,7 +16,13 @@ flight_widget_tool = [
         "type": "function",
         "function": {
             "name": "generate_flight_widget",
-            "description": "Trigger this function ONLY when the user has confirmed their trip details and you are ready to generate the final visual summary card for the flight.",
+            "description": (
+                "Trigger this function ONLY when the user has confirmed their trip details "
+                "and you are ready to add the flight to the cart. You only need to provide "
+                "the flight_number and departure_date for each segment — the backend will "
+                "automatically look up departure/arrival times, duration, route, and transfer "
+                "status from the database. Do NOT pass times or durations yourself."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -27,54 +33,21 @@ flight_widget_tool = [
                     },
                     "segments": {
                         "type": "array",
-                        "description": "An array of flight segments in chronological order.",
+                        "description": "An array of flight segments in chronological order. Only flight_number and departure_date are required — all other fields are populated by the backend.",
                         "items": {
                             "type": "object",
                             "properties": {
-                                "departure_point": {
+                                "flight_number": {
                                     "type": "string",
-                                    "description": "The city or airport code the user is flying from (e.g., Istanbul, IST)."
-                                },
-                                "arrival_point": {
-                                    "type": "string",
-                                    "description": "The city or airport code the user is flying to (e.g., Baku, GYD)."
+                                    "description": "Flight number from the flight database (e.g., PX-0401). Must be a real flight number returned by search_flights."
                                 },
                                 "departure_date": {
                                     "type": "string",
                                     "description": "The departure date agreed upon (format MUST be YYYY-MM-DD)."
-                                },
-                                "departure_time": {
-                                    "type": "string",
-                                    "description": "Generate a realistic mock departure time (e.g., 08:15)."
-                                },
-                                "arrival_time": {
-                                    "type": "string",
-                                    "description": "Generate a realistic mock arrival time based on the distance (e.g., 10:30)."
-                                },
-                                "flight_duration": {
-                                    "type": "string",
-                                    "description": "Generate a realistic mock flight duration (e.g., 2h 15m)."
-                                },
-                                "transfer_status": {
-                                    "type": "string",
-                                    "enum": ["Direct", "Connecting"],
-                                    "description": "Transfer status from the flight database."
-                                },
-                                "flight_number": {
-                                    "type": "string",
-                                    "description": "Flight number from the flight database (e.g., PX-0752)."
                                 }
                             },
-                            "required": [
-                                "departure_point", "arrival_point", "departure_date",
-                                "departure_time", "arrival_time", "flight_duration",
-                                "transfer_status", "flight_number"
-                            ]
+                            "required": ["flight_number", "departure_date"]
                         }
-                    },
-                    "price_tl": {
-                        "type": "integer",
-                        "description": "Total trip price in TL from the database."
                     },
                     "ticket_class": {
                         "type": "string",
@@ -95,7 +68,7 @@ flight_widget_tool = [
                     }
                 },
                 "required": [
-                    "trip_type", "segments", "price_tl",
+                    "trip_type", "segments",
                     "ticket_class", "adult_count", "child_count", "baby_count"
                 ]
             }
@@ -300,6 +273,37 @@ db_tools = [
     }
 ]
 
+search_itinerary_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_itinerary",
+            "description": (
+                "Search for complete connected itineraries between two cities, "
+                "automatically routing via hub airports when no direct flight exists. "
+                "Use this when the user wants to travel between two cities that may "
+                "require a connection — it returns all viable multi-leg options in a "
+                "single call. This is much more reliable than calling search_flights "
+                "multiple times and manually stitching legs together."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "origin": {
+                        "type": "string",
+                        "description": "Origin city name or airport code (e.g., Ankara or ESB)."
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Destination city name or airport code (e.g., Amsterdam or AMS)."
+                    }
+                },
+                "required": ["origin", "destination"]
+            }
+        }
+    }
+]
+
 context_tool = [
     {
         "type": "function",
@@ -420,6 +424,7 @@ ALL_TOOLS = (
     flight_widget_tool
     + final_report_tool
     + db_tools
+    + search_itinerary_tool
     + context_tool
     + check_capacity_tool
     + remove_flight_tool
@@ -428,12 +433,13 @@ ALL_TOOLS = (
     + send_itinerary_email_tool
 )
 
-PRE_CART_TOOLS = flight_widget_tool + db_tools + context_tool + check_capacity_tool
+PRE_CART_TOOLS = flight_widget_tool + db_tools + search_itinerary_tool + context_tool + check_capacity_tool
 
 POST_CART_TOOLS = (
     flight_widget_tool
     + final_report_tool
     + db_tools
+    + search_itinerary_tool
     + context_tool
     + check_capacity_tool
     + remove_flight_tool

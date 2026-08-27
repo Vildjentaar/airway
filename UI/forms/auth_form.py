@@ -53,6 +53,7 @@ def render_auth_form() -> None:
         st.session_state.pending_user_message = (
             f"[System Note: User successfully submitted the auth form. {result.get('detail', '')}]".strip()
         )
+        st.session_state.report_data = None
         st.rerun()
     else:
         st.error(result["error"])

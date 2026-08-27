@@ -29,6 +29,7 @@ PASSTHROUGH_NAMES = [
     "list_bookings",
     "get_booking_details",
     "find_alternative_routes",
+    "search_itinerary",
 ]
 
 

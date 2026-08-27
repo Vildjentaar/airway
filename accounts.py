@@ -140,7 +140,7 @@ class DatabaseAuthProvider(AuthProvider):
                     profile.get("birthdate", None) or None,
                     sex,
                     profile.get("nationality", ""),
-                    profile.get("tckn", ""),
+                    profile.get("tckn") or None,
                     profile.get("mobile", "")
                 )
             )

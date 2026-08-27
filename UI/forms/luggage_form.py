@@ -142,6 +142,7 @@ def render_luggage_form() -> None:
             "[System Note: User successfully submitted the luggage"
             f" form. {result.get('detail', '')}]".strip()
         )
+        st.session_state.report_data = None
         st.rerun()
     else:
         st.error(result["error"])

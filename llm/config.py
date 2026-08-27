@@ -26,9 +26,10 @@ FLIGHT_REQUIRED = [
 # ── Orchestration-loop limits ────────────────────────────────────────
 # Maximum number of tool-call turns the engine will run before forcing
 # the model to emit a text reply.
-CIRCUIT_BREAK_TURN = 3
+CIRCUIT_BREAK_TURN = 4
 
 # Maximum total loop iterations (tool-call + follow-up turns).
-# Raised from 5 to 6 to accommodate the mandatory trailing
-# send_itinerary_email call after generate_final_report.
-MAX_TURNS = 6
+# Raised to 8 to accommodate search_itinerary + parallel search
+# patterns for complex multi-leg itineraries plus the mandatory
+# trailing send_itinerary_email call after generate_final_report.
+MAX_TURNS = 8

@@ -18,7 +18,7 @@ Dependencies
 
 from datetime import datetime
 
-from thall_lines_db import find_flight, AIRLINE_NAME
+from thall_lines_db import find_flight, get_flight_by_number, AIRLINE_NAME
 from pricing import calculate_total_price
 
 from .config import FLIGHT_REQUIRED
@@ -95,9 +95,11 @@ def build_verified_flight(tool_args: dict, flight_data: list) -> dict:
     verified_segments = []
     prev_dep_date = None
 
+    # Per-call cache: avoids hitting the DB twice for the same flight
+    # number (e.g. round-trip using the same flight, or retries).
+    _flight_cache: dict[str, dict | None] = {}
+
     for seg_idx, seg in enumerate(segments):
-        dep = extract_code(seg.get("departure_point", ""))
-        arr = extract_code(seg.get("arrival_point", ""))
         dep_date_str = seg.get("departure_date", "")
 
         try:
@@ -118,22 +120,45 @@ def build_verified_flight(tool_args: dict, flight_data: list) -> dict:
         prev_dep_date = dep_date_parsed.date()
 
         flight_number_provided = seg.get("flight_number")
-        if flight_number_provided:
-            from thall_lines_db import get_flight_by_number
-            found = get_flight_by_number(flight_number_provided)
-            if not found or found["origin_code"] != dep or found["dest_code"] != arr:
-                return {"error": f"Invalid flight number '{flight_number_provided}' for route {dep} to {arr}."}
-        else:
-            found = find_flight(dep, arr)
-            if not found:
+        if not flight_number_provided:
+            return {"error": (
+                f"Segment {seg_idx + 1}: flight_number is required. "
+                f"Use search_flights or search_itinerary to find valid flight numbers first."
+            )}
+
+        # Look up the flight entirely from the database — the LLM only
+        # provides the flight_number; all route/time data comes from the DB.
+        if flight_number_provided not in _flight_cache:
+            _flight_cache[flight_number_provided] = get_flight_by_number(flight_number_provided)
+        found = _flight_cache[flight_number_provided]
+        if not found:
+            return {"error": (
+                f"Flight number '{flight_number_provided}' not found in the database. "
+                f"Use search_flights or search_itinerary to find valid flight numbers."
+            )}
+
+        # If the LLM also provided departure_point/arrival_point (legacy
+        # payloads or extra context), validate them against the DB record.
+        dep_provided = seg.get("departure_point", "")
+        arr_provided = seg.get("arrival_point", "")
+        if dep_provided:
+            dep_code = extract_code(dep_provided)
+            if dep_code and dep_code != found["origin_code"]:
                 return {"error": (
-                    f"No route found from '{dep}' to '{arr}'. "
-                    f"{AIRLINE_NAME} does not operate that route."
+                    f"Flight {flight_number_provided} departs from {found['origin_code']}, "
+                    f"not {dep_code}. Check the flight number."
+                )}
+        if arr_provided:
+            arr_code = extract_code(arr_provided)
+            if arr_code and arr_code != found["dest_code"]:
+                return {"error": (
+                    f"Flight {flight_number_provided} arrives at {found['dest_code']}, "
+                    f"not {arr_code}. Check the flight number."
                 )}
 
         verified_segments.append({
-            "departure_point": dep,
-            "arrival_point": arr,
+            "departure_point": found["origin_code"],
+            "arrival_point": found["dest_code"],
             "departure_date": dep_date_str,
             "departure_time": found["departure_time"],
             "arrival_time": found["arrival_time"],

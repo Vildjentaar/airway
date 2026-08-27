@@ -100,6 +100,7 @@ def render_extras_form() -> None:
             "[System Note: User successfully submitted the extras"
             f" form. {result.get('detail', '')}]".strip()
         )
+        st.session_state.report_data = None
         st.rerun()
     else:
         st.error(result["error"])
@@ -111,6 +112,7 @@ def _skip_extras() -> None:
     st.session_state.pending_user_message = (
         "[System Note: User skipped extra services selection.]"
     )
+    st.session_state.report_data = None
     st.rerun()
 
 

@@ -53,6 +53,7 @@ def render_payment_form() -> None:
             "[System Note: User successfully submitted the payment form."
             f" {result.get('detail', '')}]".strip()
         )
+        st.session_state.report_data = None
         st.rerun()
     else:
         st.error(result["error"])

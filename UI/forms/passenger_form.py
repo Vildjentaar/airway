@@ -142,6 +142,7 @@ def render_passenger_form() -> None:
             "[System Note: User successfully submitted the passenger_details"
             f" form. {result.get('detail', '')}]".strip()
         )
+        st.session_state.report_data = None
         st.rerun()
     else:
         st.error(result["error"])
