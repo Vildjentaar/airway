@@ -57,6 +57,7 @@ def _run_llm_turn():
             "seat_selections": st.session_state.get("seat_selections", []),
             "luggage_selections": st.session_state.get("luggage_selections", []),
             "extras_selections": st.session_state.get("extras_selections", []),
+            "passenger_details": st.session_state.get("passenger_details", []),
         },
         user_email=user_email,
         email_sent=st.session_state.get("email_sent", False),

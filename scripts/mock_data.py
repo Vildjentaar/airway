@@ -132,124 +132,124 @@ _AC_LONGHAUL = ("Boeing 787-9", 296)
 # ---------------------------------------------------------------------------
 _RAW_FLIGHTS = [
     # --- Türkiye domestic (Direct) - ORIGINAL ---
-    {"flight_id": 1,  "flight_number": "PX-0010", "origin_code": "IST", "dest_code": "ESB", "departure_time": "07:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 2,  "flight_number": "PX-0011", "origin_code": "ESB", "dest_code": "IST", "departure_time": "09:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 3,  "flight_number": "PX-0012", "origin_code": "IST", "dest_code": "ADB", "departure_time": "10:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 25, "flight_number": "PX-0013", "origin_code": "ADB", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 4,  "flight_number": "PX-0014", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "14:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 26, "flight_number": "PX-0016", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "16:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 5,  "flight_number": "PX-0015", "origin_code": "AYT", "dest_code": "IST", "departure_time": "18:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 27, "flight_number": "PX-0017", "origin_code": "IST", "dest_code": "AYT", "departure_time": "12:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 1,  "flight_number": "TL-0010", "origin_code": "IST", "dest_code": "ESB", "departure_time": "07:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 2,  "flight_number": "TL-0011", "origin_code": "ESB", "dest_code": "IST", "departure_time": "09:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 3,  "flight_number": "TL-0012", "origin_code": "IST", "dest_code": "ADB", "departure_time": "10:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 25, "flight_number": "TL-0013", "origin_code": "ADB", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 4,  "flight_number": "TL-0014", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "14:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 26, "flight_number": "TL-0016", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "16:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 5,  "flight_number": "TL-0015", "origin_code": "AYT", "dest_code": "IST", "departure_time": "18:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 27, "flight_number": "TL-0017", "origin_code": "IST", "dest_code": "AYT", "departure_time": "12:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
 
     # --- Türkiye domestic (Direct) - NEW FREQUENCIES ---
-    {"flight_id": 47, "flight_number": "PX-0018", "origin_code": "IST", "dest_code": "ESB", "departure_time": "11:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 48, "flight_number": "PX-0019", "origin_code": "IST", "dest_code": "ESB", "departure_time": "15:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 49, "flight_number": "PX-0020", "origin_code": "IST", "dest_code": "ESB", "departure_time": "19:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 50, "flight_number": "PX-0021", "origin_code": "ESB", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 51, "flight_number": "PX-0022", "origin_code": "ESB", "dest_code": "IST", "departure_time": "17:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 52, "flight_number": "PX-0023", "origin_code": "ESB", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 53, "flight_number": "PX-0024", "origin_code": "IST", "dest_code": "ADB", "departure_time": "08:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 54, "flight_number": "PX-0025", "origin_code": "IST", "dest_code": "ADB", "departure_time": "14:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 55, "flight_number": "PX-0026", "origin_code": "IST", "dest_code": "ADB", "departure_time": "19:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 56, "flight_number": "PX-0027", "origin_code": "ADB", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 57, "flight_number": "PX-0028", "origin_code": "ADB", "dest_code": "IST", "departure_time": "16:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 58, "flight_number": "PX-0029", "origin_code": "ADB", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 59, "flight_number": "PX-0030", "origin_code": "IST", "dest_code": "AYT", "departure_time": "07:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 60, "flight_number": "PX-0031", "origin_code": "IST", "dest_code": "AYT", "departure_time": "17:00", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 61, "flight_number": "PX-0032", "origin_code": "IST", "dest_code": "AYT", "departure_time": "21:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 62, "flight_number": "PX-0033", "origin_code": "AYT", "dest_code": "IST", "departure_time": "09:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 63, "flight_number": "PX-0034", "origin_code": "AYT", "dest_code": "IST", "departure_time": "14:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 64, "flight_number": "PX-0035", "origin_code": "AYT", "dest_code": "IST", "departure_time": "23:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 65, "flight_number": "PX-0036", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "09:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 66, "flight_number": "PX-0037", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "18:30", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 67, "flight_number": "PX-0038", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "11:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
-    {"flight_id": 68, "flight_number": "PX-0039", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "20:30", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 47, "flight_number": "TL-0018", "origin_code": "IST", "dest_code": "ESB", "departure_time": "11:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 48, "flight_number": "TL-0019", "origin_code": "IST", "dest_code": "ESB", "departure_time": "15:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 49, "flight_number": "TL-0020", "origin_code": "IST", "dest_code": "ESB", "departure_time": "19:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 50, "flight_number": "TL-0021", "origin_code": "ESB", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 51, "flight_number": "TL-0022", "origin_code": "ESB", "dest_code": "IST", "departure_time": "17:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 52, "flight_number": "TL-0023", "origin_code": "ESB", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1250.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 53, "flight_number": "TL-0024", "origin_code": "IST", "dest_code": "ADB", "departure_time": "08:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 54, "flight_number": "TL-0025", "origin_code": "IST", "dest_code": "ADB", "departure_time": "14:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 55, "flight_number": "TL-0026", "origin_code": "IST", "dest_code": "ADB", "departure_time": "19:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 56, "flight_number": "TL-0027", "origin_code": "ADB", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 57, "flight_number": "TL-0028", "origin_code": "ADB", "dest_code": "IST", "departure_time": "16:30", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 58, "flight_number": "TL-0029", "origin_code": "ADB", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1400.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 59, "flight_number": "TL-0030", "origin_code": "IST", "dest_code": "AYT", "departure_time": "07:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 60, "flight_number": "TL-0031", "origin_code": "IST", "dest_code": "AYT", "departure_time": "17:00", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 61, "flight_number": "TL-0032", "origin_code": "IST", "dest_code": "AYT", "departure_time": "21:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 62, "flight_number": "TL-0033", "origin_code": "AYT", "dest_code": "IST", "departure_time": "09:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 63, "flight_number": "TL-0034", "origin_code": "AYT", "dest_code": "IST", "departure_time": "14:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 64, "flight_number": "TL-0035", "origin_code": "AYT", "dest_code": "IST", "departure_time": "23:30", "flight_minutes": 85,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1500.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 65, "flight_number": "TL-0036", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "09:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 66, "flight_number": "TL-0037", "origin_code": "ESB", "dest_code": "AYT", "departure_time": "18:30", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 67, "flight_number": "TL-0038", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "11:00", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
+    {"flight_id": 68, "flight_number": "TL-0039", "origin_code": "AYT", "dest_code": "ESB", "departure_time": "20:30", "flight_minutes": 70,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 1350.00, "aircraft": _AC_DOMESTIC},
 
     # --- Europe / short-haul international (Direct) - ORIGINAL ---
-    {"flight_id": 6,  "flight_number": "PX-0101", "origin_code": "IST", "dest_code": "LHR", "departure_time": "09:00", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 7,  "flight_number": "PX-0102", "origin_code": "LHR", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 8,  "flight_number": "PX-0201", "origin_code": "IST", "dest_code": "CDG", "departure_time": "08:45", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 9,  "flight_number": "PX-0202", "origin_code": "CDG", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 10, "flight_number": "PX-0301", "origin_code": "IST", "dest_code": "BER", "departure_time": "10:15", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 28, "flight_number": "PX-0302", "origin_code": "BER", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 11, "flight_number": "PX-0401", "origin_code": "IST", "dest_code": "AMS", "departure_time": "14:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 29, "flight_number": "PX-0402", "origin_code": "AMS", "dest_code": "IST", "departure_time": "11:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 12, "flight_number": "PX-0501", "origin_code": "IST", "dest_code": "FCO", "departure_time": "16:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 30, "flight_number": "PX-0502", "origin_code": "FCO", "dest_code": "IST", "departure_time": "09:30", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 13, "flight_number": "PX-0601", "origin_code": "IST", "dest_code": "GOT", "departure_time": "11:20", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 31, "flight_number": "PX-0602", "origin_code": "GOT", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 6,  "flight_number": "TL-0101", "origin_code": "IST", "dest_code": "LHR", "departure_time": "09:00", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 7,  "flight_number": "TL-0102", "origin_code": "LHR", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 8,  "flight_number": "TL-0201", "origin_code": "IST", "dest_code": "CDG", "departure_time": "08:45", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 9,  "flight_number": "TL-0202", "origin_code": "CDG", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 10, "flight_number": "TL-0301", "origin_code": "IST", "dest_code": "BER", "departure_time": "10:15", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 28, "flight_number": "TL-0302", "origin_code": "BER", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 11, "flight_number": "TL-0401", "origin_code": "IST", "dest_code": "AMS", "departure_time": "14:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 29, "flight_number": "TL-0402", "origin_code": "AMS", "dest_code": "IST", "departure_time": "11:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 12, "flight_number": "TL-0501", "origin_code": "IST", "dest_code": "FCO", "departure_time": "16:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 30, "flight_number": "TL-0502", "origin_code": "FCO", "dest_code": "IST", "departure_time": "09:30", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 13, "flight_number": "TL-0601", "origin_code": "IST", "dest_code": "GOT", "departure_time": "11:20", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 31, "flight_number": "TL-0602", "origin_code": "GOT", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
 
     # --- Europe / short-haul international (Direct) - NEW FREQUENCIES ---
-    {"flight_id": 69, "flight_number": "PX-0103", "origin_code": "IST", "dest_code": "LHR", "departure_time": "14:00", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 70, "flight_number": "PX-0105", "origin_code": "IST", "dest_code": "LHR", "departure_time": "19:30", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 71, "flight_number": "PX-0104", "origin_code": "LHR", "dest_code": "IST", "departure_time": "18:00", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 72, "flight_number": "PX-0106", "origin_code": "LHR", "dest_code": "IST", "departure_time": "23:30", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 73, "flight_number": "PX-0203", "origin_code": "IST", "dest_code": "CDG", "departure_time": "14:15", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 74, "flight_number": "PX-0205", "origin_code": "IST", "dest_code": "CDG", "departure_time": "18:45", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 75, "flight_number": "PX-0204", "origin_code": "CDG", "dest_code": "IST", "departure_time": "18:30", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 76, "flight_number": "PX-0206", "origin_code": "CDG", "dest_code": "IST", "departure_time": "23:00", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 77, "flight_number": "PX-0303", "origin_code": "IST", "dest_code": "BER", "departure_time": "16:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 78, "flight_number": "PX-0304", "origin_code": "BER", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 79, "flight_number": "PX-0403", "origin_code": "IST", "dest_code": "AMS", "departure_time": "08:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 80, "flight_number": "PX-0404", "origin_code": "AMS", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 81, "flight_number": "PX-0503", "origin_code": "IST", "dest_code": "FCO", "departure_time": "09:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 82, "flight_number": "PX-0504", "origin_code": "FCO", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
-    {"flight_id": 83, "flight_number": "PX-0603", "origin_code": "IST", "dest_code": "GOT", "departure_time": "16:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
-    {"flight_id": 84, "flight_number": "PX-0604", "origin_code": "GOT", "dest_code": "IST", "departure_time": "09:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 69, "flight_number": "TL-0103", "origin_code": "IST", "dest_code": "LHR", "departure_time": "14:00", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 70, "flight_number": "TL-0105", "origin_code": "IST", "dest_code": "LHR", "departure_time": "19:30", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 71, "flight_number": "TL-0104", "origin_code": "LHR", "dest_code": "IST", "departure_time": "18:00", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 72, "flight_number": "TL-0106", "origin_code": "LHR", "dest_code": "IST", "departure_time": "23:30", "flight_minutes": 240, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 12500.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 73, "flight_number": "TL-0203", "origin_code": "IST", "dest_code": "CDG", "departure_time": "14:15", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 74, "flight_number": "TL-0205", "origin_code": "IST", "dest_code": "CDG", "departure_time": "18:45", "flight_minutes": 225, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 75, "flight_number": "TL-0204", "origin_code": "CDG", "dest_code": "IST", "departure_time": "18:30", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 76, "flight_number": "TL-0206", "origin_code": "CDG", "dest_code": "IST", "departure_time": "23:00", "flight_minutes": 210, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 77, "flight_number": "TL-0303", "origin_code": "IST", "dest_code": "BER", "departure_time": "16:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 78, "flight_number": "TL-0304", "origin_code": "BER", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 175, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7500.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 79, "flight_number": "TL-0403", "origin_code": "IST", "dest_code": "AMS", "departure_time": "08:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 80, "flight_number": "TL-0404", "origin_code": "AMS", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 8900.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 81, "flight_number": "TL-0503", "origin_code": "IST", "dest_code": "FCO", "departure_time": "09:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 82, "flight_number": "TL-0504", "origin_code": "FCO", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 160, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 7200.00,  "aircraft": _AC_EUROPE},
+    {"flight_id": 83, "flight_number": "TL-0603", "origin_code": "IST", "dest_code": "GOT", "departure_time": "16:30", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
+    {"flight_id": 84, "flight_number": "TL-0604", "origin_code": "GOT", "dest_code": "IST", "departure_time": "09:00", "flight_minutes": 220, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 11200.00, "aircraft": _AC_EUROPE},
 
     # --- Long-haul & New destinations (Direct) - ORIGINAL ---
-    {"flight_id": 14, "flight_number": "PX-0990", "origin_code": "IST", "dest_code": "JFK", "departure_time": "06:30", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 15, "flight_number": "PX-0991", "origin_code": "JFK", "dest_code": "IST", "departure_time": "12:30", "flight_minutes": 580, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 16, "flight_number": "PX-0999", "origin_code": "LHR", "dest_code": "JFK", "departure_time": "14:30", "flight_minutes": 465, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 32, "flight_number": "PX-0998", "origin_code": "JFK", "dest_code": "LHR", "departure_time": "19:00", "flight_minutes": 410, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 17, "flight_number": "PX-0880", "origin_code": "IST", "dest_code": "NRT", "departure_time": "02:10", "flight_minutes": 680, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 18, "flight_number": "PX-0881", "origin_code": "NRT", "dest_code": "IST", "departure_time": "22:30", "flight_minutes": 795, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 19, "flight_number": "PX-0752", "origin_code": "IST", "dest_code": "GYD", "departure_time": "08:15", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 20, "flight_number": "PX-0753", "origin_code": "GYD", "dest_code": "IST", "departure_time": "18:45", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 21, "flight_number": "PX-0420", "origin_code": "IST", "dest_code": "DXB", "departure_time": "23:30", "flight_minutes": 260, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 22, "flight_number": "PX-0421", "origin_code": "DXB", "dest_code": "IST", "departure_time": "06:30", "flight_minutes": 285, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 33, "flight_number": "PX-0700", "origin_code": "IST", "dest_code": "CAI", "departure_time": "09:15", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 34, "flight_number": "PX-0701", "origin_code": "CAI", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 35, "flight_number": "PX-0810", "origin_code": "IST", "dest_code": "SIN", "departure_time": "22:00", "flight_minutes": 615, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 36, "flight_number": "PX-0811", "origin_code": "SIN", "dest_code": "IST", "departure_time": "00:30", "flight_minutes": 640, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 37, "flight_number": "PX-0920", "origin_code": "IST", "dest_code": "LAX", "departure_time": "13:00", "flight_minutes": 715, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 38, "flight_number": "PX-0921", "origin_code": "LAX", "dest_code": "IST", "departure_time": "22:00", "flight_minutes": 660, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 39, "flight_number": "PX-0930", "origin_code": "IST", "dest_code": "GRU", "departure_time": "16:00", "flight_minutes": 800, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 40, "flight_number": "PX-0931", "origin_code": "GRU", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 770, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 41, "flight_number": "PX-0940", "origin_code": "IST", "dest_code": "SYD", "departure_time": "01:00", "flight_minutes": 1050,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 42, "flight_number": "PX-0941", "origin_code": "SYD", "dest_code": "IST", "departure_time": "12:00", "flight_minutes": 1020,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 14, "flight_number": "TL-0990", "origin_code": "IST", "dest_code": "JFK", "departure_time": "06:30", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 15, "flight_number": "TL-0991", "origin_code": "JFK", "dest_code": "IST", "departure_time": "12:30", "flight_minutes": 580, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 16, "flight_number": "TL-0999", "origin_code": "LHR", "dest_code": "JFK", "departure_time": "14:30", "flight_minutes": 465, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 32, "flight_number": "TL-0998", "origin_code": "JFK", "dest_code": "LHR", "departure_time": "19:00", "flight_minutes": 410, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 17, "flight_number": "TL-0880", "origin_code": "IST", "dest_code": "NRT", "departure_time": "02:10", "flight_minutes": 680, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 18, "flight_number": "TL-0881", "origin_code": "NRT", "dest_code": "IST", "departure_time": "22:30", "flight_minutes": 795, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 19, "flight_number": "TL-0752", "origin_code": "IST", "dest_code": "GYD", "departure_time": "08:15", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 20, "flight_number": "TL-0753", "origin_code": "GYD", "dest_code": "IST", "departure_time": "18:45", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 21, "flight_number": "TL-0420", "origin_code": "IST", "dest_code": "DXB", "departure_time": "23:30", "flight_minutes": 260, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 22, "flight_number": "TL-0421", "origin_code": "DXB", "dest_code": "IST", "departure_time": "06:30", "flight_minutes": 285, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 33, "flight_number": "TL-0700", "origin_code": "IST", "dest_code": "CAI", "departure_time": "09:15", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 34, "flight_number": "TL-0701", "origin_code": "CAI", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 35, "flight_number": "TL-0810", "origin_code": "IST", "dest_code": "SIN", "departure_time": "22:00", "flight_minutes": 615, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 36, "flight_number": "TL-0811", "origin_code": "SIN", "dest_code": "IST", "departure_time": "00:30", "flight_minutes": 640, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 37, "flight_number": "TL-0920", "origin_code": "IST", "dest_code": "LAX", "departure_time": "13:00", "flight_minutes": 715, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 38, "flight_number": "TL-0921", "origin_code": "LAX", "dest_code": "IST", "departure_time": "22:00", "flight_minutes": 660, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 39, "flight_number": "TL-0930", "origin_code": "IST", "dest_code": "GRU", "departure_time": "16:00", "flight_minutes": 800, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 40, "flight_number": "TL-0931", "origin_code": "GRU", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 770, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 41, "flight_number": "TL-0940", "origin_code": "IST", "dest_code": "SYD", "departure_time": "01:00", "flight_minutes": 1050,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 42, "flight_number": "TL-0941", "origin_code": "SYD", "dest_code": "IST", "departure_time": "12:00", "flight_minutes": 1020,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
 
     # --- Long-haul & New destinations (Direct) - NEW FREQUENCIES ---
-    {"flight_id": 85, "flight_number": "PX-0992", "origin_code": "IST", "dest_code": "JFK", "departure_time": "15:00", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 86, "flight_number": "PX-0993", "origin_code": "JFK", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 580, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 87, "flight_number": "PX-0997", "origin_code": "LHR", "dest_code": "JFK", "departure_time": "09:00", "flight_minutes": 465, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 88, "flight_number": "PX-0996", "origin_code": "JFK", "dest_code": "LHR", "departure_time": "23:00", "flight_minutes": 410, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 89, "flight_number": "PX-0882", "origin_code": "IST", "dest_code": "NRT", "departure_time": "13:00", "flight_minutes": 680, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 90, "flight_number": "PX-0883", "origin_code": "NRT", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 795, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 91, "flight_number": "PX-0812", "origin_code": "IST", "dest_code": "SIN", "departure_time": "10:00", "flight_minutes": 615, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 92, "flight_number": "PX-0813", "origin_code": "SIN", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 640, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 93, "flight_number": "PX-0922", "origin_code": "IST", "dest_code": "LAX", "departure_time": "06:00", "flight_minutes": 715, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 94, "flight_number": "PX-0923", "origin_code": "LAX", "dest_code": "IST", "departure_time": "14:00", "flight_minutes": 660, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 95, "flight_number": "PX-0932", "origin_code": "IST", "dest_code": "GRU", "departure_time": "08:00", "flight_minutes": 800, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 96, "flight_number": "PX-0933", "origin_code": "GRU", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 770, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 97, "flight_number": "PX-0942", "origin_code": "IST", "dest_code": "SYD", "departure_time": "18:00", "flight_minutes": 1050,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 98, "flight_number": "PX-0943", "origin_code": "SYD", "dest_code": "IST", "departure_time": "06:00", "flight_minutes": 1020,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
-    {"flight_id": 99, "flight_number": "PX-0754", "origin_code": "IST", "dest_code": "GYD", "departure_time": "15:00", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 100, "flight_number": "PX-0755", "origin_code": "GYD", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 101, "flight_number": "PX-0422", "origin_code": "IST", "dest_code": "DXB", "departure_time": "14:00", "flight_minutes": 260, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 102, "flight_number": "PX-0423", "origin_code": "DXB", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 285, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 103, "flight_number": "PX-0702", "origin_code": "IST", "dest_code": "CAI", "departure_time": "18:00", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
-    {"flight_id": 104, "flight_number": "PX-0703", "origin_code": "CAI", "dest_code": "IST", "departure_time": "08:30", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 85, "flight_number": "TL-0992", "origin_code": "IST", "dest_code": "JFK", "departure_time": "15:00", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 86, "flight_number": "TL-0993", "origin_code": "JFK", "dest_code": "IST", "departure_time": "21:00", "flight_minutes": 580, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 28500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 87, "flight_number": "TL-0997", "origin_code": "LHR", "dest_code": "JFK", "departure_time": "09:00", "flight_minutes": 465, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 88, "flight_number": "TL-0996", "origin_code": "JFK", "dest_code": "LHR", "departure_time": "23:00", "flight_minutes": 410, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 35000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 89, "flight_number": "TL-0882", "origin_code": "IST", "dest_code": "NRT", "departure_time": "13:00", "flight_minutes": 680, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 90, "flight_number": "TL-0883", "origin_code": "NRT", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 795, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 38000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 91, "flight_number": "TL-0812", "origin_code": "IST", "dest_code": "SIN", "departure_time": "10:00", "flight_minutes": 615, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 92, "flight_number": "TL-0813", "origin_code": "SIN", "dest_code": "IST", "departure_time": "15:00", "flight_minutes": 640, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 32500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 93, "flight_number": "TL-0922", "origin_code": "IST", "dest_code": "LAX", "departure_time": "06:00", "flight_minutes": 715, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 94, "flight_number": "TL-0923", "origin_code": "LAX", "dest_code": "IST", "departure_time": "14:00", "flight_minutes": 660, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 42000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 95, "flight_number": "TL-0932", "origin_code": "IST", "dest_code": "GRU", "departure_time": "08:00", "flight_minutes": 800, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 96, "flight_number": "TL-0933", "origin_code": "GRU", "dest_code": "IST", "departure_time": "13:00", "flight_minutes": 770, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 45500.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 97, "flight_number": "TL-0942", "origin_code": "IST", "dest_code": "SYD", "departure_time": "18:00", "flight_minutes": 1050,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 98, "flight_number": "TL-0943", "origin_code": "SYD", "dest_code": "IST", "departure_time": "06:00", "flight_minutes": 1020,"transfer_status": TransferStatus.DIRECT, "base_price_tl": 52000.00, "aircraft": _AC_LONGHAUL},
+    {"flight_id": 99, "flight_number": "TL-0754", "origin_code": "IST", "dest_code": "GYD", "departure_time": "15:00", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 100, "flight_number": "TL-0755", "origin_code": "GYD", "dest_code": "IST", "departure_time": "10:00", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6480.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 101, "flight_number": "TL-0422", "origin_code": "IST", "dest_code": "DXB", "departure_time": "14:00", "flight_minutes": 260, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 102, "flight_number": "TL-0423", "origin_code": "DXB", "dest_code": "IST", "departure_time": "19:00", "flight_minutes": 285, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 9800.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 103, "flight_number": "TL-0702", "origin_code": "IST", "dest_code": "CAI", "departure_time": "18:00", "flight_minutes": 135, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
+    {"flight_id": 104, "flight_number": "TL-0703", "origin_code": "CAI", "dest_code": "IST", "departure_time": "08:30", "flight_minutes": 140, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 6200.00,  "aircraft": _AC_REGIONAL},
 
     # --- Connecting itineraries: leg rows (is_leg=True) - ORIGINAL ---
-    {"flight_id": 43, "flight_number": "PX-C100A", "origin_code": "ESB", "dest_code": "IST", "departure_time": "05:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_DOMESTIC, "is_leg": True},
-    {"flight_id": 44, "flight_number": "PX-C100B", "origin_code": "IST", "dest_code": "JFK", "departure_time": "08:30", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_LONGHAUL, "is_leg": True},
-    {"flight_id": 45, "flight_number": "PX-C101A", "origin_code": "ADB", "dest_code": "IST", "departure_time": "07:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_DOMESTIC, "is_leg": True},
-    {"flight_id": 46, "flight_number": "PX-C101B", "origin_code": "IST", "dest_code": "LHR", "departure_time": "09:45", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_EUROPE,   "is_leg": True},
+    {"flight_id": 43, "flight_number": "TL-C100A", "origin_code": "ESB", "dest_code": "IST", "departure_time": "05:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_DOMESTIC, "is_leg": True},
+    {"flight_id": 44, "flight_number": "TL-C100B", "origin_code": "IST", "dest_code": "JFK", "departure_time": "08:30", "flight_minutes": 650, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_LONGHAUL, "is_leg": True},
+    {"flight_id": 45, "flight_number": "TL-C101A", "origin_code": "ADB", "dest_code": "IST", "departure_time": "07:00", "flight_minutes": 75,  "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_DOMESTIC, "is_leg": True},
+    {"flight_id": 46, "flight_number": "TL-C101B", "origin_code": "IST", "dest_code": "LHR", "departure_time": "09:45", "flight_minutes": 255, "transfer_status": TransferStatus.DIRECT, "base_price_tl": 0.0, "aircraft": _AC_EUROPE,   "is_leg": True},
 
     # --- Connecting itineraries: packaged/marketed rows - ORIGINAL ---
-    {"flight_id": 23, "flight_number": "PX-C100", "origin_code": "ESB", "dest_code": "JFK", "transfer_status": TransferStatus.CONNECTING, "base_price_tl": 29500.00, "aircraft": _AC_LONGHAUL, "legs": [43, 44]},
-    {"flight_id": 24, "flight_number": "PX-C101", "origin_code": "ADB", "dest_code": "LHR", "transfer_status": TransferStatus.CONNECTING, "base_price_tl": 13900.00, "aircraft": _AC_EUROPE,   "legs": [45, 46]},
+    {"flight_id": 23, "flight_number": "TL-C100", "origin_code": "ESB", "dest_code": "JFK", "transfer_status": TransferStatus.CONNECTING, "base_price_tl": 29500.00, "aircraft": _AC_LONGHAUL, "legs": [43, 44]},
+    {"flight_id": 24, "flight_number": "TL-C101", "origin_code": "ADB", "dest_code": "LHR", "transfer_status": TransferStatus.CONNECTING, "base_price_tl": 13900.00, "aircraft": _AC_EUROPE,   "legs": [45, 46]},
 ]
 
 _FLIGHTS_BY_ID_RAW: dict[int, dict] = {f["flight_id"]: f for f in _RAW_FLIGHTS}
@@ -488,7 +488,7 @@ def route_catalogue() -> str:
 #    original seed data — verified by recomputing base_price × passengers
 #    × 2 against each stored total). Booking 13 was already correct.
 #  - booking_id 5 (GOT round-trip) was previously *impossible*: no
-#    GOT→IST flight existed in FLIGHTS at all. Fixed by adding PX-0602.
+#    GOT→IST flight existed in FLIGHTS at all. Fixed by adding TL-0602.
 #  - Added Waitlisted and Failed status examples, a capacity-exceeding
 #    edge case, and bookings against the new destinations/connections.
 BOOKINGS: list[dict] = [
@@ -498,7 +498,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0752", "departure_date": "2026-10-23"}
+            {"flight_number": "TL-0752", "departure_date": "2026-10-23"}
         ],
         "total_price_tl": 6480.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -508,8 +508,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0101", "departure_date": "2026-09-15"},
-            {"flight_number": "PX-0102", "departure_date": "2026-09-22"}
+            {"flight_number": "TL-0101", "departure_date": "2026-09-15"},
+            {"flight_number": "TL-0102", "departure_date": "2026-09-22"}
         ],
         "total_price_tl": 50000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -519,8 +519,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 4,
         "segments": [
-            {"flight_number": "PX-0990", "departure_date": "2026-12-20"},
-            {"flight_number": "PX-0991", "departure_date": "2027-01-05"}
+            {"flight_number": "TL-0990", "departure_date": "2026-12-20"},
+            {"flight_number": "TL-0991", "departure_date": "2027-01-05"}
         ],
         "total_price_tl": 228000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -530,7 +530,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0010", "departure_date": "2026-08-10"}
+            {"flight_number": "TL-0010", "departure_date": "2026-08-10"}
         ],
         "total_price_tl": 1250.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -540,8 +540,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 3,
         "segments": [
-            {"flight_number": "PX-0601", "departure_date": "2026-11-01"},
-            {"flight_number": "PX-0602", "departure_date": "2026-11-15"}
+            {"flight_number": "TL-0601", "departure_date": "2026-11-01"},
+            {"flight_number": "TL-0602", "departure_date": "2026-11-15"}
         ],
         "total_price_tl": 67200.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -551,7 +551,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-C100", "departure_date": "2026-08-25"}
+            {"flight_number": "TL-C100", "departure_date": "2026-08-25"}
         ],
         "total_price_tl": 29500.00,
         "booking_status": BookingStatus.PENDING
@@ -561,8 +561,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0301", "departure_date": "2026-09-10"},
-            {"flight_number": "PX-0302", "departure_date": "2026-09-14"}
+            {"flight_number": "TL-0301", "departure_date": "2026-09-10"},
+            {"flight_number": "TL-0302", "departure_date": "2026-09-14"}
         ],
         "total_price_tl": 30000.00,
         "booking_status": BookingStatus.PENDING
@@ -572,7 +572,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 5,
         "segments": [
-            {"flight_number": "PX-0012", "departure_date": "2026-10-01"}
+            {"flight_number": "TL-0012", "departure_date": "2026-10-01"}
         ],
         "total_price_tl": 7000.00,
         "booking_status": BookingStatus.PENDING
@@ -582,8 +582,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0201", "departure_date": "2026-08-15"},
-            {"flight_number": "PX-0202", "departure_date": "2026-08-20"}
+            {"flight_number": "TL-0201", "departure_date": "2026-08-15"},
+            {"flight_number": "TL-0202", "departure_date": "2026-08-20"}
         ],
         "total_price_tl": 39200.00,
         "booking_status": BookingStatus.CANCELLED
@@ -593,7 +593,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0880", "departure_date": "2026-09-05"}
+            {"flight_number": "TL-0880", "departure_date": "2026-09-05"}
         ],
         "total_price_tl": 38000.00,
         "booking_status": BookingStatus.CANCELLED
@@ -603,7 +603,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0014", "departure_date": "2026-07-15"}
+            {"flight_number": "TL-0014", "departure_date": "2026-07-15"}
         ],
         "total_price_tl": 1350.00,
         "booking_status": BookingStatus.CANCELLED
@@ -613,7 +613,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 12,
         "segments": [
-            {"flight_number": "PX-0015", "departure_date": "2026-11-10"}
+            {"flight_number": "TL-0015", "departure_date": "2026-11-10"}
         ],
         "total_price_tl": 18000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -623,8 +623,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 8,
         "segments": [
-            {"flight_number": "PX-0420", "departure_date": "2026-12-05"},
-            {"flight_number": "PX-0421", "departure_date": "2026-12-12"}
+            {"flight_number": "TL-0420", "departure_date": "2026-12-05"},
+            {"flight_number": "TL-0421", "departure_date": "2026-12-12"}
         ],
         "total_price_tl": 156800.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -634,19 +634,19 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 215,
         "segments": [
-            {"flight_number": "PX-0015", "departure_date": "2026-11-10"}
+            {"flight_number": "TL-0015", "departure_date": "2026-11-10"}
         ],
         "total_price_tl": 0.00,
         "booking_status": BookingStatus.FAILED,
-        "notes": "Rejected: only 208 of 220 seats remained on PX-0015/2026-11-10 after booking_id 12's 12 passengers — db_check_capacity('PX-0015','2026-11-10',215) returns can_accommodate=False"
+        "notes": "Rejected: only 208 of 220 seats remained on TL-0015/2026-11-10 after booking_id 12's 12 passengers — db_check_capacity('TL-0015','2026-11-10',215) returns can_accommodate=False"
     },
     {
         "booking_id": 15,
         "trip_type": "Round-trip",
         "passenger_count": 6,
         "segments": [
-            {"flight_number": "PX-0940", "departure_date": "2027-01-10"},
-            {"flight_number": "PX-0941", "departure_date": "2027-01-24"}
+            {"flight_number": "TL-0940", "departure_date": "2027-01-10"},
+            {"flight_number": "TL-0941", "departure_date": "2027-01-24"}
         ],
         "total_price_tl": None,
         "booking_status": BookingStatus.WAITLISTED,
@@ -657,7 +657,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-C100", "departure_date": "2026-09-01"}
+            {"flight_number": "TL-C100", "departure_date": "2026-09-01"}
         ],
         "total_price_tl": 59000.00,
         "booking_status": BookingStatus.CONFIRMED,
@@ -668,8 +668,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0700", "departure_date": "2026-10-12"},
-            {"flight_number": "PX-0701", "departure_date": "2026-10-19"}
+            {"flight_number": "TL-0700", "departure_date": "2026-10-12"},
+            {"flight_number": "TL-0701", "departure_date": "2026-10-19"}
         ],
         "total_price_tl": 24800.00,
         "booking_status": BookingStatus.CONFIRMED,
@@ -680,7 +680,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0921", "departure_date": "2026-08-09"}
+            {"flight_number": "TL-0921", "departure_date": "2026-08-09"}
         ],
         "total_price_tl": 0.00,
         "booking_status": BookingStatus.FAILED,
@@ -691,7 +691,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 218,
         "segments": [
-            {"flight_number": "PX-0010", "departure_date": "2026-08-12"}
+            {"flight_number": "TL-0010", "departure_date": "2026-08-12"}
         ],
         "total_price_tl": 272500.00,
         "booking_status": BookingStatus.CONFIRMED,
@@ -704,12 +704,12 @@ BOOKINGS: list[dict] = [
         "trip_type": "Multi-city",
         "passenger_count": 2,  
         "segments": [
-            {"flight_number": "PX-0010", "departure_date": "2026-08-10"}, # ESB -> IST
-            {"flight_number": "PX-0601", "departure_date": "2026-08-10"}, # IST -> GOT
-            {"flight_number": "PX-0602", "departure_date": "2026-08-14"}, # GOT -> IST
-            {"flight_number": "PX-0401", "departure_date": "2026-08-14"}, # IST -> AMS
-            {"flight_number": "PX-0402", "departure_date": "2026-08-18"}, # AMS -> IST
-            {"flight_number": "PX-0011", "departure_date": "2026-08-18"}  # IST -> ESB
+            {"flight_number": "TL-0010", "departure_date": "2026-08-10"}, # ESB -> IST
+            {"flight_number": "TL-0601", "departure_date": "2026-08-10"}, # IST -> GOT
+            {"flight_number": "TL-0602", "departure_date": "2026-08-14"}, # GOT -> IST
+            {"flight_number": "TL-0401", "departure_date": "2026-08-14"}, # IST -> AMS
+            {"flight_number": "TL-0402", "departure_date": "2026-08-18"}, # AMS -> IST
+            {"flight_number": "TL-0011", "departure_date": "2026-08-18"}  # IST -> ESB
         ],
         "total_price_tl": 85000.00,  
         "booking_status": BookingStatus.CONFIRMED,
@@ -722,7 +722,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0301", "departure_date": "2026-09-01"}
+            {"flight_number": "TL-0301", "departure_date": "2026-09-01"}
         ],
         "total_price_tl": 7500.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -732,8 +732,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0102", "departure_date": "2026-10-10"},
-            {"flight_number": "PX-0101", "departure_date": "2026-10-17"}
+            {"flight_number": "TL-0102", "departure_date": "2026-10-10"},
+            {"flight_number": "TL-0101", "departure_date": "2026-10-17"}
         ],
         "total_price_tl": 50000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -743,10 +743,10 @@ BOOKINGS: list[dict] = [
         "trip_type": "Multi-city",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0991", "departure_date": "2026-09-01"}, # JFK -> IST
-            {"flight_number": "PX-0420", "departure_date": "2026-09-05"}, # IST -> DXB
-            {"flight_number": "PX-0421", "departure_date": "2026-09-12"}, # DXB -> IST
-            {"flight_number": "PX-0990", "departure_date": "2026-09-15"}  # IST -> JFK
+            {"flight_number": "TL-0991", "departure_date": "2026-09-01"}, # JFK -> IST
+            {"flight_number": "TL-0420", "departure_date": "2026-09-05"}, # IST -> DXB
+            {"flight_number": "TL-0421", "departure_date": "2026-09-12"}, # DXB -> IST
+            {"flight_number": "TL-0990", "departure_date": "2026-09-15"}  # IST -> JFK
         ],
         "total_price_tl": 65000.00,
         "booking_status": BookingStatus.CONFIRMED,
@@ -757,10 +757,10 @@ BOOKINGS: list[dict] = [
         "trip_type": "Multi-city",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0026", "departure_date": "2026-10-01"}, # ADB -> IST
-            {"flight_number": "PX-0201", "departure_date": "2026-10-02"}, # IST -> CDG
-            {"flight_number": "PX-0202", "departure_date": "2026-10-10"}, # CDG -> IST
-            {"flight_number": "PX-0027", "departure_date": "2026-10-11"}  # IST -> ADB
+            {"flight_number": "TL-0026", "departure_date": "2026-10-01"}, # ADB -> IST
+            {"flight_number": "TL-0201", "departure_date": "2026-10-02"}, # IST -> CDG
+            {"flight_number": "TL-0202", "departure_date": "2026-10-10"}, # CDG -> IST
+            {"flight_number": "TL-0027", "departure_date": "2026-10-11"}  # IST -> ADB
         ],
         "total_price_tl": 42000.00,
         "booking_status": BookingStatus.PENDING
@@ -770,7 +770,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0921", "departure_date": "2026-11-05"}
+            {"flight_number": "TL-0921", "departure_date": "2026-11-05"}
         ],
         "total_price_tl": 42000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -780,8 +780,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0941", "departure_date": "2026-12-01"},
-            {"flight_number": "PX-0940", "departure_date": "2026-12-15"}
+            {"flight_number": "TL-0941", "departure_date": "2026-12-01"},
+            {"flight_number": "TL-0940", "departure_date": "2026-12-15"}
         ],
         "total_price_tl": 104000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -791,9 +791,9 @@ BOOKINGS: list[dict] = [
         "trip_type": "Multi-city",
         "passenger_count": 3,
         "segments": [
-            {"flight_number": "PX-0014", "departure_date": "2026-08-20"}, # ESB -> AYT
-            {"flight_number": "PX-0015", "departure_date": "2026-08-25"}, # AYT -> IST
-            {"flight_number": "PX-0010", "departure_date": "2026-08-30"}  # IST -> ESB
+            {"flight_number": "TL-0014", "departure_date": "2026-08-20"}, # ESB -> AYT
+            {"flight_number": "TL-0015", "departure_date": "2026-08-25"}, # AYT -> IST
+            {"flight_number": "TL-0010", "departure_date": "2026-08-30"}  # IST -> ESB
         ],
         "total_price_tl": 12000.00,
         "booking_status": BookingStatus.CONFIRMED,
@@ -804,7 +804,7 @@ BOOKINGS: list[dict] = [
         "trip_type": "One-way",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0881", "departure_date": "2027-02-14"}
+            {"flight_number": "TL-0881", "departure_date": "2027-02-14"}
         ],
         "total_price_tl": 38000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -814,8 +814,8 @@ BOOKINGS: list[dict] = [
         "trip_type": "Round-trip",
         "passenger_count": 2,
         "segments": [
-            {"flight_number": "PX-0931", "departure_date": "2027-03-10"},
-            {"flight_number": "PX-0930", "departure_date": "2027-03-24"}
+            {"flight_number": "TL-0931", "departure_date": "2027-03-10"},
+            {"flight_number": "TL-0930", "departure_date": "2027-03-24"}
         ],
         "total_price_tl": 91000.00,
         "booking_status": BookingStatus.CONFIRMED
@@ -825,10 +825,10 @@ BOOKINGS: list[dict] = [
         "trip_type": "Multi-city",
         "passenger_count": 1,
         "segments": [
-            {"flight_number": "PX-0811", "departure_date": "2026-11-01"}, # SIN -> IST
-            {"flight_number": "PX-0501", "departure_date": "2026-11-05"}, # IST -> FCO
-            {"flight_number": "PX-0502", "departure_date": "2026-11-10"}, # FCO -> IST
-            {"flight_number": "PX-0810", "departure_date": "2026-11-12"}  # IST -> SIN
+            {"flight_number": "TL-0811", "departure_date": "2026-11-01"}, # SIN -> IST
+            {"flight_number": "TL-0501", "departure_date": "2026-11-05"}, # IST -> FCO
+            {"flight_number": "TL-0502", "departure_date": "2026-11-10"}, # FCO -> IST
+            {"flight_number": "TL-0810", "departure_date": "2026-11-12"}  # IST -> SIN
         ],
         "total_price_tl": 78000.00,
         "booking_status": BookingStatus.CONFIRMED

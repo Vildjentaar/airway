@@ -140,7 +140,7 @@ def render_passenger_form() -> None:
     if result["success"]:
         st.session_state.pending_user_message = (
             "[System Note: User successfully submitted the passenger_details"
-            f" form. {result.get('detail', '')}]".strip()
+            f" form. {result.get('detail', '')} Now call render_secure_form(form_type='seat_selection').]".strip()
         )
         st.session_state.report_data = None
         st.rerun()

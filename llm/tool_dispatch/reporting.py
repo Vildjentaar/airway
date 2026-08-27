@@ -64,6 +64,7 @@ def handle_generate_final_report(
     report_data["seat_selections"] = _anc.get("seat_selections", [])
     report_data["luggage_selections"] = _anc.get("luggage_selections", [])
     report_data["extras_selections"] = _anc.get("extras_selections", [])
+    report_data["passenger_details"] = _anc.get("passenger_details", [])
 
     booked_summary = "; ".join(
         f"{f['segments'][0]['flight_number']} {f['segments'][0]['departure_point']}→{f['segments'][-1]['arrival_point']} "
@@ -109,14 +110,38 @@ def handle_send_itinerary_email(
     """
     skip_followup = False
 
-    pnr = tool_args.get("pnr_code", "N/A")
+    import random
+    import string
+
+    # Ensure the final report has been generated first
+    current_report = report_data or {}
+
+    pnr = tool_args.get("pnr_code")
+    if not pnr or pnr == "N/A" or len(pnr) > 6 or "PNR" in pnr:
+        # Generate a valid 6-char alphanumeric PNR
+        pnr = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    current_report["pnr"] = pnr
+        
+    ticket_number = current_report.get("ticket_number")
+    if not ticket_number:
+        # Generate a 13-digit ticket number
+        ticket_number = ''.join(random.choices(string.digits, k=13))
+        current_report["ticket_number"] = ticket_number
+
     passenger_summary = tool_args.get("passenger_name_summary", "")
 
     destination_email = user_email  # server-controlled; never from LLM output
 
-    # report_data may still be None if the LLM jumped the gun before
-    # generate_final_report ran. Guard defensively.
+    # Ensure the final report has been generated first
     current_report = report_data or {}
+    if "booked_flights" not in current_report:
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": "Error: You must call generate_final_report FIRST before sending the itinerary email."
+        })
+        return report_data, skip_followup, False
+
 
     try:
         send_result = _send_itinerary_email(

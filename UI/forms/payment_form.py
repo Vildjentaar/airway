@@ -51,7 +51,7 @@ def render_payment_form() -> None:
     if result["success"]:
         st.session_state.pending_user_message = (
             "[System Note: User successfully submitted the payment form."
-            f" {result.get('detail', '')}]".strip()
+            f" {result.get('detail', '')} Now call generate_final_report.]".strip()
         )
         st.session_state.report_data = None
         st.rerun()

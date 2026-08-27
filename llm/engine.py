@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 from .config import MODEL_NAME, MAX_HISTORY_MESSAGES, CIRCUIT_BREAK_TURN, MAX_TURNS
-from .history_sanitizer import truncate_tool_results, sanitize_for_gemini, flatten_history
+from .history_sanitizer import truncate_tool_results, sanitize_for_gemini
 from .tool_policy import select_active_tools
 from .tool_dispatch import dispatch_tool_call
 
@@ -33,8 +33,7 @@ def call_llm(
         recent = messages[1:][-MAX_HISTORY_MESSAGES:]
         
         trimmed_recent = truncate_tool_results(recent)
-        flattened_messages = flatten_history(trimmed_recent)
-        flattened_history = sanitize_for_gemini(system_msg + flattened_messages)
+        flattened_history = sanitize_for_gemini(system_msg + trimmed_recent)
 
         if turn >= CIRCUIT_BREAK_TURN and active_tools:
             nudge = {
@@ -62,7 +61,13 @@ def call_llm(
         response_message = response.choices[0].message
 
         if response_message.tool_calls:
-            messages.append(response_message.model_dump(exclude_none=True))
+            msg_dump = response_message.model_dump(exclude_none=True)
+            for tc in msg_dump.get("tool_calls", []):
+                if isinstance(tc, dict):
+                    tc.pop("extra_content", None)
+                    if isinstance(tc.get("function"), dict):
+                        tc["function"].pop("extra_content", None)
+            messages.append(msg_dump)
 
             skip_followup = False
             forms_called_this_turn = 0

@@ -47,6 +47,17 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
     seat_sel = report_data.get("seat_selections", [])
     luggage_sel = report_data.get("luggage_selections", [])
     extras_sel = report_data.get("extras_selections", [])
+    passenger_details = report_data.get("passenger_details", [])
+    ticket_number = report_data.get("ticket_number", "N/A")
+
+    if passenger_details:
+        names = [f"{p.get('first_name', '')} {p.get('last_name', '')}".strip() for p in passenger_details]
+        passenger_summary_display = f"{len(names)} passenger(s) — " + ", ".join(names)
+    else:
+        passenger_summary_display = passenger_summary
+
+    grand_total = 0.0
+
 
     flights_html = ""
     for flight_idx, flight in enumerate(booked):
@@ -66,7 +77,7 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
                   {seg.get('departure_date', '')} &nbsp;|&nbsp;
                   {seg.get('departure_time', '')} – {seg.get('arrival_time', '')} &nbsp;|&nbsp;
                   {flight.get('ticket_class', 'Economy')} &nbsp;|&nbsp;
-                  Terminal 1, Gate TBA
+                  Gate TBA
                 </span><br/>
                 <span style="font-size:13px;">
                   Passengers: {flight.get('passenger_count', 1)}
@@ -88,16 +99,33 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
           </td>
         </tr>
         """)
+        try:
+            grand_total += float(pricing.get('total_tl', flight.get('price_tl', 0)))
+        except (ValueError, TypeError):
+            pass
 
     ancillary_rows = ""
     for s in seat_sel:
-        ancillary_rows += f"<li>Seat {s.get('seat_id', '?')} ({s.get('type','')}) — {s.get('price_tl', 0)} TL</li>"
+        price = s.get('price_tl', 0)
+        ancillary_rows += f"<li>Seat {s.get('seat_id', '?')} ({s.get('type','')}) — {price} TL</li>"
+        try: grand_total += float(price)
+        except (ValueError, TypeError): pass
     if not seat_sel:
         ancillary_rows += "<li>Seat Assignment: Unassigned (Selected at check-in)</li>"
+    
     for l in luggage_sel:
-        ancillary_rows += f"<li>Luggage: {l.get('tier','')} — {l.get('price_tl', 0)} TL</li>"
+        price = l.get('price_tl', 0)
+        ancillary_rows += f"<li>Luggage: {l.get('tier','')} — {price} TL</li>"
+        try: grand_total += float(price)
+        except (ValueError, TypeError): pass
+    if not luggage_sel:
+        ancillary_rows += "<li>Luggage: Standard Cabin Bag Included</li>"
+        
     for e in extras_sel:
-        ancillary_rows += f"<li>{e.get('service','')} — {e.get('price_tl', 0)} TL</li>"
+        price = e.get('price_tl', 0)
+        ancillary_rows += f"<li>{e.get('service','')} — {price} TL</li>"
+        try: grand_total += float(price)
+        except (ValueError, TypeError): pass
 
     ancillary_section = ""
     if ancillary_rows:
@@ -105,6 +133,12 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
         <h3 style="color:#1d4ed8;margin-top:24px;">Add-ons &amp; Services</h3>
         <ul style="padding-left:20px;color:#374151;font-size:14px;">{ancillary_rows}</ul>
         """
+        
+    grand_total_section = f"""
+        <div style="margin-top:24px; padding:16px; background:#f3f4f6; border-radius:8px; text-align:right;">
+            <strong style="font-size:16px; color:#111827;">Grand Total: {grand_total:,.2f} TL</strong>
+        </div>
+    """
 
     from thall_lines_db import AIRLINE_NAME  # local import to keep module lean at import time
 
@@ -130,7 +164,10 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
                   <strong>Booking Reference (PNR):</strong> {pnr}
                 </p>
                 <p style="margin:8px 0 0;font-size:15px;opacity:0.9;">
-                  <strong>Passengers:</strong> {passenger_summary}
+                  <strong>Ticket Number:</strong> {ticket_number}
+                </p>
+                <p style="margin:8px 0 0;font-size:15px;opacity:0.9;">
+                  <strong>Passengers:</strong> {passenger_summary_display}
                 </p>
               </td>
             </tr>
@@ -142,6 +179,7 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
                   {flights_html}
                 </table>
                 {ancillary_section}
+                {grand_total_section}
                 <p style="margin-top:32px;font-size:13px;color:#9ca3af;border-top:1px solid #e5e7eb;
                            padding-top:16px;">
                   You can view or manage your trips any time in the
@@ -161,10 +199,20 @@ def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -
 def _build_plain_text(report_data: dict, pnr: str, passenger_summary: str) -> str:
     """Fallback plain-text version of the itinerary email."""
     booked = report_data.get("booked_flights", [])
+    ticket_number = report_data.get("ticket_number", "N/A")
+    passenger_details = report_data.get("passenger_details", [])
+    
+    if passenger_details:
+        names = [f"{p.get('first_name', '')} {p.get('last_name', '')}".strip() for p in passenger_details]
+        passenger_summary_display = f"{len(names)} passenger(s) — " + ", ".join(names)
+    else:
+        passenger_summary_display = passenger_summary
+
     lines = [
         "Your booking is confirmed!\n", 
         f"Booking Reference (PNR): {pnr}",
-        f"Passengers: {passenger_summary}\n",
+        f"Ticket Number: {ticket_number}",
+        f"Passengers: {passenger_summary_display}\n",
         "=== ITINERARY ==="
     ]
     for flight in booked:
@@ -180,7 +228,7 @@ def _build_plain_text(report_data: dict, pnr: str, passenger_summary: str) -> st
                 f"  Date : {seg.get('departure_date')}  "
                 f"{seg.get('departure_time')} – {seg.get('arrival_time')}\n"
                 f"  Class: {flight.get('ticket_class', 'Economy')}\n"
-                f"  Terminal 1, Gate TBA"
+                f"  Gate TBA"
             )
             
         lines.append(
@@ -198,6 +246,17 @@ def _build_plain_text(report_data: dict, pnr: str, passenger_summary: str) -> st
         for s in seat_sel:
             lines.append(f"\n  Seat {s.get('seat_id', '?')} ({s.get('type','')}) — {s.get('price_tl', 0)} TL")
             
+    luggage_sel = report_data.get("luggage_selections", [])
+    if not luggage_sel:
+        lines.append("\n  Luggage: Standard Cabin Bag Included")
+    else:
+        for l in luggage_sel:
+            lines.append(f"\n  Luggage: {l.get('tier','')} — {l.get('price_tl', 0)} TL")
+
+    extras_sel = report_data.get("extras_selections", [])
+    for e in extras_sel:
+        lines.append(f"\n  {e.get('service','')} — {e.get('price_tl', 0)} TL")
+
     lines.append(
         "\nManage your trip any time from the My Trips section of the app."
     )

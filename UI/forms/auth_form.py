@@ -51,7 +51,7 @@ def render_auth_form() -> None:
 
     if result["success"]:
         st.session_state.pending_user_message = (
-            f"[System Note: User successfully submitted the auth form. {result.get('detail', '')}]".strip()
+            f"[System Note: User successfully submitted the auth form. {result.get('detail', '')} Now call render_secure_form(form_type='passenger_details').]".strip()
         )
         st.session_state.report_data = None
         st.rerun()

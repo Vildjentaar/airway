@@ -107,6 +107,18 @@ def build_transcript(
     return "\n".join(lines)
 
 
+def _make_serializable(obj):
+    """Recursively convert any non-JSON-native value to a safe primitive."""
+    if obj is None or isinstance(obj, (bool, int, float, str)):
+        return obj
+    if isinstance(obj, dict):
+        return {k: _make_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_make_serializable(v) for v in obj]
+    # datetime.date, datetime.datetime, Decimal, Enum, custom objects, etc.
+    return str(obj)
+
+
 def build_raw_log(
     messages: list,
     flight_data: list,
@@ -118,4 +130,4 @@ def build_raw_log(
         "flight_data": flight_data,
         "report_data": report_data,
     }
-    return json.dumps(payload, indent=2, ensure_ascii=False)
+    return json.dumps(_make_serializable(payload), indent=2, ensure_ascii=False)

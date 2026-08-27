@@ -18,7 +18,18 @@ def render_final_report(report_data: dict):
     booked_flights = report_data.get("booked_flights", [])
     if booked_flights:
         st.markdown("### Final E-Ticket Details")
+        
+        pnr = report_data.get("pnr")
+        ticket_number = report_data.get("ticket_number")
+        if pnr:
+            st.info(f"**Booking Reference (PNR):** {pnr} &nbsp;|&nbsp; **Ticket Number:** {ticket_number}")
+            
+        grand_total = 0.0
+        
         for flight in booked_flights:
+            try: grand_total += float(flight.get("pricing_details", {}).get("total_tl", flight.get("price_tl", 0)))
+            except: pass
+            
             with st.container(border=True):
                 for seg_idx, seg in enumerate(flight.get("segments", [])):
                     if seg_idx > 0:
@@ -58,17 +69,32 @@ def render_final_report(report_data: dict):
         if report_data.get("seat_selections"):
             st.markdown("#### 💺 Seat Selections")
             for s in report_data["seat_selections"]:
-                st.markdown(f"- Passenger {s['passenger_idx']+1}: Seat **{s['seat_id']}** ({s['type']}) — {s['price_tl']} TL")
+                price = s.get('price_tl', 0)
+                st.markdown(f"- Passenger {s.get('passenger_idx', 0)+1}: Seat **{s.get('seat_id', '?')}** ({s.get('type', '')}) — {price} TL")
+                try: grand_total += float(price)
+                except: pass
 
         if report_data.get("luggage_selections"):
             st.markdown("#### 🧳 Luggage")
             for l in report_data["luggage_selections"]:
-                st.markdown(f"- Passenger {l['passenger_idx']+1}: {l['tier']} — {l['price_tl']} TL")
+                price = l.get('price_tl', 0)
+                st.markdown(f"- Passenger {l.get('passenger_idx', 0)+1}: {l.get('tier', '')} — {price} TL")
+                try: grand_total += float(price)
+                except: pass
+        else:
+            st.markdown("#### 🧳 Luggage")
+            st.markdown("- Standard Cabin Bag Included")
 
         if report_data.get("extras_selections"):
             st.markdown("#### ✨ Extra Services")
             for e in report_data["extras_selections"]:
-                st.markdown(f"- {e['service']} — {e['price_tl']} TL")
+                price = e.get('price_tl', 0)
+                st.markdown(f"- {e.get('service', '')} — {price} TL")
+                try: grand_total += float(price)
+                except: pass
+                
+        st.divider()
+        st.markdown(f"<h4 style='text-align:right'>Grand Total: {grand_total:,.2f} TL</h4>", unsafe_allow_html=True)
 
     st.divider()
     st.markdown("### 📊 Session Analytics Report")

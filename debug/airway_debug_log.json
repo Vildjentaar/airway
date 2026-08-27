@@ -11,17 +11,17 @@
     },
     {
       "role": "assistant",
-      "content": "i'm with thall lines. cut the fluff—where are you trying to fly?"
+      "content": "i'm thall lines. we run a tight ship, fast and no nonsense. \n\nwhat are we flying today?"
     },
     {
       "role": "user",
-      "content": "buy me an eco ticket from ankara to amsterdam with connecting hub istanbul for 28th of this and 1st of next month"
+      "content": "buy me an eco ticket from ankara to amsterdam with connecting hub istanbul for 28th of this and 1st of next month for return"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_953991",
+          "id": "call_2162323",
           "function": {
             "arguments": "{\"info_type\":\"current_datetime\"}",
             "name": "get_context"
@@ -29,7 +29,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPHNhbzd1rp3akpIrPR3kceuR16KDHn1xhrJZJjtmhdA/EgFWEsuQof3TWPww6LMlF9ByQeL5aXNeuqLxJ426KeBu8U4IHmxiM5XwJsHbmo5RnA22ThdFt"
+              "thought_signature": "El4KXAERTTIP8YYmH8rBTXfZWDZs/jq4ICfskrGKwhVTdCfJXGYZR1V0SBxAacL35bm9xMTuwT4ilfQn8mgm8H8SBuFPJ20NYv8+07tCahhwmq4jpBhm1w5nhoWPFich"
             }
           }
         }
@@ -37,22 +37,22 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_953991",
-      "content": "{\"date\": \"2026-08-27\", \"date_readable\": \"Thursday, 27 August 2026\", \"time\": \"15:12\", \"day_of_week\": \"Thursday\", \"timezone_note\": \"Server local time\"}"
+      "tool_call_id": "call_2162323",
+      "content": "{\"date\": \"2026-08-27\", \"date_readable\": \"Thursday, 27 August 2026\", \"time\": \"16:01\", \"day_of_week\": \"Thursday\", \"timezone_note\": \"Server local time\"}"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_843113",
+          "id": "call_2160846",
           "function": {
-            "arguments": "{\"origin\":\"Ankara\",\"destination\":\"Amsterdam\"}",
+            "arguments": "{\"destination\":\"AMS\",\"origin\":\"ESB\"}",
             "name": "search_itinerary"
           },
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPPfDDh+7FiNg5tniUydB76TETceTUqsbWl+/WzXA8us2OzH6N4l+asdKsO65/XjkGjwUYciu8jK8Bij6vqahjcM3ejDC3SrO+K1ujGE+zrXbBCvd6RjpG"
+              "thought_signature": "El4KXAERTTIPUgBaG9SszYw3zr9WB9jVOYk864J/BFyfzn57+ugMtIzzXivMz55jo+R5/d3hMM7rf9YlTXVLomxP3GIXy06p0jAIlpGgIJklNg8inxSG3mRwQz4STQIT"
             }
           }
         }
@@ -60,37 +60,14 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_843113",
-      "content": "{\"success\": true, \"result\": {\"origin\": \"ESB\", \"destination\": \"AMS\", \"direct_flights\": [], \"connecting_options\": [{\"connection_airport\": \"IST\", \"layover_minutes\": 255, \"next_day_departure\": false, \"legs\": [{\"flight_number\": \"PX-0011\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"09:00\", \"arrival_time\": \"10:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 615, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0023\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"21:00\", \"arrival_time\": \"22:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 855, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0022\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"17:00\", \"arrival_time\": \"18:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 975, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0023\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"21:00\", \"arrival_time\": \"22:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1095, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0021\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"13:00\", \"arrival_time\": \"14:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1215, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0022\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"17:00\", \"arrival_time\": \"18:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1335, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0011\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"09:00\", \"arrival_time\": \"10:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"PX-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}], \"total_options\": 7}}"
+      "tool_call_id": "call_2160846",
+      "content": "{\"success\": true, \"result\": {\"origin\": \"ESB\", \"destination\": \"AMS\", \"direct_flights\": [], \"connecting_options\": [{\"connection_airport\": \"IST\", \"layover_minutes\": 255, \"next_day_departure\": false, \"legs\": [{\"flight_number\": \"TL-0011\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"09:00\", \"arrival_time\": \"10:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 615, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0023\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"21:00\", \"arrival_time\": \"22:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 855, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0022\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"17:00\", \"arrival_time\": \"18:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 975, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0023\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"21:00\", \"arrival_time\": \"22:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1095, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0021\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"13:00\", \"arrival_time\": \"14:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1215, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0022\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"17:00\", \"arrival_time\": \"18:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0401\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"14:30\", \"arrival_time\": \"17:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1335, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0011\", \"origin_code\": \"ESB\", \"dest_code\": \"IST\", \"departure_time\": \"09:00\", \"arrival_time\": \"10:15\", \"arrival_date_offset\": 0, \"duration\": \"1h 15m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}, {\"flight_number\": \"TL-0403\", \"origin_code\": \"IST\", \"dest_code\": \"AMS\", \"departure_time\": \"08:30\", \"arrival_time\": \"11:10\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}], \"combined_base_price_tl\": 10150.0}], \"total_options\": 7}}"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_968647",
-          "function": {
-            "arguments": "{\"flight_number\":\"PX-0011\",\"departure_date\":\"2026-08-28\",\"additional_passengers\":1}",
-            "name": "check_capacity"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPWRYxdTlqInGJRoIJ50i/5NQ+OzjCLJ/tXGFLezAwUSi5fnfTzztg1pYt5m0YcaTcEfhqsmMy/CcTaPz0fFrWKPAbnvAwqlxlBs0rJv1LH3v2exrZ21If"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_968647",
-      "content": "{\"status\": \"Available\", \"remaining_seats\": 220}"
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_852135",
+          "id": "call_2120816",
           "function": {
             "arguments": "{\"destination\":\"ESB\",\"origin\":\"AMS\"}",
             "name": "search_itinerary"
@@ -98,7 +75,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIP/JGq4csSA2aC1U55g+WAW+JBLUxEnx1j9Iu0qV2TNH0VbtY18FVFVP04I8gFZxI/3aqUTfL8LhXxyEAeO72tHXsdNPInVdNfKfev3Dlw9uwO/3UNqqwA"
+              "thought_signature": "El4KXAERTTIPH3KcenWu41tRfZFXXjtnXrgcL53pNYOvADAy+bRfGRUJQ5tFHvOHoowoQjY3wANESWmU0wOgcSSB+4wO+lNi/8tJQslsgmX9VF+P6jjrld2oTMiQP1d9"
             }
           }
         }
@@ -106,30 +83,22 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_852135",
-      "content": "{\"success\": true, \"result\": {\"origin\": \"AMS\", \"destination\": \"ESB\", \"direct_flights\": [], \"connecting_options\": [{\"connection_airport\": \"IST\", \"layover_minutes\": 200, \"next_day_departure\": false, \"legs\": [{\"flight_number\": \"PX-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0020\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"19:00\", \"arrival_time\": \"20:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 440, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0010\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"07:00\", \"arrival_time\": \"08:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 680, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0018\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"11:00\", \"arrival_time\": \"12:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 920, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0010\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"07:00\", \"arrival_time\": \"08:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 920, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0019\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"15:00\", \"arrival_time\": \"16:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1160, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0018\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"11:00\", \"arrival_time\": \"12:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1160, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0020\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"19:00\", \"arrival_time\": \"20:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1400, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"PX-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"PX-0019\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"15:00\", \"arrival_time\": \"16:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}], \"total_options\": 8}}"
-    },
-    {
-      "role": "assistant",
-      "content": "got it. you're looking for a round-trip from ankara (esb) to amsterdam (ams) via istanbul (ist), economy class, departing august 28, 2026 and returning september 1, 2026 for 1 adult.\n\nhere is the rundown:\n\n**outbound (august 28, 2026):**\n1. **px-0011**: esb → ist | 09:00 - 10:15 (1h 15m)\n   *layover at ist: 4h 15m*\n2. **px-0401**: ist → ams | 14:30 - 17:10 (3h 40m)\n\n**return (september 1, 2026):**\n1. **px-0402**: ams → ist | 11:00 - 15:40 (3h 40m)\n   *layover at ist: 3h 20m*\n2. **px-0020**: ist → esb | 19:00 - 20:10 (1h 10m)\n\ntotal combined base price: 20,300 tl. seats are wide open. want to lock this in and add it to your cart?"
-    },
-    {
-      "role": "user",
-      "content": "ye"
+      "tool_call_id": "call_2120816",
+      "content": "{\"success\": true, \"result\": {\"origin\": \"AMS\", \"destination\": \"ESB\", \"direct_flights\": [], \"connecting_options\": [{\"connection_airport\": \"IST\", \"layover_minutes\": 200, \"next_day_departure\": false, \"legs\": [{\"flight_number\": \"TL-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0020\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"19:00\", \"arrival_time\": \"20:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 440, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0010\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"07:00\", \"arrival_time\": \"08:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 680, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0018\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"11:00\", \"arrival_time\": \"12:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 920, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0010\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"07:00\", \"arrival_time\": \"08:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 920, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0019\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"15:00\", \"arrival_time\": \"16:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1160, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0018\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"11:00\", \"arrival_time\": \"12:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1160, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0404\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"19:00\", \"arrival_time\": \"23:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0020\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"19:00\", \"arrival_time\": \"20:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}, {\"connection_airport\": \"IST\", \"layover_minutes\": 1400, \"next_day_departure\": true, \"legs\": [{\"flight_number\": \"TL-0402\", \"origin_code\": \"AMS\", \"dest_code\": \"IST\", \"departure_time\": \"11:00\", \"arrival_time\": \"15:40\", \"arrival_date_offset\": 0, \"duration\": \"3h 40m\", \"base_price_tl\": 8900.0, \"aircraft_type\": \"Airbus A321LR\"}, {\"flight_number\": \"TL-0019\", \"origin_code\": \"IST\", \"dest_code\": \"ESB\", \"departure_time\": \"15:00\", \"arrival_time\": \"16:10\", \"arrival_date_offset\": 0, \"duration\": \"1h 10m\", \"base_price_tl\": 1250.0, \"aircraft_type\": \"Airbus A321neo\"}], \"combined_base_price_tl\": 10150.0}], \"total_options\": 8}}"
     },
     {
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_1953398",
+          "id": "call_2041690",
           "function": {
-            "arguments": "{\"ticket_class\":\"Economy\",\"baby_count\":0,\"segments\":[{\"departure_date\":\"2026-08-28\",\"flight_number\":\"PX-0011\"},{\"flight_number\":\"PX-0401\",\"departure_date\":\"2026-08-28\"},{\"departure_date\":\"2026-09-01\",\"flight_number\":\"PX-0402\"},{\"flight_number\":\"PX-0020\",\"departure_date\":\"2026-09-01\"}],\"adult_count\":1,\"trip_type\":\"Multi-city\",\"child_count\":0}",
-            "name": "generate_flight_widget"
+            "arguments": "{\"departure_date\":\"2026-08-28\",\"additional_passengers\":1,\"flight_number\":\"TL-0011\"}",
+            "name": "check_capacity"
           },
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPFckhsuROOER4BJgopSeCHTq+ZzrHpw88shPHu0drbGi2+ndX6DAi3AC/KtjxJuIVMJveuI4ZsTHWSbdZV7LbRaemnEj+PsumoVaEd1TW6rgU1BZWmF86"
+              "thought_signature": "El4KXAERTTIP8V7L6JUWZ76nHJIqXsoDlPCJ+4NkY9wbBsnj4sz4nazPNU+m3BYjC2uiSHZa6B3meps5VzqLh8e3HGWssZddNkAut2iuASrBRof/6aNUIKfGbKeubMhP"
             }
           }
         }
@@ -137,12 +106,43 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_1953398",
-      "content": "Flight PX-0011 (ESB → ESB, Economy, 2026-08-28) added to cart. Price breakdown — subtotal: 20300.0 TL, tax: 1624.0 TL, fees: 150.0 TL, total: 22074 TL. Confirm to the user in THEIR language. Remind them they can add more flights or proceed to checkout."
+      "tool_call_id": "call_2041690",
+      "content": "{\"status\": \"Available\", \"remaining_seats\": 220}"
     },
     {
       "role": "assistant",
-      "content": "got that round-trip added to your cart. \n\nwant to add another flight, or are you ready to check out?"
+      "content": "got your round-trip locked down from ankara (esb) to amsterdam (ams) via istanbul (ist). \n\nhere's the breakdown:\n- **outbound (28 aug 2026):**\n  - leg 1: tl-0011 | esb → ist | 09:00 - 10:15\n  - layover: 4h 15m at ist\n  - leg 2: tl-0401 | ist → ams | 14:30 - 17:10\n- **return (1 sep 2026):**\n  - leg 1: tl-0402 | ams → ist | 11:00 - 15:40\n  - layover: 3h 20m at ist\n  - leg 2: tl-0020 | ist → esb | 19:00 - 20:10\n\n- **class:** economy\n- **passengers:** 1 adult\n\nseats are wide open. want me to toss this into your cart, or are we making changes?"
+    },
+    {
+      "role": "user",
+      "content": "yes"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_2617969",
+          "function": {
+            "arguments": "{\"ticket_class\":\"Economy\",\"trip_type\":\"Round-trip\",\"segments\":[{\"departure_date\":\"2026-08-28\",\"flight_number\":\"TL-0011\"},{\"departure_date\":\"2026-08-28\",\"flight_number\":\"TL-0401\"},{\"flight_number\":\"TL-0402\",\"departure_date\":\"2026-09-01\"},{\"departure_date\":\"2026-09-01\",\"flight_number\":\"TL-0020\"}],\"adult_count\":1,\"baby_count\":0,\"child_count\":0}",
+            "name": "generate_flight_widget"
+          },
+          "type": "function",
+          "extra_content": {
+            "google": {
+              "thought_signature": "El4KXAERTTIPC4qunPHh8oJZ9AfzOnZ8O9FAn3xScUc3w8V+7j9Ywc8D/KqOY3ufi5X70XWXxDQXvl++tNtpOgHkisj+igIOaKaws000eeynI4vHB0smuj2DJOUWym2t"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_2617969",
+      "content": "Flight TL-0011 (ESB → ESB, Economy, 2026-08-28) added to cart. Price breakdown — subtotal: 20300.0 TL, tax: 1624.0 TL, fees: 300.0 TL, total: 22224 TL. Confirm to the user in THEIR language. Remind them they can add more flights or proceed to checkout."
+    },
+    {
+      "role": "assistant",
+      "content": "that's in your cart. want to add another flight, or are you ready to check out?"
     },
     {
       "role": "user",
@@ -152,7 +152,7 @@
       "role": "assistant",
       "tool_calls": [
         {
-          "id": "call_852529",
+          "id": "call_1759368",
           "function": {
             "arguments": "{\"form_type\":\"auth\"}",
             "name": "render_secure_form"
@@ -160,7 +160,7 @@
           "type": "function",
           "extra_content": {
             "google": {
-              "thought_signature": "El4KXAERTTIPdJw3Xc2D0CqTV67kZSRD5En2XYB4wMh89vMlXsqz9FM2RBtRQEnlT6dQ60c5tc1Hbf4CqrUIFBBy20OsN5trx66QzfCBRqnYw1DUaI6ZQf8n0ScSSyxN"
+              "thought_signature": "El4KXAERTTIPdXOKaZoabK+rtXE+qYeZ8CzpgvaZVbaWHvs83m/pQWPOWw1COaJoztCfrDfch4ht0l0alpBq2gNJARHox/4mVDpNxjqZbgbFASr+9xWSRpm3g8IiJfYu"
             }
           }
         }
@@ -168,7 +168,7 @@
     },
     {
       "role": "tool",
-      "tool_call_id": "call_852529",
+      "tool_call_id": "call_1759368",
       "content": "Form 'auth' rendered. Waiting for user submission...",
       "report_data": {
         "render_form": "auth"
@@ -176,319 +176,24 @@
     },
     {
       "role": "user",
-      "content": "[System Note: User successfully submitted the auth form. Continuing as guest.]",
+      "content": "[System Note: User successfully submitted the auth form. Continuing as guest. Now call render_secure_form(form_type='passenger_details').]",
       "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_1209042",
-          "function": {
-            "arguments": "{\"form_type\":\"passenger_details\"}",
-            "name": "render_secure_form"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPsn5pHUNZFEF72i2YkXfCuOe7HUW85ASWNkXFXQTpr3zlY1kggXoaigt5p1WHckQSiRHB0G19BO4ogdVQteBu4khQkdl/ZQJPcYP9AW3AldjNWjv8V1zF"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_1209042",
-      "content": "Form 'passenger_details' rendered. Waiting for user submission...",
-      "report_data": {
-        "render_form": "passenger_details"
-      }
-    },
-    {
-      "role": "user",
-      "content": "[System Note: User successfully submitted the passenger_details form. Passenger details recorded.]",
-      "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_781959",
-          "function": {
-            "arguments": "{\"form_type\":\"seat_selection\"}",
-            "name": "render_secure_form"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPy7Bju+mLJOwtQFvsNFnIgBgvztIIEOeFEeNUe5ntcTzn+PVN6uRxL5/TPdq06YiVrFZ5xRdG5DbCvuJJgdKZU2bGMR2k9n8QiQUS3ccsVjbDyNCNDvQ1"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_781959",
-      "content": "Form 'seat_selection' rendered. Waiting for user submission...",
-      "report_data": {
-        "render_form": "seat_selection"
-      }
-    },
-    {
-      "role": "user",
-      "content": "[System Note: User successfully submitted the seat_selection form. Seat selections recorded.]",
-      "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_1690921",
-          "function": {
-            "arguments": "{\"form_type\":\"luggage\"}",
-            "name": "render_secure_form"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPpR+lNVjYcp9sb5+cxbdvMCJTRYKEJjfKOufm1e+KHYmXnVJUQU7jjxsvSBW9OgcRxx594wBBXBXF5mUKQ83K+tVY3O4XeWxwHxJmuVricQShECQoihN+"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_1690921",
-      "content": "Form 'luggage' rendered. Waiting for user submission...",
-      "report_data": {
-        "render_form": "luggage"
-      }
-    },
-    {
-      "role": "user",
-      "content": "[System Note: User successfully submitted the luggage form. Luggage selections recorded.]",
-      "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_2077497",
-          "function": {
-            "arguments": "{\"form_type\":\"extras\"}",
-            "name": "render_secure_form"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPNuSwumIBWRlqPy4DUTJ+T+jzaUjFHqhQEKoLj4+PuRPZyqrzHt30E7u4P4GZ9o4AgdJY8YA4hSLzCvkCXdjRe7Zx4R0fR7etPc+zXVpLNaAAr2+XWtxg"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_2077497",
-      "content": "Form 'extras' rendered. Waiting for user submission...",
-      "report_data": {
-        "render_form": "extras"
-      }
-    },
-    {
-      "role": "user",
-      "content": "[System Note: User successfully submitted the extras form. No extras selected.]",
-      "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_1064603",
-          "function": {
-            "arguments": "{\"form_type\":\"payment\"}",
-            "name": "render_secure_form"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIP5a2inQifsUKvSyE05dp2rOB/n8HA0iXWhvGQf9Og/iaUz4VEgv+nBEttMvmP4lnkJ9ZOTpIN57YvLxMeEdKsqUr97YovaQphW5YvFbal2Yxim/cmHCKU"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_1064603",
-      "content": "Form 'payment' rendered. Waiting for user submission...",
-      "report_data": {
-        "render_form": "payment"
-      }
-    },
-    {
-      "role": "user",
-      "content": "[System Note: User successfully submitted the payment form. Payment approved (TXN-MOCK-4246).]",
-      "hidden": true
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_2019127",
-          "function": {
-            "arguments": "{\"passenger_summary\":\"1 passenger, Economy round-trip Ankara to Amsterdam via Istanbul.\",\"issues_encountered\":[],\"process_smoothness\":\"Smooth\",\"overall_evaluation\":\"Booking completed smoothly from start to finish with all security forms successfully submitted and payment approved.\"}",
-            "name": "generate_final_report"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPCLV1nCAcTRPkyhSSalM9N9XBgU1+W1bdsq6Oxydpfa/KlKwzzEDvWJKoP9tz6LUJjeslkkhnKyb/xxudk/DjqCYlJ6rU27f+FWEBIwZN2fqdIl3g0Gas"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_2019127",
-      "content": "Final report generated. Booked flights: PX-0011 ESB→ESB (Economy, 2026-08-28). Now call send_itinerary_email immediately (the system will supply the destination address — do NOT ask the user for their email). Once the email tool returns, tell the user (in THEIR language) that their itinerary is confirmed and the summary report is shown below.",
-      "report_data": {
-        "passenger_summary": "1 passenger, Economy round-trip Ankara to Amsterdam via Istanbul.",
-        "issues_encountered": [],
-        "process_smoothness": "Smooth",
-        "overall_evaluation": "Booking completed smoothly from start to finish with all security forms successfully submitted and payment approved.",
-        "booked_flights": [
-          {
-            "trip_type": "Multi-city",
-            "passenger_count": 1,
-            "adult_count": 1,
-            "child_count": 0,
-            "baby_count": 0,
-            "ticket_class": "Economy",
-            "price_tl": 22074,
-            "pricing_details": {
-              "subtotal_tl": 20300.0,
-              "tax_tl": 1624.0,
-              "fees_tl": 150.0,
-              "total_tl": 22074
-            },
-            "segments": [
-              {
-                "departure_point": "ESB",
-                "arrival_point": "IST",
-                "departure_date": "2026-08-28",
-                "departure_time": "09:00",
-                "arrival_time": "10:15",
-                "flight_duration": "1h 15m",
-                "transfer_status": "Direct",
-                "airline_name": "Thall Lines",
-                "flight_number": "PX-0011",
-                "base_price_tl": 1250.0
-              },
-              {
-                "departure_point": "IST",
-                "arrival_point": "AMS",
-                "departure_date": "2026-08-28",
-                "departure_time": "14:30",
-                "arrival_time": "17:10",
-                "flight_duration": "3h 40m",
-                "transfer_status": "Direct",
-                "airline_name": "Thall Lines",
-                "flight_number": "PX-0401",
-                "base_price_tl": 8900.0
-              },
-              {
-                "departure_point": "AMS",
-                "arrival_point": "IST",
-                "departure_date": "2026-09-01",
-                "departure_time": "11:00",
-                "arrival_time": "15:40",
-                "flight_duration": "3h 40m",
-                "transfer_status": "Direct",
-                "airline_name": "Thall Lines",
-                "flight_number": "PX-0402",
-                "base_price_tl": 8900.0
-              },
-              {
-                "departure_point": "IST",
-                "arrival_point": "ESB",
-                "departure_date": "2026-09-01",
-                "departure_time": "19:00",
-                "arrival_time": "20:10",
-                "flight_duration": "1h 10m",
-                "transfer_status": "Direct",
-                "airline_name": "Thall Lines",
-                "flight_number": "PX-0020",
-                "base_price_tl": 1250.0
-              }
-            ]
-          }
-        ],
-        "seat_selections": [
-          {
-            "passenger_idx": 0,
-            "seat_id": "random",
-            "type": "no_preference",
-            "price_tl": 0
-          }
-        ],
-        "luggage_selections": [
-          {
-            "passenger_idx": 0,
-            "tier": "cabin_only",
-            "label": "Cabin Bag Only",
-            "price_tl": 0.0
-          }
-        ],
-        "extras_selections": []
-      }
-    },
-    {
-      "role": "assistant",
-      "tool_calls": [
-        {
-          "id": "call_2187632",
-          "function": {
-            "arguments": "{\"passenger_name_summary\":\"1 passenger — Economy\",\"pnr_code\":\"PNR-PX0011-20260827\"}",
-            "name": "send_itinerary_email"
-          },
-          "type": "function",
-          "extra_content": {
-            "google": {
-              "thought_signature": "El4KXAERTTIPDQqTtcoJ0Phm/LZS25MnH+V6L1nOLRnK4gflfWzHj2GtkSpU9dQQR14UO7hqqINDEW70a9B8XO8lEt1aFZgRUdYG7oxbPYSShm/EMu29DPGA22bD5Ilr"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "role": "tool",
-      "tool_call_id": "call_2187632",
-      "content": "EMAIL_FAILED: status=SERVICE_UNAVAILABLE. Activate the email-failure fallback protocol: reassure the user that their booking IS confirmed, display the ticket details directly in the chat, and direct them to the My Trips section of the app."
-    },
-    {
-      "role": "assistant",
-      "content": "your booking is fully confirmed and your payment went through successfully—don't sweat the automated email dispatch hiccup on our end, your seats are locked in. \n\nhere are your ticket details:\n* **route:** ankara (esb) to amsterdam (ams) via istanbul (ist), round-trip\n* **outbound (august 28, 2026):** px-0011 (esb → ist) & px-0401 (ist → ams)\n* **return (september 1, 2026):** px-0402 (ams → ist) & px-0020 (ist → esb)\n* **class:** economy (1 adult)\n* **total paid:** 22,074 tl (inclusive of taxes and fees)\n\nyou can always view your full itinerary and boarding passes anytime under the \"my trips\" section of the app. need anything else?"
     }
   ],
   "flight_data": [
     {
-      "trip_type": "Multi-city",
+      "trip_type": "Round-trip",
       "passenger_count": 1,
       "adult_count": 1,
       "child_count": 0,
       "baby_count": 0,
       "ticket_class": "Economy",
-      "price_tl": 22074,
+      "price_tl": 22224,
       "pricing_details": {
         "subtotal_tl": 20300.0,
         "tax_tl": 1624.0,
-        "fees_tl": 150.0,
-        "total_tl": 22074
+        "fees_tl": 300.0,
+        "total_tl": 22224
       },
       "segments": [
         {
@@ -500,7 +205,7 @@
           "flight_duration": "1h 15m",
           "transfer_status": "Direct",
           "airline_name": "Thall Lines",
-          "flight_number": "PX-0011",
+          "flight_number": "TL-0011",
           "base_price_tl": 1250.0
         },
         {
@@ -512,7 +217,7 @@
           "flight_duration": "3h 40m",
           "transfer_status": "Direct",
           "airline_name": "Thall Lines",
-          "flight_number": "PX-0401",
+          "flight_number": "TL-0401",
           "base_price_tl": 8900.0
         },
         {
@@ -524,7 +229,7 @@
           "flight_duration": "3h 40m",
           "transfer_status": "Direct",
           "airline_name": "Thall Lines",
-          "flight_number": "PX-0402",
+          "flight_number": "TL-0402",
           "base_price_tl": 8900.0
         },
         {
@@ -536,100 +241,11 @@
           "flight_duration": "1h 10m",
           "transfer_status": "Direct",
           "airline_name": "Thall Lines",
-          "flight_number": "PX-0020",
+          "flight_number": "TL-0020",
           "base_price_tl": 1250.0
         }
       ]
     }
   ],
-  "report_data": {
-    "passenger_summary": "1 passenger, Economy round-trip Ankara to Amsterdam via Istanbul.",
-    "issues_encountered": [],
-    "process_smoothness": "Smooth",
-    "overall_evaluation": "Booking completed smoothly from start to finish with all security forms successfully submitted and payment approved.",
-    "booked_flights": [
-      {
-        "trip_type": "Multi-city",
-        "passenger_count": 1,
-        "adult_count": 1,
-        "child_count": 0,
-        "baby_count": 0,
-        "ticket_class": "Economy",
-        "price_tl": 22074,
-        "pricing_details": {
-          "subtotal_tl": 20300.0,
-          "tax_tl": 1624.0,
-          "fees_tl": 150.0,
-          "total_tl": 22074
-        },
-        "segments": [
-          {
-            "departure_point": "ESB",
-            "arrival_point": "IST",
-            "departure_date": "2026-08-28",
-            "departure_time": "09:00",
-            "arrival_time": "10:15",
-            "flight_duration": "1h 15m",
-            "transfer_status": "Direct",
-            "airline_name": "Thall Lines",
-            "flight_number": "PX-0011",
-            "base_price_tl": 1250.0
-          },
-          {
-            "departure_point": "IST",
-            "arrival_point": "AMS",
-            "departure_date": "2026-08-28",
-            "departure_time": "14:30",
-            "arrival_time": "17:10",
-            "flight_duration": "3h 40m",
-            "transfer_status": "Direct",
-            "airline_name": "Thall Lines",
-            "flight_number": "PX-0401",
-            "base_price_tl": 8900.0
-          },
-          {
-            "departure_point": "AMS",
-            "arrival_point": "IST",
-            "departure_date": "2026-09-01",
-            "departure_time": "11:00",
-            "arrival_time": "15:40",
-            "flight_duration": "3h 40m",
-            "transfer_status": "Direct",
-            "airline_name": "Thall Lines",
-            "flight_number": "PX-0402",
-            "base_price_tl": 8900.0
-          },
-          {
-            "departure_point": "IST",
-            "arrival_point": "ESB",
-            "departure_date": "2026-09-01",
-            "departure_time": "19:00",
-            "arrival_time": "20:10",
-            "flight_duration": "1h 10m",
-            "transfer_status": "Direct",
-            "airline_name": "Thall Lines",
-            "flight_number": "PX-0020",
-            "base_price_tl": 1250.0
-          }
-        ]
-      }
-    ],
-    "seat_selections": [
-      {
-        "passenger_idx": 0,
-        "seat_id": "random",
-        "type": "no_preference",
-        "price_tl": 0
-      }
-    ],
-    "luggage_selections": [
-      {
-        "passenger_idx": 0,
-        "tier": "cabin_only",
-        "label": "Cabin Bag Only",
-        "price_tl": 0.0
-      }
-    ],
-    "extras_selections": []
-  }
+  "report_data": null
 }

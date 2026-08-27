@@ -98,7 +98,7 @@ def render_extras_form() -> None:
     if result["success"]:
         st.session_state.pending_user_message = (
             "[System Note: User successfully submitted the extras"
-            f" form. {result.get('detail', '')}]".strip()
+            f" form. {result.get('detail', '')} Now call render_secure_form(form_type='payment').]".strip()
         )
         st.session_state.report_data = None
         st.rerun()
@@ -110,7 +110,7 @@ def _skip_extras() -> None:
     """Record an empty extras selection and advance the pipeline."""
     st.session_state.extras_selections = []
     st.session_state.pending_user_message = (
-        "[System Note: User skipped extra services selection.]"
+        "[System Note: User skipped extra services selection. Now call render_secure_form(form_type='payment').]"
     )
     st.session_state.report_data = None
     st.rerun()

@@ -103,7 +103,7 @@ def render_seat_form() -> None:
     if skipped:
         st.session_state.seat_selections = []
         st.session_state.pending_user_message = (
-            "[System Note: User skipped seat selection (random assignment).]"
+            "[System Note: User skipped seat selection (random assignment). Now call render_secure_form(form_type='luggage').]"
         )
         st.session_state.report_data = None
         st.rerun()
@@ -118,7 +118,7 @@ def render_seat_form() -> None:
     if result["success"]:
         st.session_state.pending_user_message = (
             "[System Note: User successfully submitted the seat_selection"
-            f" form. {result.get('detail', '')}]".strip()
+            f" form. {result.get('detail', '')} Now call render_secure_form(form_type='luggage').]".strip()
         )
         st.session_state.report_data = None
         st.rerun()
