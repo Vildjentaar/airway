@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 # Template builder
 # ---------------------------------------------------------------------------
 
-def _build_itinerary_html(report_data: dict) -> str:
+def _build_itinerary_html(report_data: dict, pnr: str, passenger_summary: str) -> str:
     """Return a self-contained HTML email body from the report_data dict."""
     booked = report_data.get("booked_flights", [])
     seat_sel = report_data.get("seat_selections", [])
@@ -49,26 +49,41 @@ def _build_itinerary_html(report_data: dict) -> str:
     extras_sel = report_data.get("extras_selections", [])
 
     flights_html = ""
-    for flight in booked:
+    for flight_idx, flight in enumerate(booked):
         segs = flight.get("segments", [])
         if not segs:
             continue
-        first = segs[0]
-        last = segs[-1]
+        
         pricing = flight.get("pricing_details", {})
+        
+        for seg_idx, seg in enumerate(segs):
+            flights_html += textwrap.dedent(f"""
+            <tr>
+              <td style="padding:12px 0; border-bottom:1px solid #e5e7eb;">
+                <strong>{seg.get('flight_number', '')} &nbsp;
+                {seg.get('departure_point', '')} → {seg.get('arrival_point', '')}</strong><br/>
+                <span style="color:#6b7280;font-size:13px;">
+                  {seg.get('departure_date', '')} &nbsp;|&nbsp;
+                  {seg.get('departure_time', '')} – {seg.get('arrival_time', '')} &nbsp;|&nbsp;
+                  {flight.get('ticket_class', 'Economy')} &nbsp;|&nbsp;
+                  Terminal 1, Gate TBA
+                </span><br/>
+                <span style="font-size:13px;">
+                  Passengers: {flight.get('passenger_count', 1)}
+                </span>
+              </td>
+            </tr>
+            """)
+            
         flights_html += textwrap.dedent(f"""
         <tr>
-          <td style="padding:12px 0; border-bottom:1px solid #e5e7eb;">
-            <strong>{first.get('flight_number', '')} &nbsp;
-            {first.get('departure_point', '')} → {last.get('arrival_point', '')}</strong><br/>
-            <span style="color:#6b7280;font-size:13px;">
-              {first.get('departure_date', '')} &nbsp;|&nbsp;
-              {first.get('departure_time', '')} – {last.get('arrival_time', '')} &nbsp;|&nbsp;
-              {flight.get('ticket_class', 'Economy')}
-            </span><br/>
-            <span style="font-size:13px;">
-              Passengers: {flight.get('passenger_count', 1)} &nbsp;·&nbsp;
-              Total: <strong>{pricing.get('total_tl', flight.get('price_tl', '—'))} TL</strong>
+          <td style="padding:8px 0 16px 0; border-bottom:2px solid #d1d5db;">
+            <span style="font-size:13px; color:#4b5563;">
+              <strong>Fare Breakdown:</strong> 
+              Base: {pricing.get('subtotal_tl', '—')} TL &nbsp;|&nbsp;
+              Taxes: {pricing.get('tax_tl', '—')} TL &nbsp;|&nbsp;
+              Fees: {pricing.get('fees_tl', '—')} TL &nbsp;|&nbsp;
+              <strong>Total: {pricing.get('total_tl', flight.get('price_tl', '—'))} TL</strong>
             </span>
           </td>
         </tr>
@@ -77,6 +92,8 @@ def _build_itinerary_html(report_data: dict) -> str:
     ancillary_rows = ""
     for s in seat_sel:
         ancillary_rows += f"<li>Seat {s.get('seat_id', '?')} ({s.get('type','')}) — {s.get('price_tl', 0)} TL</li>"
+    if not seat_sel:
+        ancillary_rows += "<li>Seat Assignment: Unassigned (Selected at check-in)</li>"
     for l in luggage_sel:
         ancillary_rows += f"<li>Luggage: {l.get('tier','')} — {l.get('price_tl', 0)} TL</li>"
     for e in extras_sel:
@@ -109,6 +126,12 @@ def _build_itinerary_html(report_data: dict) -> str:
                 <p style="margin:8px 0 0;font-size:15px;opacity:0.9;">
                   Your booking is confirmed — have a great trip!
                 </p>
+                <p style="margin:8px 0 0;font-size:15px;opacity:0.9;">
+                  <strong>Booking Reference (PNR):</strong> {pnr}
+                </p>
+                <p style="margin:8px 0 0;font-size:15px;opacity:0.9;">
+                  <strong>Passengers:</strong> {passenger_summary}
+                </p>
               </td>
             </tr>
             <!-- Body -->
@@ -135,24 +158,46 @@ def _build_itinerary_html(report_data: dict) -> str:
     """).strip()
 
 
-def _build_plain_text(report_data: dict) -> str:
+def _build_plain_text(report_data: dict, pnr: str, passenger_summary: str) -> str:
     """Fallback plain-text version of the itinerary email."""
     booked = report_data.get("booked_flights", [])
-    lines = ["Your booking is confirmed!\n", "=== ITINERARY ==="]
+    lines = [
+        "Your booking is confirmed!\n", 
+        f"Booking Reference (PNR): {pnr}",
+        f"Passengers: {passenger_summary}\n",
+        "=== ITINERARY ==="
+    ]
     for flight in booked:
         segs = flight.get("segments", [])
         if not segs:
             continue
-        first, last = segs[0], segs[-1]
         pricing = flight.get("pricing_details", {})
+        
+        for seg in segs:
+            lines.append(
+                f"\n• {seg.get('flight_number')}  "
+                f"{seg.get('departure_point')} → {seg.get('arrival_point')}\n"
+                f"  Date : {seg.get('departure_date')}  "
+                f"{seg.get('departure_time')} – {seg.get('arrival_time')}\n"
+                f"  Class: {flight.get('ticket_class', 'Economy')}\n"
+                f"  Terminal 1, Gate TBA"
+            )
+            
         lines.append(
-            f"\n• {first.get('flight_number')}  "
-            f"{first.get('departure_point')} → {last.get('arrival_point')}\n"
-            f"  Date : {first.get('departure_date')}  "
-            f"{first.get('departure_time')} – {last.get('arrival_time')}\n"
-            f"  Class: {flight.get('ticket_class', 'Economy')}\n"
+            f"\n  Fare Breakdown:\n"
+            f"  Base: {pricing.get('subtotal_tl', '—')} TL\n"
+            f"  Taxes: {pricing.get('tax_tl', '—')} TL\n"
+            f"  Fees: {pricing.get('fees_tl', '—')} TL\n"
             f"  Total: {pricing.get('total_tl', flight.get('price_tl', '—'))} TL"
         )
+        
+    seat_sel = report_data.get("seat_selections", [])
+    if not seat_sel:
+        lines.append("\n  Seat Assignment: Unassigned (Selected at check-in)")
+    else:
+        for s in seat_sel:
+            lines.append(f"\n  Seat {s.get('seat_id', '?')} ({s.get('type','')}) — {s.get('price_tl', 0)} TL")
+            
     lines.append(
         "\nManage your trip any time from the My Trips section of the app."
     )
@@ -230,6 +275,7 @@ def send_itinerary_email(
     to_email: str,
     report_data: dict,
     pnr: Optional[str] = None,
+    passenger_summary: Optional[str] = None,
 ) -> dict:
     """
     Send the post-checkout itinerary email to the authenticated user.
@@ -256,11 +302,12 @@ def send_itinerary_email(
         }
 
     pnr_label = pnr or "N/A"
+    summary_label = passenger_summary or "1 Passenger"
     subject = f"✈️ Your Booking Confirmation — Ref {pnr_label}"
 
     try:
-        html_body = _build_itinerary_html(report_data)
-        plain_body = _build_plain_text(report_data)
+        html_body = _build_itinerary_html(report_data, pnr_label, summary_label)
+        plain_body = _build_plain_text(report_data, pnr_label, summary_label)
     except Exception as build_err:
         log.exception("Failed to build email body: %s", build_err)
         return {

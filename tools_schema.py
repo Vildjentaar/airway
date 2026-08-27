@@ -39,7 +39,7 @@ flight_widget_tool = [
                             "properties": {
                                 "flight_number": {
                                     "type": "string",
-                                    "description": "Flight number from the flight database (e.g., PX-0401). Must be a real flight number returned by search_flights."
+                                    "description": "Flight number from the flight database (e.g., TL-0401). Must be a real flight number returned by search_flights."
                                 },
                                 "departure_date": {
                                     "type": "string",

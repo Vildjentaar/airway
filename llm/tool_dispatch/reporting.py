@@ -123,6 +123,7 @@ def handle_send_itinerary_email(
             to_email=destination_email or "",
             report_data=current_report,
             pnr=pnr,
+            passenger_summary=passenger_summary,
         )
     except Exception as unexpected:
         # Belt-and-suspenders: _send_itinerary_email already catches all

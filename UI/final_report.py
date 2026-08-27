@@ -20,24 +20,16 @@ def render_final_report(report_data: dict):
         st.markdown("### Final E-Ticket Details")
         for flight in booked_flights:
             with st.container(border=True):
-                st.markdown(f"** Flight {flight.get('flight_number', '')}**")
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.text(f"Depart: {flight.get('departure_point', '')} at {flight.get('departure_time', '')}")
-                    st.text(f"Date: {flight.get('departure_date', '')}")
-                with col2:
-                    st.text(f"Arrive: {flight.get('arrival_point', '')} at {flight.get('arrival_time', '')}")
-                    st.text(f"Class: {flight.get('ticket_class', 'Economy')}")
-
-                if flight.get("trip_type") == "Round-trip" and flight.get("return_flight_number"):
-                    st.divider()
-                    st.markdown(f"** Return Flight {flight.get('return_flight_number', '')}**")
-                    r_col1, r_col2 = st.columns(2)
-                    with r_col1:
-                        st.text(f"Depart: {flight.get('arrival_point', '')} at {flight.get('return_departure_time', '')}")
-                        st.text(f"Date: {flight.get('return_date', '')}")
-                    with r_col2:
-                        st.text(f"Arrive: {flight.get('departure_point', '')} at {flight.get('return_arrival_time', '')}")
+                for seg_idx, seg in enumerate(flight.get("segments", [])):
+                    if seg_idx > 0:
+                        st.divider()
+                    st.markdown(f"** Flight {seg.get('flight_number', '')}**")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.text(f"Depart: {seg.get('departure_point', '')} at {seg.get('departure_time', '')}")
+                        st.text(f"Date: {seg.get('departure_date', '')}")
+                    with col2:
+                        st.text(f"Arrive: {seg.get('arrival_point', '')} at {seg.get('arrival_time', '')}")
                         st.text(f"Class: {flight.get('ticket_class', 'Economy')}")
 
                 pax_data = st.session_state.get("passenger_details", [])
