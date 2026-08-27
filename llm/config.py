@@ -9,7 +9,16 @@ that references it (history_sanitizer, engine, flight_validation, …).
 """
 
 # ── Gemini model identifier ──────────────────────────────────────────
+# gemini-3.5-flash-lite is a thinking model by default.  Setting
+# THINKING_BUDGET = 0 disables the reasoning trace entirely, which:
+#   - eliminates the thought_signature requirement (no more 400 errors)
+#   - reduces latency significantly (no hidden chain-of-thought tokens)
+#   - keeps the modern Gemini 3.x model family
+# Raise THINKING_BUDGET to a positive int (e.g. 1024) if you want deep
+# reasoning on complex queries, and ensure _prepare_for_api in engine.py
+# is in place to round-trip thought_signatures correctly.
 MODEL_NAME = "gemini-3.5-flash-lite"
+THINKING_BUDGET = 0  # 0 = thinking disabled; -1 = dynamic (model decides)
 
 # ── History / context-window knobs ───────────────────────────────────
 MAX_HISTORY_MESSAGES = 100

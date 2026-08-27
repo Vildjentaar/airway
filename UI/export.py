@@ -112,7 +112,13 @@ def _make_serializable(obj):
     if obj is None or isinstance(obj, (bool, int, float, str)):
         return obj
     if isinstance(obj, dict):
-        return {k: _make_serializable(v) for k, v in obj.items()}
+        return {
+            k: _make_serializable(v)
+            for k, v in obj.items()
+            # Skip the raw SDK object stored for thought_signature preservation —
+            # it is not JSON-serializable and is an internal engine detail only.
+            if k != "_raw_response_message"
+        }
     if isinstance(obj, (list, tuple)):
         return [_make_serializable(v) for v in obj]
     # datetime.date, datetime.datetime, Decimal, Enum, custom objects, etc.

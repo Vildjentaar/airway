@@ -1,10 +1,31 @@
 import json
 from typing import Optional
 
-from .config import MODEL_NAME, MAX_HISTORY_MESSAGES, CIRCUIT_BREAK_TURN, MAX_TURNS
+from .config import MODEL_NAME, THINKING_BUDGET, MAX_HISTORY_MESSAGES, CIRCUIT_BREAK_TURN, MAX_TURNS
 from .history_sanitizer import truncate_tool_results, sanitize_for_gemini
 from .tool_policy import select_active_tools
 from .tool_dispatch import dispatch_tool_call
+
+
+def _prepare_for_api(messages: list) -> list:
+    """Replace any message dict that carries ``_raw_response_message`` with
+    the raw SDK object itself.
+
+    Gemini thinking models attach a ``thought_signature`` to every functionCall
+    part.  That field is encoded inside the raw SDK object and is NOT reproduced
+    by ``model_dump()`` / any dict serialisation.  By passing the original SDK
+    object back to ``client.chat.completions.create`` (which the OpenAI-compat
+    layer accepts) the signature survives the round-trip and the API stops
+    returning the 400 'Function call is missing a thought_signature' error.
+    """
+    out = []
+    for msg in messages:
+        raw = msg.get("_raw_response_message") if isinstance(msg, dict) else None
+        if raw is not None:
+            out.append(raw)
+        else:
+            out.append(msg)
+    return out
 
 
 def call_llm(
@@ -47,12 +68,28 @@ def call_llm(
             flattened_history = flattened_history + [nudge]
 
         try:
+            # _prepare_for_api replaces any dict that wraps a raw SDK message
+            # object (stored under '_raw_response_message') with the object
+            # itself, so thought_signatures are preserved on the wire.
+            api_messages = _prepare_for_api(flattened_history)
+
+            # Only send thinking_config when a budget is actually set.
+            # Models that don't support thinking (e.g. gemini-3.5-flash-lite)
+            # return 400 INVALID_ARGUMENT if thinking_config is present at all,
+            # even when the budget is 0.
+            extra_body = (
+                {"thinking_config": {"thinking_budget": THINKING_BUDGET}}
+                if THINKING_BUDGET != 0
+                else {}
+            )
+
             response = client.chat.completions.create(
                 model=MODEL_NAME,
-                messages=flattened_history,
+                messages=api_messages,
                 temperature=0.3,
                 tools=active_tools if active_tools else None,
                 tool_choice=active_tool_choice if active_tools else "none",
+                extra_body=extra_body or None,
             )
         except Exception as e:
             last_error = str(e)
@@ -61,13 +98,37 @@ def call_llm(
         response_message = response.choices[0].message
 
         if response_message.tool_calls:
-            msg_dump = response_message.model_dump(exclude_none=True)
-            for tc in msg_dump.get("tool_calls", []):
-                if isinstance(tc, dict):
-                    tc.pop("extra_content", None)
-                    if isinstance(tc.get("function"), dict):
-                        tc["function"].pop("extra_content", None)
-            messages.append(msg_dump)
+            # IMPORTANT: Do NOT use model_dump() here — Gemini thinking models
+            # attach a `thought_signature` to each functionCall part.  That
+            # field lives in the raw SDK object and is silently dropped by
+            # model_dump()'s OpenAI-compat mapping.  If it is missing when the
+            # history is replayed the API returns:
+            #   400 – "Function call is missing a thought_signature"
+            #
+            # Solution: store the raw SDK message object directly.  The Gemini
+            # Python SDK accepts its own Content/GenerateContentResponse objects
+            # back in the `messages` list, so the signature is preserved
+            # end-to-end.  We keep a parallel `_raw` key so the sanitizer and
+            # debug logger can introspect it without re-serialising.
+            msg_dict = {
+                "role": "assistant",
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments,
+                        },
+                    }
+                    for tc in response_message.tool_calls
+                ],
+                "content": response_message.content or "",
+                # Preserve the raw SDK object so thought_signature survives
+                # the round-trip back to the API.
+                "_raw_response_message": response_message,
+            }
+            messages.append(msg_dict)
 
             skip_followup = False
             forms_called_this_turn = 0
