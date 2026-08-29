@@ -18,6 +18,7 @@ Dependencies
 
 from datetime import datetime
 
+from booking_context import _get_now
 from thall_lines_db import find_flight, get_flight_by_number, AIRLINE_NAME
 from pricing import calculate_total_price
 
@@ -104,7 +105,8 @@ def build_verified_flight(tool_args: dict, flight_data: list) -> dict:
 
         try:
             dep_date_parsed = datetime.strptime(dep_date_str, "%Y-%m-%d")
-            if dep_date_parsed.date() < datetime.now().date():
+            current_time = _get_now()
+            if dep_date_parsed.date() < current_time.date():
                 return {"error": f"Departure date {dep_date_str} cannot be in the past."}
         except ValueError:
             return {"error": f"Invalid departure_date format: {dep_date_str}. Must be YYYY-MM-DD."}
@@ -154,6 +156,16 @@ def build_verified_flight(tool_args: dict, flight_data: list) -> dict:
                 return {"error": (
                     f"Flight {flight_number_provided} arrives at {found['dest_code']}, "
                     f"not {arr_code}. Check the flight number."
+                )}
+
+        # Also validate the exact time if the flight is today
+        if dep_date_parsed.date() == current_time.date():
+            # e.g. "09:00" -> parsed into hours and minutes
+            dep_hour, dep_minute = map(int, found["departure_time"].split(":"))
+            if current_time.hour > dep_hour or (current_time.hour == dep_hour and current_time.minute > dep_minute):
+                return {"error": (
+                    f"Flight {flight_number_provided} departs at {found['departure_time']}, "
+                    f"which has already passed today. Please select a future flight."
                 )}
 
         verified_segments.append({

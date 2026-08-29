@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from luggage_data import get_luggage_options, validate_luggage_selection
+from data.luggage_data import get_luggage_options, validate_luggage_selection
 
 
 # Maximum additional bags a single passenger can add (beyond default cabin)

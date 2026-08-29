@@ -1,5 +1,18 @@
+# Environment & secrets
 .env
+*.pem
+
+# Python
 __pycache__/
-debug
 *.pyc
-airway-key.pem
+*.pyo
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Debug / runtime output
+debug/
+
+# Docker volumes
+mysql_data/

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from extras_data import get_extras_for_class, validate_extras_selection
+from data.extras_data import get_extras_for_class, validate_extras_selection
 
 
 def render_extras_form() -> None:

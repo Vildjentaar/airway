@@ -1,6 +1,10 @@
 """
 Thall Lines (Proxima Air) — Expanded Mock Flight-Booking Database
 ====================================================================
+⚠️  ARCHIVED — This was the original in-memory database used during early
+development.  The application now uses MySQL (see ``database/db.py`` and
+``thall_lines_db.py``).  This file is kept for reference only and is NOT
+imported by any production code.
 
 This module is a drop-in, API-compatible replacement for the original
 mock DB. Every function that existed before still exists, still takes

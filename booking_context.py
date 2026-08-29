@@ -11,12 +11,21 @@ need this file touched.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+def _get_now() -> datetime:
+    tz_str = os.environ.get("TZ", "Europe/Istanbul")
+    try:
+        return datetime.now(ZoneInfo(tz_str))
+    except Exception:
+        return datetime.now().astimezone()
 
 
 def ctx_get_current_datetime() -> dict:
     """Return the current date, time, and day of the week."""
-    now = datetime.now().astimezone()
+    now = _get_now()
     return {
         "date":          now.strftime("%Y-%m-%d"),
         "date_readable": now.strftime("%A, %d %B %Y"),
@@ -28,7 +37,7 @@ def ctx_get_current_datetime() -> dict:
 
 def ctx_get_relative_dates() -> dict:
     """Return pre-computed common relative dates (tomorrow, this weekend, next Monday, etc.)."""
-    now = datetime.now().astimezone()
+    now = _get_now()
     today = now.date()
 
     days_to_saturday = (5 - today.weekday()) % 7 or 7
@@ -53,7 +62,7 @@ def ctx_get_relative_dates() -> dict:
 
 def ctx_get_booking_window() -> dict:
     """Return the allowed booking window (earliest and latest bookable dates)."""
-    now = datetime.now().astimezone()
+    now = _get_now()
     min_booking = now + timedelta(hours=2)
     max_booking = now + timedelta(days=180)
     return {

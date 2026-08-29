@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from email_service import send_itinerary_email as _send_itinerary_email
+from services.email_service import send_itinerary_email as _send_itinerary_email
 
 log = logging.getLogger(__name__)
 

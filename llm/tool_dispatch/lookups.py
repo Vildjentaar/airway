@@ -52,7 +52,7 @@ def handle_passthrough(
 
     Returns ``(report_data, skip_followup, email_sent)``.
     """
-    from tool_dispatcher import dispatch_tool
+    from .dispatcher import dispatch_tool
 
     email_sent = False
     skip_followup = False

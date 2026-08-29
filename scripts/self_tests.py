@@ -20,7 +20,7 @@ from thall_lines_db import (
 )
 from database.db import fetch_one
 from pricing import calculate_total_price, self_test_booking_prices
-from accounts import default_auth_provider, validate_tckn
+from services.accounts import default_auth_provider, validate_tckn
 from payment import default_payment_gateway
 
     flight_stats = fetch_one("SELECT COUNT(*) as total, SUM(CASE WHEN is_leg = 0 THEN 1 ELSE 0 END) as sellable, SUM(is_leg) as legs FROM flights")

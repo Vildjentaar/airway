@@ -9,7 +9,9 @@ from .tool_dispatch import dispatch_tool_call
 
 def _prepare_for_api(messages: list) -> list:
     """Replace any message dict that carries ``_raw_response_message`` with
-    the raw SDK object itself.
+    the raw SDK object itself, and strip internal application keys (like 
+    `report_data` and `hidden`) so they don't break JSON serialization
+    when passed to the OpenAI client.
 
     Gemini thinking models attach a ``thought_signature`` to every functionCall
     part.  That field is encoded inside the raw SDK object and is NOT reproduced
@@ -19,12 +21,17 @@ def _prepare_for_api(messages: list) -> list:
     returning the 400 'Function call is missing a thought_signature' error.
     """
     out = []
+    allowed_keys = {"role", "content", "name", "tool_call_id", "tool_calls"}
     for msg in messages:
         raw = msg.get("_raw_response_message") if isinstance(msg, dict) else None
         if raw is not None:
             out.append(raw)
         else:
-            out.append(msg)
+            if isinstance(msg, dict):
+                clean_msg = {k: v for k, v in msg.items() if k in allowed_keys}
+                out.append(clean_msg)
+            else:
+                out.append(msg)
     return out
 
 

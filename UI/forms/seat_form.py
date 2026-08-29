@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from seat_data import get_available_seats, validate_seat_selection
+from data.seat_data import get_available_seats, validate_seat_selection
 
 
 def render_seat_form() -> None:

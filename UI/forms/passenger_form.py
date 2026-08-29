@@ -23,7 +23,7 @@ from ..constants import GENDERS, NATIONALITIES
 from ..validation.name_rules import validate_name
 from ..validation.passenger_rules import validate_age_for_type
 
-from accounts import validate_tckn
+from services.accounts import validate_tckn
 
 
 def render_passenger_form() -> None:

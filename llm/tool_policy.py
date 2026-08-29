@@ -17,7 +17,7 @@ Public API:
         -> (tools: list, tool_choice: str)
 """
 
-from tools_schema import (
+from .schemas import (
     PRE_CART_TOOLS,
     POST_CART_TOOLS,
     send_itinerary_email_tool,

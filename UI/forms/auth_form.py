@@ -18,7 +18,7 @@ import streamlit as st
 from ..constants import AUTH_MODES
 from ..validation.name_rules import validate_name
 
-from accounts import default_auth_provider
+from services.accounts import default_auth_provider
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 

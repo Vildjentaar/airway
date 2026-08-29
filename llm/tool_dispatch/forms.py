@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 from typing import Optional
 
-from accounts import validate_tckn
+from services.accounts import validate_tckn
 
 
 def handle_validate_tckn(
