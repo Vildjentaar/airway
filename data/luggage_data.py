@@ -3,7 +3,7 @@ luggage_data.py
 ---------------
 Luggage-tier catalogue and helpers.
 
-Delegates to ``thall_lines_db.db_get_luggage_tiers()`` for the raw
+Delegates to ``db.db_get_luggage_tiers()`` for the raw
 catalogue (sourced from the ``luggage_tiers`` table created by
 ``02-ancillary.sql``).
 
@@ -16,7 +16,7 @@ This module adds:
 
 from __future__ import annotations
 
-from thall_lines_db import db_get_luggage_tiers
+from db import db_get_luggage_tiers
 
 
 # ---------------------------------------------------------------------------

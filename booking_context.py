@@ -3,7 +3,7 @@ booking_context.py
 -------------------
 Date/time context the LLM looks up via the `get_context` tool: the
 current date/time, pre-computed relative dates ("tomorrow", "next
-Monday"), and the allowed booking window. Split out of thall_lines_db.py
+Monday"), and the allowed booking window. Split out of the db/ package
 because none of this has anything to do with the flight/route data model —
 it doesn't change when a route is added, and a route being added doesn't
 need this file touched.

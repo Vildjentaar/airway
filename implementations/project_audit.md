@@ -21,7 +21,7 @@ airway/
 ├── llm_engine.py           🔴 DEAD CODE — superseded by llm/ package
 ├── tool_dispatcher.py      ⚠️  Still imported by llm/ submodules — needs relocation
 ├── tools_schema.py         ⚠️  Only imported by llm_engine.py (dead) & llm/tool_policy.py
-├── thall_lines_db.py       ⚠️  899-line data+query monolith — addressed in §2
+├── the db/ package       ⚠️  899-line data+query monolith — addressed in §2
 │
 ├── accounts.py             ⚠️  Root-level business logic (auth/TCKN)
 ├── email_service.py        ⚠️  Root-level service (357 lines)
@@ -158,7 +158,7 @@ airway/
 | # | File | Lines | Type | Refactoring Notes |
 |---|------|-------|------|-------------------|
 | ~~1~~ | ~~`llm_engine.py`~~ | ~~683~~ | ~~Dead code~~ | ~~**Delete it** — superseded by `llm/` package~~ |
-| 2 | `thall_lines_db.py` | 899 | Active logic | **Top priority.** This is a monolith: enums + helpers + 12+ query functions + booking queries all in one file. Could be split into `db/models.py`, `db/flights.py`, `db/bookings.py`, `db/airports.py` |
+| 2 | `the db/ package` | 899 | Active logic | **Top priority.** This is a monolith: enums + helpers + 12+ query functions + booking queries all in one file. Could be split into `db/models.py`, `db/flights.py`, `db/bookings.py`, `db/airports.py` |
 | 3 | `tools_schema.py` | 434 | Active (schema defs) | Mostly declarative JSON schema dicts — long but **not spaghetti**. Low priority. Moving it into `llm/` is enough cleanup |
 | 4 | `email_service.py` | 357 | Active logic | Moderate — contains HTML template strings + send logic. Could extract the HTML template into a separate file or use a template engine, but for a demo project this is acceptable |
 | 5 | `scripts/migrate_to_mysql.py` | 455 | Migration script | One-time script — **leave as-is** |
@@ -173,7 +173,7 @@ Pick from this list in priority order:
 
 | Priority | File | Why |
 |----------|------|-----|
-| **1** | [thall_lines_db.py](file:///c:/Users/THALL1/Desktop/airway/thall_lines_db.py) (899 lines) | Monolith with 6 distinct concerns (enums, helpers, flight queries, airport queries, booking queries, capacity checks). A portfolio reviewer would notice this immediately. |
+| **1** | [the db/ package](file:///c:/Users/THALL1/Desktop/airway/the db/ package) (899 lines) | Monolith with 6 distinct concerns (enums, helpers, flight queries, airport queries, booking queries, capacity checks). A portfolio reviewer would notice this immediately. |
 | **2** | [email_service.py](file:///c:/Users/THALL1/Desktop/airway/email_service.py) (357 lines) | Mixing HTML template construction with email sending logic. Separating the template would improve readability. |
 | **3** | [tools_schema.py](file:///c:/Users/THALL1/Desktop/airway/tools_schema.py) (434 lines) | Not really "spaghetti" (it's declarative schema defs), but it's long. Moving it to `llm/schemas.py` is sufficient cleanup. |
 
@@ -186,7 +186,7 @@ Pick from this list in priority order:
 3. 📝 **Update imports** across the codebase to match new locations
 4. 📋 **Expand `.gitignore`**
 5. 📖 **Create `README.md`**
-6. 🔧 **Refactor `thall_lines_db.py`** (optional, highest-impact)
+6. 🔧 **Refactor `the db/ package`** (optional, highest-impact)
 7. 🔧 **Refactor `email_service.py`** (optional, moderate-impact)
 
 > [!IMPORTANT]

@@ -6,23 +6,25 @@ Combined self-test / demo runner for the mock backend. Run directly:
     python self_tests.py
 
 This replaces the old `if __name__ == "__main__":` block that used to
-live at the bottom of thall_lines_db.py. It lives on its own now because
-it exercises several modules (thall_lines_db, pricing, accounts, payment,
+live at the bottom of the db/ package. It lives on its own now because
+it exercises several modules (db, pricing, accounts, payment,
 booking_context) — bottom-of-file demo code for a multi-module system
 doesn't belong inside any one of those modules.
 """
 
 import json
 
-from thall_lines_db import (
+from db import (
     find_flight, db_check_capacity,
-    route_catalogue, db_get_route_details, self_test_bidirectional_coverage,
+    route_catalogue, db_get_route_details,
 )
+from db._self_tests import self_test_bidirectional_coverage
 from database.db import fetch_one
 from pricing import calculate_total_price, self_test_booking_prices
 from services.accounts import default_auth_provider, validate_tckn
 from payment import default_payment_gateway
 
+if __name__ == "__main__":
     flight_stats = fetch_one("SELECT COUNT(*) as total, SUM(CASE WHEN is_leg = 0 THEN 1 ELSE 0 END) as sellable, SUM(is_leg) as legs FROM flights")
     booking_stats = fetch_one("SELECT COUNT(*) as total FROM bookings")
     

@@ -37,7 +37,7 @@ The application follows a layered architecture with strict separation of concern
 │  tool_policy.py  │  data/seat_data.py, luggage, extras  │
 ├──────────────┴──────────────────────────────────────────┤
 │  Database Layer (database/db.py → MySQL)                │
-│  thall_lines_db.py — parameterized queries only         │
+│  the db/ package — parameterized queries only         │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -85,7 +85,7 @@ airway/
 ├── booking_context.py      # Date/time context helpers for tool calls
 ├── pricing.py              # Fare calculation (class multipliers, taxes, fees)
 ├── payment.py              # Payment gateway stubs
-├── thall_lines_db.py       # SQL-backed flight & booking repository
+├── the db/ package       # SQL-backed flight & booking repository
 │
 ├── llm/                    # LLM orchestration package
 │   ├── engine.py           # Gemini API call loop & tool-call handling

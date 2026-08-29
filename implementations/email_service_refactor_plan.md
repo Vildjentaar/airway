@@ -23,7 +23,7 @@ services/
 ### What moves to `email_templates.py`:
 - `_build_itinerary_html()` (lines 44–196) — the entire HTML email template
 - `_build_plain_text()` (lines 199–263) — the plain-text fallback
-- The `from thall_lines_db import AIRLINE_NAME` import (only used in templates)
+- The `from db import AIRLINE_NAME` import (only used in templates)
 - The `textwrap` import (only used in templates)
 
 ### What stays in `email_service.py`:

@@ -3,7 +3,7 @@ Thall Lines (Proxima Air) — Expanded Mock Flight-Booking Database
 ====================================================================
 ⚠️  ARCHIVED — This was the original in-memory database used during early
 development.  The application now uses MySQL (see ``database/db.py`` and
-``thall_lines_db.py``).  This file is kept for reference only and is NOT
+``the db/ package``).  This file is kept for reference only and is NOT
 imported by any production code.
 
 This module is a drop-in, API-compatible replacement for the original
@@ -969,7 +969,7 @@ def self_test_bidirectional_coverage() -> list[str]:
 accounts.py
 -----------
 User accounts, identity validation (TCKN), and authentication. Split out
-of thall_lines_db.py because "who is this customer and can they log in"
+of the db/ package because "who is this customer and can they log in"
 is a different responsibility than "what flights exist" — they change for
 different reasons and shouldn't force edits to the same file.
 

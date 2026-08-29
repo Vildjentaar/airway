@@ -2,9 +2,9 @@
 """
 Migrate mock data from:
 
-- thall_lines_db.AIRPORTS
-- thall_lines_db.FLIGHTS
-- thall_lines_db.BOOKINGS
+- db.AIRPORTS
+- db.FLIGHTS
+- db.BOOKINGS
 - accounts.USERS
 - pricing constants
 

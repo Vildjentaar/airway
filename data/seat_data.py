@@ -3,7 +3,7 @@ seat_data.py
 ------------
 Seat-map catalogue and validation helpers.
 
-Delegates to ``thall_lines_db.db_get_seat_types()`` for the raw catalogue
+Delegates to ``db.db_get_seat_types()`` for the raw catalogue
 (sourced from the ``seat_types`` table created by ``02-ancillary.sql``).
 This module adds:
 
@@ -14,7 +14,7 @@ This module adds:
 
 from __future__ import annotations
 
-from thall_lines_db import db_get_seat_types
+from db import db_get_seat_types
 
 
 # ---------------------------------------------------------------------------

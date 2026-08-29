@@ -1,8 +1,8 @@
-# Refactoring Plan: `thall_lines_db.py` → `db/` Package
+# Refactoring Plan: `the db/ package` → `db/` Package
 
 ## Current State
 
-`thall_lines_db.py` is a **1059-line monolith** containing 6 distinct concerns:
+`the db/ package` is a **1059-line monolith** containing 6 distinct concerns:
 
 | Section | Lines | Functions |
 |---------|-------|-----------|
@@ -17,10 +17,10 @@
 
 ## Proposed Split
 
-Rename the existing `database/` to keep `db.py` (connection layer) where it is, and create a new top-level package `db/` that replaces `thall_lines_db.py`:
+Rename the existing `database/` to keep `db.py` (connection layer) where it is, and create a new top-level package `db/` that replaces `the db/ package`:
 
 > [!IMPORTANT]
-> We can't use `database/` because it already exists with `db.py` (the MySQL connection helper). The new package will be called `db/` and will re-export everything via `__init__.py` so **zero external imports need to change** — consumers just switch `from thall_lines_db import X` → `from db import X` (or we keep a shim).
+> We can't use `database/` because it already exists with `db.py` (the MySQL connection helper). The new package will be called `db/` and will re-export everything via `__init__.py` so **zero external imports need to change** — consumers just switch `from db import X` → `from db import X` (or we keep a shim).
 
 ### Module breakdown:
 
@@ -40,15 +40,15 @@ db/
 ### Backward Compatibility Strategy
 
 **Option A — Shim file (zero-change for consumers):**
-Keep `thall_lines_db.py` as a thin re-export file:
+Keep `the db/ package` as a thin re-export file:
 ```python
 """Backward-compatible shim — real implementation is in db/ package."""
 from db import *  # noqa: F401,F403
 ```
-Every existing `from thall_lines_db import X` keeps working with no changes.
+Every existing `from db import X` keeps working with no changes.
 
 **Option B — Update all imports:**
-Delete `thall_lines_db.py` and update all 10 consumer files to `from db import ...`.
+Delete `the db/ package` and update all 10 consumer files to `from db import ...`.
 
 > [!TIP]
 > **Recommendation: Option A** — it's safer, takes 2 lines, and lets us split the logic without touching any other file. We can deprecate the shim later.
@@ -61,7 +61,7 @@ Delete `thall_lines_db.py` and update all 10 consumer files to `from db import .
 | `system_prompt.py` | `AIRLINE_NAME` |
 | `llm/schemas.py` | `AIRLINE_NAME` |
 | `llm/flight_validation.py` | `find_flight`, `get_flight_by_number`, `AIRLINE_NAME` |
-| `llm/tool_dispatch/dispatcher.py` | `import thall_lines_db` (module-level, 12 function refs) |
+| `llm/tool_dispatch/dispatcher.py` | `import db` (module-level, 12 function refs) |
 | `pricing.py` | `db_list_bookings`, `get_flight_by_number`, `BookingStatus` |
 | `data/seat_data.py` | `db_get_seat_types` |
 | `data/luggage_data.py` | `db_get_luggage_tiers` |
@@ -83,8 +83,8 @@ With **Option A**, none of these need changing.
 8. Create `db/ancillary.py` — extract ancillary catalogues
 9. Create `db/_self_tests.py` — extract self-test helper
 10. Create `db/__init__.py` — re-export all public symbols
-11. Replace `thall_lines_db.py` with backward-compat shim (Option A)
+11. Replace `the db/ package` with backward-compat shim (Option A)
 12. Smoke-test all imports
 
 > [!NOTE]
-> The internal `database/db.py` (connection helper with `fetch_one`, `fetch_all`) stays exactly where it is. The new `db/` package imports from `database.db` just like `thall_lines_db.py` does today.
+> The internal `database/db.py` (connection helper with `fetch_one`, `fetch_all`) stays exactly where it is. The new `db/` package imports from `database.db` just like `the db/ package` does today.

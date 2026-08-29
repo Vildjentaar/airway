@@ -1,4 +1,4 @@
-from thall_lines_db import AIRLINE_NAME
+from db import AIRLINE_NAME
 
 def get_system_prompt() -> str:
     return f"""

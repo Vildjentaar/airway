@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
-import thall_lines_db
+import db
 
 
 logger = logging.getLogger(__name__)
@@ -24,24 +24,24 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 SAFE_TOOLS: dict[str, Callable[..., Any]] = {
     # Flight/route tools
-    "search_flights": thall_lines_db.search_flights,
-    "find_flight": thall_lines_db.find_flight,
-    "find_alternative_routes": thall_lines_db.db_find_alternative_routes,
-    "search_itinerary": thall_lines_db.db_search_itinerary,
-    "get_route_details": thall_lines_db.db_get_route_details,
-    "list_all_routes": thall_lines_db.db_list_all_routes,
-    "route_catalogue": thall_lines_db.route_catalogue,
+    "search_flights": db.search_flights,
+    "find_flight": db.find_flight,
+    "find_alternative_routes": db.db_find_alternative_routes,
+    "search_itinerary": db.db_search_itinerary,
+    "get_route_details": db.db_get_route_details,
+    "list_all_routes": db.db_list_all_routes,
+    "route_catalogue": db.route_catalogue,
 
     # Airport tools
-    "list_airports": thall_lines_db.db_list_airports,
-    "get_airport_info": thall_lines_db.db_get_airport_info,
+    "list_airports": db.db_list_airports,
+    "get_airport_info": db.db_get_airport_info,
 
     # Booking tools
-    "list_bookings": thall_lines_db.db_list_bookings,
-    "get_booking_details": thall_lines_db.get_booking_details,
+    "list_bookings": db.db_list_bookings,
+    "get_booking_details": db.get_booking_details,
 
     # Capacity tools
-    "check_capacity": thall_lines_db.db_check_capacity,
+    "check_capacity": db.db_check_capacity,
 }
 
 

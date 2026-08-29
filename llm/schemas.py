@@ -9,7 +9,7 @@ declarative schema definitions. This makes it trivial to see, edit, or add
 new bot capabilities without scrolling past UI or engine code.
 """
 
-from thall_lines_db import AIRLINE_NAME
+from db import AIRLINE_NAME
 
 flight_widget_tool = [
     {

@@ -1,7 +1,7 @@
 """
 pricing.py
 ----------
-Fare calculation — split out of thall_lines_db.py because "how much does
+Fare calculation — split out of the db/ package because "how much does
 this cost" is a different responsibility than "what flights exist," even
 though today they're both backed by the same mock data. Pricing rules
 change on a completely different cadence and for completely different
@@ -164,12 +164,12 @@ def calculate_ancillary_total(
 # ---------------------------------------------------------------------------
 # Self-check — verifies every stored booking's price still matches what
 # calculate_total_price() produces today. Lives here (not in
-# thall_lines_db.py) because it's a pricing self-test, not a flight-data
+# the db/ package) because it's a pricing self-test, not a flight-data
 # self-test; it imports the flight/booking data it needs rather than the
 # other way around, so there's no import cycle.
 # ---------------------------------------------------------------------------
 def self_test_booking_prices() -> list[str]:
-    from thall_lines_db import db_list_bookings, get_flight_by_number, BookingStatus
+    from db import db_list_bookings, get_flight_by_number, BookingStatus
 
     problems = []
 

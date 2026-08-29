@@ -10,7 +10,7 @@ those changes never touch the dispatch or sanitization code.
 
 Dependencies
 ~~~~~~~~~~~~
-* ``thall_lines_db`` — route / flight-number lookups.
+* ``db`` — route / flight-number lookups.
 * ``pricing`` — total-price calculation.
 * ``llm.config.FLIGHT_REQUIRED`` — list of required segment keys.
 * ``llm.history_sanitizer.extract_code`` — IATA code extraction.
@@ -19,7 +19,7 @@ Dependencies
 from datetime import datetime
 
 from booking_context import _get_now
-from thall_lines_db import find_flight, get_flight_by_number, AIRLINE_NAME
+from db import find_flight, get_flight_by_number, AIRLINE_NAME
 from pricing import calculate_total_price
 
 from .config import FLIGHT_REQUIRED
