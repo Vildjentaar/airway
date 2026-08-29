@@ -85,7 +85,15 @@ airway/
 ├── booking_context.py      # Date/time context helpers for tool calls
 ├── pricing.py              # Fare calculation (class multipliers, taxes, fees)
 ├── payment.py              # Payment gateway stubs
-├── the db/ package       # SQL-backed flight & booking repository
+│
+├── db/                     # SQL-backed flight & booking repository
+│   ├── _helpers.py         # DB connection & query utilities
+│   ├── airports.py         # Airport lookup queries
+│   ├── ancillary.py        # Extras & luggage lookups
+│   ├── bookings.py         # Booking creation & retrieval
+│   ├── flights.py          # Flight schedule & availability queries
+│   ├── models.py           # Data classes for DB results
+│   └── routes.py           # Multi-city route calculations
 │
 ├── llm/                    # LLM orchestration package
 │   ├── engine.py           # Gemini API call loop & tool-call handling
@@ -105,6 +113,7 @@ airway/
 │       └── unknown.py      # Fallback for unrecognized tools
 │
 ├── UI/                     # Streamlit UI components
+│   ├── constants.py        # Shared UI constants
 │   ├── forms/              # Checkout form renderers (auth, passenger, seat, etc.)
 │   ├── validation/         # Input validation rules (name, passenger, payment)
 │   ├── flight_cart.py      # Sidebar cart widget
@@ -113,7 +122,8 @@ airway/
 │
 ├── services/               # Business logic services
 │   ├── accounts.py         # Auth provider & TCKN validation
-│   └── email_service.py    # SMTP email with HTML template
+│   ├── email_service.py    # SMTP email delivery
+│   └── email_templates.py  # HTML email rendering templates
 │
 ├── data/                   # Static ancillary configuration
 │   ├── seat_data.py        # Available seats by class
